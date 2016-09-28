@@ -1,0 +1,136 @@
+{
+  "name": "com.wso2telco.authorization.endpoint",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "requestType",
+      "type": "STRING"
+    },
+    {
+      "name": "appID",
+      "type": "STRING"
+    },
+    {
+      "name": "isAuthenticated",
+      "type": "BOOL"
+    },
+    {
+      "name": "authenticatorMethods",
+      "type": "STRING"
+    },
+    {
+      "name": "authenticatorEndTime",
+      "type": "LONG"
+    },
+    {
+      "name": "authenticatorStartTime",
+      "type": "LONG"
+    },
+    {
+      "name": "sessionID",
+      "type": "STRING"
+    },
+    {
+      "name": "isNewUser",
+      "type": "BOOL"
+    },
+    {
+      "name": "operator",
+      "type": "STRING"
+    },
+    {
+      "name": "userAgent",
+      "type": "STRING"
+    },
+    {
+      "name": "msisdn",
+      "type": "STRING"
+    },
+    {
+      "name": "internalCustomerReference",
+      "type": "STRING"
+    },
+    {
+      "name": "serverHost",
+      "type": "STRING"
+    },
+    {
+      "name": "requestURL",
+      "type": "STRING"
+    },
+    {
+      "name": "httpMethod",
+      "type": "STRING"
+    },
+    {
+      "name": "urlParams",
+      "type": "STRING"
+    },
+    {
+      "name": "requestStatus",
+      "type": "STRING"
+    },
+    {
+      "name": "returnedError",
+      "type": "STRING"
+    },
+    {
+      "name": "transactionID",
+      "type": "STRING"
+    },
+    {
+      "name": "consentTimestamp",
+      "type": "LONG"
+    },
+    {
+      "name": "consentState",
+      "type": "STRING"
+    },
+    {
+      "name": "consentType",
+      "type": "STRING"
+    },
+    {
+      "name": "isAuthCodeIssued",
+      "type": "BOOL"
+    },
+    {
+      "name": "state",
+      "type": "STRING"
+    },
+    {
+      "name": "nonce",
+      "type": "STRING"
+    },
+    {
+      "name": "scope",
+      "type": "STRING"
+    },
+    {
+      "name": "acrValue",
+      "type": "INT"
+    },
+    {
+      "name": "isMsisdnHeader",
+      "type": "BOOL"
+    },
+    {
+      "name": "ipHeader",
+      "type": "STRING"
+    },
+    {
+      "name": "loginHint",
+      "type": "STRING"
+    },
+    {
+      "name": "telcoScope",
+      "type": "STRING"
+    },
+    {
+      "name": "_timestamp",
+      "type": "LONG"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+    "id": "onnet-successfail-logins-bar",
+    "title": "ONNET success vs failed logins per day",
+    "type": "gadget",
+    "thumbnail": "store://gadget/usa-business-revenue/index.png",
+    "data": {
+        "url": "store://gadget/onnet-successfail-logins-bar/index.xml"
+    },
+    "listen": {
+        "subscriber": {
+            "type": "date-range",
+            "description": "This notifies message generated in publisher"
+        }
+    }
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<analytics-data-purging>
+    <cron-expression>0 0 0 1/1 * ? *</cron-expression>
+    <purge-include-tables>
+        <table>com_wso2telco_success_appwiselogins_stream</table>
+        <table>com_wso2telco_success_appwiseoperatorwiselogins_stream</table>
+        <table>com_wso2telco_success_operatorwiselogins_stream</table>
+        <table>com_wso2telco_success_logins_stream</table>
+    </purge-include-tables>
+    <data-retention-days>1</data-retention-days>
+</analytics-data-purging>

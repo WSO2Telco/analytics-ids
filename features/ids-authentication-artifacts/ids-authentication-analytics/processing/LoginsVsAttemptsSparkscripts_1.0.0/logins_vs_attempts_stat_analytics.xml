@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>logins_vs_attempts_stat_analytics</Name>
+    <Script>
+        create temporary table user_status_raw_log_v_atmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "_timestamp LONG -i",  incrementalParams "user_status_raw_attemptsVlogins, DAY");        
+
+		create temporary table user_status_meta_raw_log_v_atmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "_timestamp LONG -i",  incrementalParams "user_status_meta_raw_attemptsVlogins, DAY");
+
+        create temporary table token_endpoint_raw_log_v_atmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_TOKEN_ENDPOINT", schema "_timestamp LONG -i",  incrementalParams "token_endpoint_raw_attemptsVlogins, DAY");
+
+        create temporary table attemptsVlogins using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_ATTEMPTS_V_LOGINS",schema "day STRING -i, operator STRING -i, appID STRING -i,total_authCount LONG -i, total_tokenCount LONG -i, total_authFailed LONG -i, total_tokenFailed LONG -i, onnet_authCount LONG -i, onnet_tokenCount LONG -i, onnet_authFailed LONG -i, onnet_tokenFailed LONG -i, offnet_authCount LONG -i, offnet_tokenCount LONG -i, offnet_authFailed LONG -i, offnet_tokenFailed LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
+
+		insert into table attemptsVlogins select getDateString(totauth.dayTimestamp),totauth.operator, totauth.appId, totauth.total_authCount, tottoken.total_tokenCount, 0,0,0,0,0,0,0,0,0,0, totauth.dayTimestamp from ( select count(totalauth.sessionID) as total_authCount, totalauth.dayTimestamp, totalauth.operator, totalauth.appId from ( select sessntime.sessionID, getDateTimestamp(sessntime._timestamp) as dayTimestamp, sessnopnapp.operator, sessnopnapp.appId from ( select sessionID, max(_timestamp) as _timestamp	from user_status_raw_log_v_atmp group by sessionID ) as sessntime inner join (	select sessionID, min(operator) as operator, min(appId) as appId	from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID ) as sessnopnapp on sessnopnapp.sessionID=sessntime.sessionID	) as totalauth group by totalauth.dayTimestamp,totalauth.operator,totalauth.appId ) as totauth	left join (	select count(totaltoken.sessionID) as total_tokenCount, totaltoken.dayTimestamp,totaltoken.operator,totaltoken.appId from ( select sessntime.sessionID,getDateTimestamp(sessntime._timestamp) AS dayTimestamp,sessnopnapp.operator,sessnopnapp.appId from	( select sessionID, max(_timestamp) as _timestamp from token_endpoint_raw_log_v_atmp group by sessionID ) as sessntime	inner join (	select sessionID, min(operator) as operator, min(appId) as appId from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID ) as sessnopnapp on sessnopnapp.sessionID=sessntime.sessionID ) as totaltoken group by totaltoken.dayTimestamp,totaltoken.operator,totaltoken.appId ) as tottoken on tottoken.dayTimestamp=totauth.dayTimestamp and tottoken.operator=totauth.operator and tottoken.appId=totauth.appId;
+
+
+        create temporary table attemptsVlogins_per_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_ATTEMPTS_V_LOGINS", schema "day STRING -i, operator STRING -i -f, total_authCount LONG -i, total_tokenCount LONG -i, total_authFailed LONG -i, total_tokenFailed LONG -i,
+        onnet_authCount LONG -i, onnet_tokenCount LONG -i, onnet_authFailed LONG -i, onnet_tokenFailed LONG -i,
+        offnet_authCount LONG -i, offnet_tokenCount LONG -i, offnet_authFailed LONG -i, offnet_tokenFailed LONG -i,
+        _timestamp LONG -i", primaryKeys "day, operator");
+
+        INSERT INTO TABLE attemptsVlogins_per_operator SELECT day, operator,
+        SUM(total_authCount), SUM(total_tokenCount), SUM(total_authFailed), SUM(total_tokenFailed),
+        SUM(onnet_authCount), SUM(onnet_tokenCount), SUM(onnet_authFailed), SUM(onnet_tokenFailed),
+        SUM(offnet_authCount), SUM(offnet_tokenCount), SUM(offnet_authFailed), SUM(offnet_tokenFailed),
+        _timestamp from attemptsVlogins GROUP BY day, _timestamp, operator;
+
+        create temporary table attemptsVlogins_per_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_ATTEMPTS_V_LOGINS", schema "day STRING -i, appID STRING -i -f, total_authCount LONG -i, total_tokenCount LONG -i, total_authFailed LONG -i, total_tokenFailed LONG -i,
+        onnet_authCount LONG -i, onnet_tokenCount LONG -i, onnet_authFailed LONG -i, onnet_tokenFailed LONG -i,
+        offnet_authCount LONG -i, offnet_tokenCount LONG -i, offnet_authFailed LONG -i, offnet_tokenFailed LONG -i,
+        _timestamp LONG -i", primaryKeys "day, appID");
+
+        INSERT INTO TABLE attemptsVlogins_per_app SELECT day, appID,
+        SUM(total_authCount), SUM(total_tokenCount), SUM(total_authFailed), SUM(total_tokenFailed),
+        SUM(onnet_authCount), SUM(onnet_tokenCount), SUM(onnet_authFailed), SUM(onnet_tokenFailed),
+        SUM(offnet_authCount), SUM(offnet_tokenCount), SUM(offnet_authFailed), SUM(offnet_tokenFailed),
+        _timestamp from attemptsVlogins GROUP BY day, _timestamp, appID;
+
+        create temporary table attemptsVlogins_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_ATTEMPTS_V_LOGINS", schema "day STRING -i, total_authCount LONG -i, total_tokenCount LONG -i, total_authFailed LONG -i, total_tokenFailed LONG -i,
+        onnet_authCount LONG -i, onnet_tokenCount LONG -i, onnet_authFailed LONG -i, onnet_tokenFailed LONG -i,
+        offnet_authCount LONG -i, offnet_tokenCount LONG -i, offnet_authFailed LONG -i, offnet_tokenFailed LONG -i,
+        _timestamp LONG -i", primaryKeys "day");
+
+        INSERT INTO TABLE attemptsVlogins_total SELECT day,
+        SUM(total_authCount), SUM(total_tokenCount), SUM(total_authFailed), SUM(total_tokenFailed),
+        SUM(onnet_authCount), SUM(onnet_tokenCount), SUM(onnet_authFailed), SUM(onnet_tokenFailed),
+        SUM(offnet_authCount), SUM(offnet_tokenCount), SUM(offnet_authFailed), SUM(offnet_tokenFailed),
+        _timestamp from attemptsVlogins GROUP BY day, _timestamp;
+
+		INCREMENTAL_TABLE_COMMIT user_status_raw_attemptsVlogins;
+        INCREMENTAL_TABLE_COMMIT user_status_meta_raw_attemptsVlogins;
+        INCREMENTAL_TABLE_COMMIT token_endpoint_raw_attemptsVlogins;
+    
+                                            
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>

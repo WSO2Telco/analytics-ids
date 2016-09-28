@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>onnet_offnet_auth_and_reg_stat_analytics</Name>
+    <Script>
+        create temporary table user_status_raw_onnet_offnet_reg_log using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "_timestamp LONG -i",  incrementalParams "user_status_onnet_offnet_reg_log, DAY");
+
+        create temporary table user_status_meta_raw_onnet_offnet_reg_log using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "_timestamp LONG -i",  incrementalParams "user_status_meta_onnet_offnet_reg_log, DAY");
+
+        create temporary table onnetOffnetRegTypes using CarbonAnalytics options(tableName "COM_WSO2TELCO_SUMMARY_ONNET_OFFNET_TYPES", schema "userCount INT -i, type STRING -i, operator STRING -i, appId STRING -i, day STRING -i, _timestamp LONG", primaryKeys "type, operator, appId, day, _timestamp", incrementalParams "onnetRegLoginTypes, DAY", mergeSchema "false");
+
+        create temporary table onnetvoffnet_per_app_per_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_ONNET_OFFNET_SUMMARY", schema "day STRING -i, appID STRING -i, operator STRING -i, onReg LONG -i, offReg LONG -i, onAuth LONG -i, offAuth LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
+
+        create temporary table onnetvoffnet_per_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_ONNET_OFFNET_APP_SUMMARY", schema "day STRING -i, appID STRING -i -f, onReg LONG -i, offReg LONG -i, onAuth LONG -i, offAuth LONG -i, _timestamp LONG -i", primaryKeys "day, appID");
+
+        create temporary table onnetvoffnet_per_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_ONNET_OFFNET_OPERATOR_SUMMARY", schema "day STRING -i, operator STRING -i -f, onReg LONG -i, offReg LONG -i, onAuth LONG -i, offAuth LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
+
+        create temporary table onnetvoffnet_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_ONNET_OFFNET_TOTAL_SUMMARY", schema "day STRING -i, onReg LONG -i, offReg LONG -i, onAuth LONG -i, offAuth LONG -i, _timestamp LONG -i", primaryKeys "day");
+
+        insert into table onnetOffnetRegTypes select count( distinct temp2.sessionID) , "ONNET_REG",  temp2.operator, temp2.appId, getDateString(temp2._timestamp), temp2._timestamp as _timestamp from ( select distinct temp.sessionID as sessionID,user_status_meta_raw_onnet_offnet_reg_log.operator as operator, user_status_meta_raw_onnet_offnet_reg_log.appId as appId, getDateTimestamp(user_status_meta_raw_onnet_offnet_reg_log._timestamp) as _timestamp 	from 	( select distinct sessionID from user_status_raw_onnet_offnet_reg_log where status ="LOGIN_SUCCESS" 	intersect select distinct sessionID from user_status_raw_onnet_offnet_reg_log where ( status = "HE_AUTH_SUCCESS" or status ="HE_AUTH_PROCESSING_FAIL" )  ) as temp 	left join user_status_meta_raw_onnet_offnet_reg_log on temp.sessionID=user_status_meta_raw_onnet_offnet_reg_log.sessionID where user_status_meta_raw_onnet_offnet_reg_log.sessionID IS NOT NULL and user_status_meta_raw_onnet_offnet_reg_log.isNewUser = true AND user_status_meta_raw_onnet_offnet_reg_log.isMSISDNHeader = true and operator IS NOT NULL and appId IS NOT NULL ) as temp2 group by temp2.operator, temp2.appId, temp2._timestamp;
+
+        insert into table onnetOffnetRegTypes select count(temp2.sessionID) , "ONNET_LOGINS", temp2.operator, temp2.appId, getDateString(temp2._timestamp), temp2._timestamp as _timestamp from ( select temp.sessionID as sessionID,user_status_meta_raw_onnet_offnet_reg_log.operator as operator, user_status_meta_raw_onnet_offnet_reg_log.appId as appId, getDateTimestamp(user_status_meta_raw_onnet_offnet_reg_log._timestamp) as _timestamp from ( select sessionID from user_status_raw_onnet_offnet_reg_log where status = "HE_AUTH_SUCCESS" intersect select sessionID from user_status_raw_onnet_offnet_reg_log where status = "LOGIN_SUCCESS" ) as temp left join user_status_meta_raw_onnet_offnet_reg_log on temp.sessionID = user_status_meta_raw_onnet_offnet_reg_log.sessionID 	) as temp2 group by temp2.operator,temp2.appId,temp2._timestamp;
+
+        insert into table onnetOffnetRegTypes select count(distinct temp2.sessionID) , "OFFNET_REG", temp2.operator, temp2.appId, getDateString(temp2._timestamp), temp2._timestamp as _timestamp from ( select distinct temp.sessionID as sessionID,user_status_meta_raw_onnet_offnet_reg_log.operator as operator, user_status_meta_raw_onnet_offnet_reg_log.appId as appId, getDateTimestamp(user_status_meta_raw_onnet_offnet_reg_log._timestamp) as _timestamp from ( select distinct sessionID from user_status_raw_onnet_offnet_reg_log where status ="LOGIN_SUCCESS" intersect	select distinct sessionID from user_status_raw_onnet_offnet_reg_log where ( status ="MSISDN_AUTH_PROCESSING_FAIL" or status = "MSISDN_AUTH_SUCCESS" ) ) as temp left join user_status_meta_raw_onnet_offnet_reg_log on temp.sessionID =user_status_meta_raw_onnet_offnet_reg_log.sessionID where user_status_meta_raw_onnet_offnet_reg_log.sessionID IS NOT NULL and user_status_meta_raw_onnet_offnet_reg_log.isNewUser = true AND user_status_meta_raw_onnet_offnet_reg_log.isMSISDNHeader = false and operator IS NOT NULL and appId IS NOT NULL ) as temp2 group by temp2.operator, temp2.appId, temp2._timestamp;
+
+        insert into table onnetOffnetRegTypes select count(temp2.sessionID) ,"OFFNET_LOGINS", temp2.operator, temp2.appId, getDateString(temp2._timestamp), temp2._timestamp as _timestamp from (select temp.sessionID as sessionID, user_status_meta_raw_onnet_offnet_reg_log.operator as operator, user_status_meta_raw_onnet_offnet_reg_log.appId as appId, getDateTimestamp(user_status_meta_raw_onnet_offnet_reg_log._timestamp) as _timestamp from (select sessionID from user_status_raw_onnet_offnet_reg_log where status = "MSISDN_AUTH_SUCCESS" intersect select sessionID from user_status_raw_onnet_offnet_reg_log where status = "LOGIN_SUCCESS") as temp left join user_status_meta_raw_onnet_offnet_reg_log on temp.sessionID = user_status_meta_raw_onnet_offnet_reg_log.sessionID ) as temp2 group by temp2.operator, temp2.appId, temp2._timestamp;
+
+
+        insert into table onnetvoffnet_per_app_per_operator select day, appId, operator,
+        SUM(IF(type = "ONNET_REG",userCount,0)),
+        SUM(IF(type = "OFFNET_REG",userCount,0)),
+        SUM(IF(type = "ONNET_LOGINS",userCount,0)),
+        SUM(IF(type = "OFFNET_LOGINS",userCount,0)), _timestamp FROM onnetOffnetRegTypes group by operator, appId, day, _timestamp;
+
+        insert into table onnetvoffnet_per_app select day, appID, SUM(onReg), SUM(offReg), SUM(onAuth), SUM(offAuth), _timestamp from onnetvoffnet_per_app_per_operator group by appID, day, _timestamp;
+
+        insert into table onnetvoffnet_per_operator select day, operator, SUM(onReg), SUM(offReg), SUM(onAuth), SUM(offAuth), _timestamp from onnetvoffnet_per_app_per_operator group by operator, day, _timestamp;
+
+        insert into table onnetvoffnet_total select day, SUM(onReg), SUM(offReg), SUM(onAuth), SUM(offAuth), _timestamp from onnetvoffnet_per_app_per_operator group by day, _timestamp;
+
+        INCREMENTAL_TABLE_COMMIT user_status_onnet_offnet_reg_log;
+        INCREMENTAL_TABLE_COMMIT user_status_meta_onnet_offnet_reg_log;
+        INCREMENTAL_TABLE_COMMIT onnetRegLoginTypes;
+    
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>
