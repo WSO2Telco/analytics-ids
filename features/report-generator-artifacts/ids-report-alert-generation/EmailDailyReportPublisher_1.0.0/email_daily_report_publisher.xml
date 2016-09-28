@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<eventPublisher name="EmailDailyReportPublisher" statistics="disable"
-  trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
-  <from streamName="com.wso2telco.notificationStream" version="1.0.0"/>
-  <mapping customMapping="enable" type="text">
-    <inline>&lt;p&gt;Hi&lt;/p&gt;
-&lt;p&gt;Please find the operator:{{operator}} appid:{{appid}} daily status update for {{day}} here: &lt;/p&gt;
-{{htmlBody}}
-&lt;p&gt;Regards&lt;/p&gt;
-&lt;p&gt;WSO2Telco&lt;/p&gt;
-</inline>
-  </mapping>
-  <to eventAdapterType="email">
-    <property name="email.subject">Operator: {{operator}} AppID:{{appid}} Daily Status Update for {{day}}</property>
-    <property name="email.address">{{emails}}</property>
-    <property name="email.type">text/html</property>
-  </to>
+<eventPublisher name="email_daily_report_publisher" statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
+    <from streamName="com.wso2telco.reportGenerationStream" version="1.0.0"/>
+    <mapping customMapping="disable" type="text"/>
+    <to eventAdapterType="http">
+        <property name="http.client.method">HttpPost</property>
+        <property name="http.username">admin</property>
+        <property encrypted="true" name="http.password">kuv2MubUUveMyv6GeHrXr9il59ajJIqUI4eoYHcgGKf/BBFOWn96NTjJQI+wYbWjKW6r79S7L7ZzgYeWx7DlGbff5X3pBN2Gh9yV0BHP1E93QtFqR7uTWi141Tr7V7ZwScwNqJbiNoV+vyLbsqKJE7T3nP8Ih9Y6omygbcLcHzg=</property>
+        <property name="http.url">https://localhost:9443/portal/apis/mail?type=21&timeFrom={{starttime}}&timeTo={{endtime}}&operator={{operator}}&appID={{appid}}</property>
+    </to>
 </eventPublisher>

@@ -22,22 +22,6 @@
             <version>${net.sf.jasperreports.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>${org.codehaus.groovy.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>${commons.beanutils.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-digester</groupId>
-            <artifactId>commons-digester</artifactId>
-            <version>${commons.digester.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.wso2.siddhi</groupId>
             <artifactId>siddhi-core</artifactId>
             <version>${siddhi.version}</version>
@@ -87,13 +71,9 @@
 
                         <Export-Package>
                             org.wso2telco.analytics.report.generator.extension.*;version="${project.version}",
-                            <!--net.sf.jasperreports.*;version="${net.sf.jasperreports.version}",-->
-                            <!--org.codehaus.groovy.*;version="${org.codehaus.groovy.version}",-->
-                            <!--commons-beanutils.*;version="${commons.beanutils.version}",-->
-                            <!--commons-digester.*;version="${commons.digester.version}",-->
                         </Export-Package>
                         <Private-Package>
-                            com.wso2telco.report.generator.siddhi.internal.*
+                            org.wso2telco.analytics.report.generator.siddhi.internal.*
                         </Private-Package>
                         <Import-Package>
                             !javax.xml.namespace,
