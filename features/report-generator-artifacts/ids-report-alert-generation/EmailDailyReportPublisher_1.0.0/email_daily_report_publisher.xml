@@ -6,6 +6,6 @@
         <property name="http.client.method">HttpPost</property>
         <property name="http.username">admin</property>
         <property encrypted="true" name="http.password">kuv2MubUUveMyv6GeHrXr9il59ajJIqUI4eoYHcgGKf/BBFOWn96NTjJQI+wYbWjKW6r79S7L7ZzgYeWx7DlGbff5X3pBN2Gh9yV0BHP1E93QtFqR7uTWi141Tr7V7ZwScwNqJbiNoV+vyLbsqKJE7T3nP8Ih9Y6omygbcLcHzg=</property>
-        <property name="http.url">https://localhost:9443/portal/apis/mail?type=21&timeFrom={{starttime}}&timeTo={{endtime}}&operator={{operator}}&appID={{appid}}</property>
+        <property name="http.url">https://localhost:9443/portal/apis/mail?type=21&amp;timeFrom={{starttime}}&amp;timeTo={{endtime}}&amp;operator={{operator}}&amp;appID={{appid}}</property>
     </to>
 </eventPublisher>
