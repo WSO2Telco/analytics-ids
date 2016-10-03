@@ -1,0 +1,16 @@
+{
+  "name": "com.wso2telco.success.appwiselogins.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "loginCount",
+      "type": "LONG"
+    },
+    {
+      "name": "appID",
+      "type": "STRING"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<analytics-data-purging>
+    <cron-expression>0 0 0 1/1 * ? *</cron-expression>
+    <purge-include-tables>
+        <table>COM_WSO2TELCO_SUMMARY_USERSTATUS</table>
+        <table>COM_WSO2TELCO_SUMMARY_TOTAL_LOGIN_CHANNELS</table>
+        <table>COM_WSO2TELCO_SUMMARY_OPERATOR_ATTEMPTS_V_LOGINS</table>
+        <table>COM_WSO2TELCO_SUMMARY_OPERATOR_DAILY_REGISTRATIONS</table>
+        <table>COM_WSO2TELCO_SUMMARY_SUCECSSFULL_LOGINS</table>
+        <table>COM_WSO2TELCO_SUMMARY_DAILY_REGISTRATIONS</table>
+        <table>COM_WSO2TELCO_SUMMARY_DROPOUTS</table>
+        <table>COM_WSO2TELCO_SUMMARY_TOTAL_ATTEMPTS_V_LOGINS</table>
+        <table>COM_WSO2TELCO_SUMMARY_LOGIN_CHANNELS</table>
+        <table>COM_WSO2TELCO_ONNET_OFFNET_TOTAL_SUMMARY</table>
+        <table>COM_WSO2TELCO_TEMP_OPERATOR_DAILY_REGISTRATIONS</table>
+        <table>COM_WSO2TELCO_SUMMARY_DROPOUTS_WITH_TYPES</table>
+        <table>COM_WSO2TELCO_SUMMARY_OPERATOR_LOGIN_CHANNELS</table>
+        <table>COM_WSO2TELCO_ONNET_OFFNET_APP_SUMMARY</table>
+        <table>COM_WSO2TELCO_SUMMARY_TOTAL_DAILY_REGISTRATIONS</table>
+        <table>COM_WSO2TELCO_SUMMARY_ONNET_OFFNET_TYPES</table>
+        <table>COM_WSO2TELCO_SUMMARY_APP_ATTEMPTS_V_LOGINS</table>
+        <table>COM_WSO2TELCO_SUMMARY_OPERATOR_DROPOUTS</table>
+        <table>COM_WSO2TELCO_SUMMARY_ATTEMPTS_V_LOGINS</table>
+        <table>COM_WSO2TELCO_ONNET_OFFNET_OPERATOR_SUMMARY</table>
+        <table>COM_WSO2TELCO_SUMMARY_APP_LOGIN_CHANNELS</table>
+        <table>COM_WSO2TELCO_SUMMARY_APP_DAILY_REGISTRATIONS</table>
+        <table>COM_WSO2TELCO_TEMP_DAILY_REGISTRATIONS</table>
+        <table>COM_WSO2TELCO_SUMMARY_TOTAL_DROPOUTS</table>
+        <table>COM_WSO2TELCO_ONNET_OFFNET_SUMMARY</table>
+        <table>COM_WSO2TELCO_SUMMARY_APP_DROPOUTS</table>
+        <table>COM_WSO2TELCO_TEMP_UNSUCECSSFULL_LOGINS</table>
+        <table>COM_WSO2TELCO_AUTHORIZATION_ENDPOINT</table>
+        <table>COM_WSO2TELCO_SUCCESS_APPWISELOGINS_STREAM</table>
+        <table>COM_WSO2TELCO_SUCCESS_APPWISEOPERATORWISELOGINS_STREAM</table>
+        <table>COM_WSO2TELCO_SUCCESS_LOGINS_STREAM</table>
+        <table>COM_WSO2TELCO_SUCCESS_OPERATORWISELOGINS_STREAM</table>
+        <table>COM_WSO2TELCO_TOKEN_ENDPOINT</table>
+        <table>COM_WSO2TELCO_USERSTATUS</table>
+        <table>COM_WSO2TELCO_USERSTATUS_META</table>
+    </purge-include-tables>
+    <data-retention-days>60</data-retention-days>
+</analytics-data-purging>

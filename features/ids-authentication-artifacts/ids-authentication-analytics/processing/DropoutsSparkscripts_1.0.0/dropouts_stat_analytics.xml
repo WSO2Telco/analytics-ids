@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>dropouts_stat_analytics</Name>
+    <Script>
+        create temporary table user_status_raw_droputs using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "_timestamp LONG -i",  incrementalParams "user_status_droputs, DAY");
+
+        create temporary table user_status_meta_raw_droputs using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "_timestamp LONG -i",  incrementalParams "user_status_meta_droputs, DAY");
+
+        create temporary table dropout using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_DROPOUTS_WITH_TYPES", schema "dropoutCount INT, operator STRING, appId STRING, type STRING, day STRING, _timestamp LONG", primaryKeys "operator, appId, type, day, _timestamp", incrementalParams "dropouts_types, DAY", mergeSchema "false");
+
+        create temporary table dropout_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_DROPOUTS", schema "day STRING -i, operator STRING -i -f, appID STRING -i -f, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID", incrementalParams "dropouts, DAY", mergeSchema "false");
+
+        create temporary table dropouts_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_DROPOUTS", schema "day STRING -i, appID STRING -i -f, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, appID");
+
+        create temporary table dropouts_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_DROPOUTS", schema "day STRING -i, operator STRING -i -f, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
+
+        create temporary table dropouts_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_DROPOUTS", schema "day STRING -i, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day");
+
+
+
+        insert into table dropout select COUNT(distinct dropoutsntime.sessionID), onnetsess.operator, onnetsess.appId, "ONNET_TC", getDateString(dropoutsntime._timestamp) as day, dropoutsntime._timestamp as _timestamp from ( select dropouts.sessionID as sessionID,getDateTimestamp(time._timestamp) as _timestamp	from ( select distinct sessionID 	from user_status_meta_raw_droputs 	where  isNewUser = true and isMSISDNHeader = true except select distinct sessionID 	from user_status_raw_droputs  where status ="LOGIN_SUCCESS" or status="SEND_USSD_PUSH" or status="SEND_SMS" or status="SEND_USSD_PIN" or status="INVALID_REQUEST" ) as dropouts inner join ( select sessionID, min(_timestamp) as _timestamp from user_status_raw_droputs where status !="LOGIN_SUCCESS" and status!="SEND_USSD_PUSH" and status !="SEND_SMS" and status !="SEND_USSD_PIN" and status !="INVALID_REQUEST"	group by sessionID ) as time on time.sessionID=dropouts.sessionID ) as dropoutsntime inner join ( select sessionID, operator, appId from user_status_meta_raw_droputs where user_status_meta_raw_droputs.isNewUser =true and user_status_meta_raw_droputs.isMSISDNHeader = true and user_status_meta_raw_droputs.operator IS NOT NULL and user_status_meta_raw_droputs.appId IS NOT NULL ) as onnetsess on onnetsess.sessionID=dropoutsntime.sessionID group by onnetsess.operator, onnetsess.appId, dropoutsntime._timestamp;
+
+
+
+
+        insert into table dropout select COUNT(distinct droputsntime.sessionID), smssess.operator, smssess.appId, "SMS", getDateString(droputsntime._timestamp) as day, droputsntime._timestamp as _timestamp from ( select dropouts.sessionID as sessionID, getDateTimestamp(time._timestamp) as _timestamp from ( select distinct sessionID from user_status_raw_droputs where status = "SEND_SMS" except select distinct sessionID from user_status_raw_droputs where status="LOGIN_SUCCESS" ) as dropouts inner join ( select sessionID, min(_timestamp) as _timestamp from user_status_raw_droputs where status !="LOGIN_SUCCESS" group by sessionID ) as time on time.sessionID=dropouts.sessionID ) as droputsntime inner join ( select sessionID, min(msisdn) as msisdn,min(operator) as operator,min(appId) as appId from user_status_meta_raw_droputs where user_status_meta_raw_droputs.msisdn IS NOT NULL group by sessionID ) as smssess on smssess.sessionID=droputsntime.sessionID where smssess.operator IS NOT NULL and smssess.appId IS NOT NULL group by smssess.operator, smssess.appId, droputsntime._timestamp;
+
+
+        insert into table dropout select COUNT(distinct dropoutsntime.sessionID), smssess.operator, smssess.appId, "MSISDN", getDateString(dropoutsntime._timestamp) as day, dropoutsntime._timestamp as _timestamp from ( select  dropouts.sessionID as sessionID, getDateTimestamp(time._timestamp) as _timestamp from ( select distinct sessionID from user_status_raw_droputs where  status = "HE_AUTH_PROCESSING_FAIL"  except select distinct sessionID from user_status_raw_droputs where status ="LOGIN_SUCCESS" or status="MSISDN_AUTH_PROCESSING_FAIL" or status="MSISDN_AUTH_SUCCESS" or status="INVALID_REQUEST" ) as dropouts inner join ( select sessionID, min(_timestamp) as _timestamp from user_status_raw_droputs  where status !="LOGIN_SUCCESS" and status!="MSISDN_AUTH_PROCESSING_FAIL" and status!="MSISDN_AUTH_SUCCESS" and status!="INVALID_REQUEST" group by sessionID ) as time on time.sessionID=dropouts.sessionID ) as dropoutsntime inner join ( select sessionID, min(msisdn) as msisdn,min(operator) as operator,min(appId) as appId from user_status_meta_raw_droputs where user_status_meta_raw_droputs.isMSISDNHeader = false and user_status_meta_raw_droputs.loginHint is NULL group by sessionID ) as smssess on smssess.sessionID=dropoutsntime.sessionID where smssess.operator IS NOT NULL and smssess.appId IS NOT NULL group by smssess.operator, smssess.appId, dropoutsntime._timestamp;
+
+
+
+        insert into table dropout select COUNT(distinct droputsntimensess.sessionID), droputsntimensess.operator, droputsntimensess.appId, "USSD_PUSH", getDateString(droputsntimensess.day), getDateTimestamp(droputsntimensess.day) as _timestamp from ( select droputs.sessionID as sessionID, ussdsess.msisdn as msisdn, time._timestamp as _timestamp,time.lasttimestamp as lasttimestamp,getDateTimestamp(time._timestamp) as  day, ussdsess.operator as operator,ussdsess.appId as appId from( select distinct sessionID from user_status_raw_droputs where status = "SEND_USSD_PUSH" except select distinct sessionID from user_status_raw_droputs where status = "LOGIN_SUCCESS" ) as droputs inner join ( select sessionID, min(_timestamp) as _timestamp, max(_timestamp) as lasttimestamp	from user_status_raw_droputs where status !="LOGIN_SUCCESS" group by sessionID ) as time on time.sessionID=droputs.sessionID inner join ( select sessionID,min(msisdn) as msisdn,min(operator) as operator,min(appId) as appId from user_status_meta_raw_droputs group by sessionID ) as ussdsess on ussdsess.sessionID=droputs.sessionID ) as droputsntimensess left join ( select allmsisdns.msisdn,allmsisdns.operator,allmsisdns.appId,smssend._timestamp from ( select sessionID, min(_timestamp) as _timestamp from user_status_raw_droputs where status = "SEND_SMS" group by sessionID ) as smssend	inner join ( select sessionID, min(msisdn) as msisdn,min(operator) as operator,min(appId) as appId from user_status_meta_raw_droputs group by sessionID ) as allmsisdns on allmsisdns.sessionID=smssend.sessionID ) as sendsms on  sendsms.msisdn=droputsntimensess.msisdn and 0 &lt; sendsms._timestamp - droputsntimensess.lasttimestamp and sendsms._timestamp - droputsntimensess.lasttimestamp &lt;= 120000 and sendsms.operator=droputsntimensess.operator and  sendsms.appId=droputsntimensess.appId where sendsms.msisdn IS NULL and droputsntimensess.operator IS NOT NULL and droputsntimensess.appId IS NOT NULL group by droputsntimensess.operator, droputsntimensess.appId, droputsntimensess.day;
+
+
+
+        insert into table dropout select COUNT(distinct dropoutsntime.sessionID), offnettcsess.operator, offnettcsess.appId, "OFFNET_TC", getDateString(dropoutsntime._timestamp) as day, dropoutsntime._timestamp as _timestamp from ( select dropouts.sessionID as sessionID, getDateTimestamp(time._timestamp) as _timestamp from ( select distinct sessionID from user_status_raw_droputs where  status = "MSISDN_AUTH_PROCESSING_FAIL" except select distinct sessionID from user_status_raw_droputs  where  status = "SEND_USSD_PUSH" or status = "LOGIN_SUCCESS" or status = "SEND_SMS"  or status = "SEND_USSD_PIN" ) as dropouts inner join ( select sessionID, min(_timestamp) as _timestamp from user_status_raw_droputs where status !="LOGIN_SUCCESS" and status!="MSISDN_AUTH_PROCESSING_FAIL" and status!="MSISDN_AUTH_SUCCESS" and status!="INVALID_REQUEST"	group by sessionID ) as time on time.sessionID=dropouts.sessionID ) as dropoutsntime inner join ( select sessionID, min(msisdn) as msisdn,min(operator) as operator,min(appId) as appId from user_status_meta_raw_droputs where user_status_meta_raw_droputs.isNewUser = true and user_status_meta_raw_droputs.isMSISDNHeader = false group by sessionID ) as offnettcsess on offnettcsess.sessionID=dropoutsntime.sessionID where offnettcsess.operator IS NOT NULL and offnettcsess.appId IS NOT NULL group by offnettcsess.operator, offnettcsess.appId, dropoutsntime._timestamp;
+
+
+        insert into table dropout_summary SELECT day, operator, appId,
+        SUM(IF(type = "USSD_PUSH",dropout.dropoutCount,0)) as ussd_dropouts,
+        SUM(IF(type = "SMS",dropout.dropoutCount,0)) as sms_dropouts,
+        SUM(IF(type = "MSISDN",dropout.dropoutCount,0)) as msisdn_dropouts,
+        SUM(IF(type ="ONNET_TC",dropout.dropoutCount,0)) as tnc_onnet_dropouts,
+        SUM(IF(type="OFFNET_TC",dropout.dropoutCount,0)) as tnc_offnet_dropouts,
+        SUM(dropout.dropoutCount) as total_dropouts, _timestamp from dropout group by operator, appId, day, _timestamp;
+
+
+        INSERT INTO TABLE dropouts_app SELECT day, appID, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, appID, _timestamp;
+
+        INSERT INTO TABLE dropouts_operator SELECT day, operator, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, operator, _timestamp;
+
+        INSERT INTO TABLE dropouts_total SELECT day, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, _timestamp;
+
+        INCREMENTAL_TABLE_COMMIT user_status_droputs;
+        INCREMENTAL_TABLE_COMMIT user_status_meta_droputs;
+        INCREMENTAL_TABLE_COMMIT dropouts;
+        INCREMENTAL_TABLE_COMMIT dropouts_types;
+
+    
+                            
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>

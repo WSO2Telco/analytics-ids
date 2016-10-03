@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<EventStoreConfiguration>
+    <TableSchema>
+        <ColumnDefinition>
+            <Name>loginCount</Name>
+            <IsFacet>false</IsFacet>
+            <EnableIndexing>true</EnableIndexing>
+            <IsPrimaryKey>false</IsPrimaryKey>
+            <EnableScoreParam>false</EnableScoreParam>
+            <Type>LONG</Type>
+        </ColumnDefinition>
+        <ColumnDefinition>
+            <Name>appID</Name>
+            <IsFacet>false</IsFacet>
+            <EnableIndexing>true</EnableIndexing>
+            <IsPrimaryKey>false</IsPrimaryKey>
+            <EnableScoreParam>false</EnableScoreParam>
+            <Type>STRING</Type>
+        </ColumnDefinition>
+    </TableSchema>
+    <Source>
+        <StreamId>com.wso2telco.success.appwiselogins.stream:1.0.0</StreamId>
+    </Source>
+    <MergeSchema>false</MergeSchema>
+    <RecordStoreName>EVENT_STORE</RecordStoreName>
+</EventStoreConfiguration>

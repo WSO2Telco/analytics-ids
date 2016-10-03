@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="LoginChannelsTotalPieChart" version="1.0.0" type="dashboards/gadget" serverRole="DataAnalyticsServer">
+    <file>operator-login-channels-total-pie</file>
+</artifact>

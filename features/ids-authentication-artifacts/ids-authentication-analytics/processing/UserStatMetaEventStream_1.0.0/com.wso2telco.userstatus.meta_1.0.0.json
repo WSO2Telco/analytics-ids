@@ -1,0 +1,76 @@
+{
+  "name": "com.wso2telco.userstatus.meta",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "sessionID",
+      "type": "STRING"
+    },
+    {
+      "name": "sourceIP",
+      "type": "STRING"
+    },
+    {
+      "name": "operator",
+      "type": "STRING"
+    },
+    {
+      "name": "appId",
+      "type": "STRING"
+    },
+    {
+      "name": "msisdn",
+      "type": "STRING"
+    },
+    {
+      "name": "isMSISDNHeader",
+      "type": "BOOL"
+    },
+    {
+      "name": "userAgent",
+      "type": "STRING"
+    },
+    {
+      "name": "consumerKey",
+      "type": "STRING"
+    },
+    {
+      "name": "state",
+      "type": "STRING"
+    },
+    {
+      "name": "nonce",
+      "type": "STRING"
+    },
+    {
+      "name": "scope",
+      "type": "STRING"
+    },
+    {
+      "name": "acrValue",
+      "type": "STRING"
+    },
+    {
+      "name": "loginHint",
+      "type": "STRING"
+    },
+    {
+      "name": "isNewUser",
+      "type": "BOOL"
+    },
+    {
+      "name": "telcoScope",
+      "type": "STRING"
+    },
+    {
+      "name": "status",
+      "type": "STRING"
+    },
+    {
+      "name": "_timestamp",
+      "type": "LONG"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="LoginsVsAttemptsSparkscripts" version="1.0.0" type="analytics/spark" serverRole="DataAnalyticsServer">
+    <file>logins_vs_attempts_stat_analytics.xml</file>
+</artifact>

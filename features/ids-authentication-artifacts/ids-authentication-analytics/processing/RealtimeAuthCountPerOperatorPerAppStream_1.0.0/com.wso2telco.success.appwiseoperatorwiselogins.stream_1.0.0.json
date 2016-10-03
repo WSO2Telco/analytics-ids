@@ -1,0 +1,20 @@
+{
+  "name": "com.wso2telco.success.appwiseoperatorwiselogins.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "loginCount",
+      "type": "LONG"
+    },
+    {
+      "name": "operator",
+      "type": "STRING"
+    },
+    {
+      "name": "appID",
+      "type": "STRING"
+    }
+  ]
+}
