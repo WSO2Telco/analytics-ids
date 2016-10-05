@@ -20,7 +20,7 @@ define stream triggerStream (type string);
 define table notificationDataTable ( operator string, appid string, emails string, enabled bool);
 
 
-from triggerStream#window.lengthBatch(4)
+from triggerStream#window.lengthBatch(7)
 select count(type) as type
 group by type
 insert into triggerExecution;
