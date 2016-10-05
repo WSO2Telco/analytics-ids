@@ -4,6 +4,7 @@
 	<dependency artifact="EmailDailyReportEventNotificationDataStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="EmailDailyReportEventNotificationDataSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="EmailDailyReportEventNotificationStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+    <dependency artifact="EmailDailyReportEventTriggerStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="EmailDailyReportEventNotificationToggleStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="EmailDailyReportEventSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="EmailDailyReportNotificationExecutionPlan" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
