@@ -1,0 +1,21 @@
+@Plan:name('TelcoSuccessLogins')
+
+@Import('com.wso2telco.authorization.endpoint:1.0.0')
+define stream inStream (requestType string, appID string, isAuthenticated bool, authenticatorMethods string, authenticatorEndTime long, authenticatorStartTime long, sessionID string, isNewUser bool, operator string, userAgent string, msisdn string, internalCustomerReference string, serverHost string, requestURL string, httpMethod string, urlParams string, requestStatus string, returnedError string, transactionID string, consentTimestamp long, consentState string, consentType string, isAuthCodeIssued bool, state string, nonce string, scope string, acrValue int, isMsisdnHeader bool, ipHeader string, loginHint string,telcoScope string, _timestamp long);
+
+@Export('com.wso2telco.success.operatorwiselogins.stream:1.0.0')
+define stream outStreamOperator (loginCount long, operator string);
+
+@Export('com.wso2telco.success.appwiseoperatorwiselogins.stream:1.0.0')
+define stream outStreamAppOperator (loginCount long, operator string, appID string);
+
+@Export('com.wso2telco.success.appwiselogins.stream:1.0.0')
+define stream outStreamApp (loginCount long, appID string);
+
+@Export('com.wso2telco.success.logins.stream:1.0.0')
+define stream outStreamTotal (loginCount long);
+
+from inStream[isAuthenticated==true]#window.externalTime(_timestamp, 1 sec) select count(*) as loginCount insert into outStreamTotal;
+from inStream#window.externalTime(_timestamp, 1 sec) select count(*) as loginCount, operator group by operator insert into outStreamOperator;
+from inStream#window.externalTime(_timestamp, 1 sec) select count(*) as loginCount, appID group by appID insert into outStreamApp;
+from inStream#window.externalTime(_timestamp, 1 sec) select count(*) as loginCount, operator, appID group by operator, appID insert into outStreamAppOperator;

@@ -9,10 +9,12 @@ var view = {
     chartConfig: {
         x : "Day",
         charts : [{type: "bar", range:"true",  y : "Count"}],
-        maxLength: 100,
+        maxLength: 60,
+        barGap: 0.1,
         width: $('#canvas').width(),
         height: $('#canvas').height(),
         padding: { "top": 60, "left": 60, "bottom": 80, "right": 60 },
+        colorScale : [CLR_CHART_TOKENS_PD],
         xAxisAngle:true
     },
     callbacks: [{

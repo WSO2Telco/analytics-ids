@@ -1,0 +1,1362 @@
+<%
+(function () {
+    var TYPE = "type";
+
+    var OPERATORS_TABLE = "COM_WSO2TELCO_OPERATORS";
+    var APP_TABLE = "COM_WSO2TELCO_APPS";
+
+    var LOGIN_CHANNELS_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_LOGIN_CHANNELS";
+    var ATTEMPTS_VS_LOGINS_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_ATTEMPTS_N_LOGINS";
+    var SUBSCRIBER_BASE_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_DAILY__REGISTRATIONS_AGGREGATIONS";
+    var DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_DAILY_REGISTRATIONS";
+    var ONNET_OFFNET_REGISTRATIONS_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_ONNET_OFFNET_OPERATOR_SUMMARY";
+    var DROPOUTS_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_DROPOUTS";
+    var REALTIME_LOGINS_PER_OPERATOR = "COM_WSO2TELCO_SUCCESS_OPERATORWISELOGINS_STREAM";
+    var ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_ACTIVE_USERS_DAILY";
+ 	var ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_ACTIVE_USERS_MONTHLY";
+
+    var LOGIN_CHANNELS_PER_APP_TABLE = "COM_WSO2TELCO_SUMMARY_APP_LOGIN_CHANNELS";
+    var ATTEMPTS_VS_LOGINS_PER_APP_TABLE = "COM_WSO2TELCO_SUMMARY_APP_ATTEMPTS_N_LOGINS";
+    var DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_APP_DAILY_REGISTRATIONS";
+    var ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_ONNET_OFFNET_APP_SUMMARY";
+    var DROPOUTS_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_APP_DROPOUTS";
+    var REALTIME_LOGINS_PER_APP = "COM_WSO2TELCO_SUCCESS_APPWISELOGINS_STREAM";
+    var ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_APP_ACTIVE_USERS_DAILY";
+ 	var ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_APP_ACTIVE_USERS_MONTHLY";
+
+    var LOGIN_CHANNELS_TOTAL_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_LOGIN_CHANNELS";
+    var ATTEMPTS_VS_LOGINS_TOTAL_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_ATTEMPTS_N_LOGINS";
+    var DAILY_REGISTRATION_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_DAILY_REGISTRATIONS";
+    var ONNET_OFFNET_REGISTRATIONS_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_ONNET_OFFNET_TOTAL_SUMMARY";
+    var SUBSCRIBER_BASE_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_DAILY__REGISTRATIONS_AGGREGATIONS";
+    var DROPOUTS_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_DROPOUTS";
+    var REALTIME_LOGINS_TOTAL = "COM_WSO2TELCO_SUCCESS_LOGINS_STREAM";
+    var ACTIVE_USERS_DAILY_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_ACTIVE_USERS_DAILY";
+ 	var ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_ACTIVE_USERS_MONTHLY";
+
+    var LOGIN_CHANNELS_PER_APP_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_LOGIN_CHANNELS";
+    var ATTEMPTS_VS_LOGINS_PER_APP_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_ATTEMPTS_N_LOGINS";
+    var DAILY_REGISTRATION_PER_APP_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_DAILY_REGISTRATIONS";
+    var ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_ONNET_OFFNET_SUMMARY";
+    var DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_DROPOUTS";
+    var REALTIME_LOGINS_PER_OPERATOR_PER_APP = "COM_WSO2TELCO_SUCCESS_APPWISEOPERATORWISELOGINS_STREAM";
+    var ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_DAILY";
+ 	var ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_MONTHLY";
+
+
+    var TIME_FROM_PARAM = "timeFrom";
+    var TIME_TO_PARAM = "timeTo";
+
+    var OPERATOR_PARAM = "operator";
+    var APP_PARAM = "appID";
+
+    var ADMIN_ROLE = "admin";
+    var OPERATOR_ROLE_PREFIX = "operator_";
+    var SERVICE_PROVIDER_ROLE_PREFIX = "serviceprovider_";
+    var CONTENT_TYPE_JSON = "application/json";
+    var USER_TOKEN = "user";
+    var TENANT_DOMAIN = "domain";
+    var CONST_AT = "@";
+    var USERNAME = "username";
+    var ROLES = "roles";
+    var HTTP_USER_NOT_AUTHENTICATED = 403;
+    var HTTP_INTERNAL_ERROR = 500;
+    var JS_MAX_VALUE = "9007199254740992";
+    var JS_MIN_VALUE = "-9007199254740992";
+    var MAX_ALLOWED_RECORDS = "1000000";
+
+    var NEAR_REALTIME_DELAY = 10000;
+    var TYPE_LOGIN_CHANNELS_PER_DAY = 1;
+    var TYPE_DAILY_REGISTRATIONS_PER_DAY = 2;
+    var TYPE_TOTAL_ATTEMPTS_VS_LOGINS = 3;
+    var TYPE_ONNET_ATTEMPTS_VS_LOGINS = 4;
+    var TYPE_OFFNET_ATTEMPTS_VS_LOGINS = 10;
+    var TYPE_SUBSCRIBER_GROWTH_PER_OPERATOR_PER_DAY = 5;
+    var TYPE_TOTAL_LOGIN_CHANNELS = 6;
+    var TYPE_ONNET_REGISTRATIONS = 7;
+    var TYPE_OPERATOR_LIST = 8;
+    var TYPE_DROPOUTS = 9;
+    var TYPE_OFFNET_REGISTRATIONS = 11;
+    var TYPE_SUCCESS_LOGIN_STREAM = 12;
+    var TYPE_TOTAL_DROPOUTS = 13;
+    var TYPE_ONNET_SUCCESS_FAIL_LOGINS = 14;
+    var TYPE_OFFNET_SUCCESS_FAIL_LOGINS = 15;
+    var TYPE_TOTAL_SUCCESS_FAIL_LOGINS = 16;
+    var TYPE_DAILY_ACTIVE_USERS=17;
+    var TYPE_MONTHLY_ACTIVE_USERS = 18;
+    var TYPE_TOTAL_TOKENS = 19;
+    var TYPE_TOTAL_AUTH_ATTEMPTS=20;
+    var TYPE_OPERATOR_USSD_LOGS=21;
+    var TYPE_OPERATOR_HE_FAILURES=22;
+    var USSD_ANALYSIS_OPERATORWISE=23;
+	var TYPE_MSISDNS_SUCCESS_FAILED_REPORT=24;
+	var TYPE_LOGGING_CHECK=25;
+	var TYPE_WRONG_EP=26;
+    var log = new Log();
+    var carbon = require('carbon');
+    var configs = require('/configs/designer.json');
+    var utils = require('/modules/utils.js');
+
+    var AnalyticsCachedJSServiceConnector = Packages.org.wso2.carbon.analytics.jsservice.AnalyticsCachedJSServiceConnector;
+    var AnalyticsCache = Packages.org.wso2.carbon.analytics.jsservice.AnalyticsCachedJSServiceConnector.AnalyticsCache;
+    var cacheTimeoutSeconds = 5;
+    var loggedInUser = null;
+    var roles = null;
+    var loginChannelTable = null;
+    var realtimeLoginTable = null;
+    var attemptsVsLoginsTable = null;
+    var dailyRegistrationTable = null;
+    var subscriberGrowthTable = null;
+    var onnetOffnetRegistrationTable = null;
+    var activeUsersDailyTable = null;
+ 	var activeUsersMonthlyTable = null;
+    var dropoutTable = null;
+    if (configs.cacheTimeoutSeconds) {
+        cacheTimeoutSeconds = parseInt(configs.cacheTimeoutSeconds);
+    }
+    var cacheSizeBytes = 1024 * 1024 * 1024; // 1GB
+    if (configs.cacheSizeBytes) {
+        cacheSizeBytes = parseInt(configs.cacheSizeBytes);
+    }
+    response.contentType = CONTENT_TYPE_JSON;
+
+    var token = session.get(USER_TOKEN);
+    if (token != null) {
+        loggedInUser = token[USERNAME] + CONST_AT + token[TENANT_DOMAIN];
+        roles = token[ROLES];
+    } else {
+        if (log.isDebugEnabled()) {
+            log.debug("user is not authenticated!");
+        }
+        response.status = HTTP_USER_NOT_AUTHENTICATED;
+        print('{ "status": "Failed", "message": "User is not authenticated." }');
+        return;
+    }
+
+    var cache = application.get("AnalyticsWebServiceCache");
+    if (cache == null) {
+        cache = new AnalyticsCache(cacheTimeoutSeconds, cacheSizeBytes);
+        application.put("AnalyticsWebServiceCache", cache);
+    }
+    var connector = new AnalyticsCachedJSServiceConnector(cache);
+    var type = 0;
+    var typeParam = request.getParameter(TYPE);
+    if (typeParam != null) {
+        type = parseInt(typeParam);
+    }
+    if (type == 0) {
+        if (log.isDebugEnabled()) {
+            log.debug("operation type is not specified!");
+        }
+        response.status = HTTP_INTERNAL_ERROR;
+        print('{ "status": "Failed", "message": "Operation type is not specified" }');
+        return;
+    }
+    var timeFromParam = request.getParameter(TIME_FROM_PARAM);
+    var timeToParam = request.getParameter(TIME_TO_PARAM);
+    var operatorParam = request.getParameter(OPERATOR_PARAM);
+    var appParam = request.getParameter(APP_PARAM);
+    var timeFilterQuery = null;
+    var operatorQuery = null;
+    var serviceProviderQuery = null;
+    var roleFilterQuery = null;
+    var isAdmin = false;
+    var isDashboardViewer = false;
+    var isOperator = false;
+    var isServiceProvider = false;
+    if (timeFromParam != "undefined" && timeToParam != "undefined") {
+        timeFilterQuery = "_timestamp :[" + timeFromParam + " TO " + timeToParam + "]";
+    } else {
+        timeFilterQuery = "_timestamp :[" + JS_MIN_VALUE + " TO " + JS_MAX_VALUE + "]";
+    }
+
+    for (var role in roles) {
+        if (roles[role].toLowerCase().startsWith(OPERATOR_ROLE_PREFIX)) {
+
+            operatorQuery = " AND operator: \"" + roles[role].substring(OPERATOR_ROLE_PREFIX.length).toLowerCase() + "\"";
+
+            if ( appParam != "undefined" && appParam != "") {
+                roleFilterQuery = operatorQuery +  " AND appID: \"" + appParam + "\"";
+                dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+                loginChannelTable = LOGIN_CHANNELS_PER_APP_PER_OPERATOR_TABLE;
+                attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_PER_OPERATOR_TABLE;
+                onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+                realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
+                dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+                activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
+ 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+            } else if (appParam == "undefined" || appParam == "") {
+                roleFilterQuery = operatorQuery;
+                dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
+                loginChannelTable = LOGIN_CHANNELS_PER_OPERATOR_TABLE;
+                attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_OPERATOR_TABLE;
+                subscriberGrowthTable = SUBSCRIBER_BASE_PER_OPERATOR_PER_DAY_TABLE;
+                onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_OPERATOR_PER_DAY_TABLE;
+                realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR;
+                dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
+                activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
+ 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
+            }
+            isDashboardViewer = true;
+            isOperator = true ;
+            break;
+
+        } else if (roles[role].toLowerCase().startsWith(SERVICE_PROVIDER_ROLE_PREFIX)) {
+            appParam=roles[role].substring(SERVICE_PROVIDER_ROLE_PREFIX.length);
+            serviceProviderQuery = " AND appID: \"" + appParam  + "\"";
+            if ( operatorParam != "undefined" && operatorParam != "") {
+                roleFilterQuery = serviceProviderQuery +  " AND operator: \"" + operatorParam + "\"";
+                dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+                loginChannelTable = LOGIN_CHANNELS_PER_APP_PER_OPERATOR_TABLE;
+                attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_PER_OPERATOR_TABLE;
+                onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+                realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
+                dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+                activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
+ 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+            } else if (operatorParam == "undefined" || operatorParam == "") {
+                roleFilterQuery =  serviceProviderQuery;
+                dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
+                loginChannelTable = LOGIN_CHANNELS_PER_APP_TABLE;
+                attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_TABLE;
+                onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_DAY_TABLE;
+                realtimeLoginTable = REALTIME_LOGINS_PER_APP;
+                dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
+                activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
+ 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+
+            }
+            isDashboardViewer = true;
+            isServiceProvider =true;
+            break;
+
+
+        } else if (roles[role].toLowerCase().equals(ADMIN_ROLE)) {
+            if (operatorParam != "undefined" && operatorParam != "" && appParam != "undefined" && appParam != "") {
+                roleFilterQuery = " AND operator: \"" + operatorParam + "\" AND appID: \"" + appParam + "\"";
+                dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+                loginChannelTable = LOGIN_CHANNELS_PER_APP_PER_OPERATOR_TABLE;
+                attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_PER_OPERATOR_TABLE;
+                onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+                realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
+                dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+                activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
+ 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+            } else if (operatorParam != "undefined" && operatorParam != "" && (appParam == "undefined" || appParam == "")) {
+                roleFilterQuery = " AND operator: \"" + operatorParam + "\"";
+                dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
+                loginChannelTable = LOGIN_CHANNELS_PER_OPERATOR_TABLE;
+                attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_OPERATOR_TABLE;
+                subscriberGrowthTable = SUBSCRIBER_BASE_PER_OPERATOR_PER_DAY_TABLE;
+                onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_OPERATOR_PER_DAY_TABLE;
+                realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR;
+                dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
+ 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
+                activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
+            } else if ((operatorParam == "undefined" || operatorParam == "") && appParam != "undefined" && appParam != "") {
+                roleFilterQuery = " AND appID: \"" + appParam + "\"";
+                dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
+                loginChannelTable = LOGIN_CHANNELS_PER_APP_TABLE;
+                attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_TABLE;
+                onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_DAY_TABLE;
+                realtimeLoginTable = REALTIME_LOGINS_PER_APP;
+                dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
+                activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
+ 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+            } else if ((operatorParam == "undefined" || operatorParam == "") && (appParam == "undefined" || appParam == "")) {
+                roleFilterQuery = "";
+                dailyRegistrationTable = DAILY_REGISTRATION_TOTAL_PER_DAY_TABLE;
+                loginChannelTable = LOGIN_CHANNELS_TOTAL_TABLE;
+                attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_TOTAL_TABLE;
+                subscriberGrowthTable = SUBSCRIBER_BASE_TOTAL_PER_DAY_TABLE;
+                onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_TOTAL_PER_DAY_TABLE;
+                realtimeLoginTable = REALTIME_LOGINS_TOTAL;
+                dropoutTable = DROPOUTS_TOTAL_PER_DAY_TABLE;
+                activeUsersDailyTable=ACTIVE_USERS_DAILY_TOTAL_PER_DAY_TABLE;
+ 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE;
+            }
+            isDashboardViewer = true;
+            isAdmin = true;
+            break;
+        }
+    }
+
+    if (isDashboardViewer){
+        if (connector != null) {
+            if (loggedInUser != null){
+                var finalQuery = timeFilterQuery + roleFilterQuery; //order matters
+                if (finalQuery != null){
+
+                    var searchParams = null;
+                    var result = null;
+                    var results = [];
+                    var data = null;
+
+                    switch (type) {
+                        case TYPE_OPERATOR_LIST :
+                        {
+                            var activeFilterQuery= "active:true"
+                            if (isAdmin) {
+                                var operatorSearchParams = {
+                                    query: activeFilterQuery,
+                                    start: 0,
+                                    count: MAX_ALLOWED_RECORDS,
+                                    sortBy: [{
+                                        "field": "operator",
+                                        "sortType": "ASC"
+                                    }]
+                                };
+                                var appSearchParams = {
+                                    query: activeFilterQuery,
+                                    start: 0,
+                                    count: MAX_ALLOWED_RECORDS,
+                                    sortBy: [{
+                                        "field": "appId",
+                                        "sortType": "ASC"
+                                    }]
+                                };
+                                var operatorResult = connector.search(loggedInUser, OPERATORS_TABLE, stringify(operatorSearchParams));
+                                var appResult = connector.search(loggedInUser, APP_TABLE, stringify(appSearchParams));
+                                if (operatorResult.getStatusCode() == 200 && appResult.getStatusCode() == 200) {
+                                    var operatorData = JSON.parse(operatorResult.getMessage());
+                                    var operators=[];
+                                    operatorData.forEach(function (record, i) {
+                                        var values = record.values;
+                                        operators.push(values["operator"]);
+                                    });
+                                    var appData = JSON.parse(appResult.getMessage());
+                                    var apps=[];
+                                    appData.forEach(function (record, i) {
+                                        var values = record.values;
+                                        apps.push(values["appId"]);
+                                    });
+                                    results = {
+                                        isAdmin: true,
+                                        operators: operators,
+                                        apps: apps
+                                    };
+                                    result = {
+                                        message: stringify(results),
+                                        statusCode: operatorResult.getStatusCode(),
+                                        status: operatorResult.getStatus()
+                                    };
+                                } else {
+                                    result = {
+                                        message: result.getMessage(),
+                                        statusCode: result.getStatusCode(),
+                                        status: result.getStatus()
+                                    };
+                                }
+                            } else  if (isOperator) {
+                                var appSearchParams = {
+                                    query: activeFilterQuery,
+                                    start: 0,
+                                    count: MAX_ALLOWED_RECORDS,
+                                    sortBy: [{
+                                        "field": "appId",
+                                        "sortType": "ASC"
+                                    }]
+                                };
+                                var appResult = connector.search(loggedInUser, APP_TABLE, stringify(appSearchParams));
+                                if ( appResult.getStatusCode() == 200) {
+                                    var appData = JSON.parse(appResult.getMessage());
+                                    var apps=[];
+                                    appData.forEach(function (record, i) {
+                                        var values = record.values;
+                                        apps.push(values["appId"]);
+                                    });
+                                    results = {
+                                        isOperator: true,
+                                        apps: apps
+                                    };
+                                    result = {
+                                        message: stringify(results),
+                                        statusCode: appResult.getStatusCode(),
+                                        status: appResult.getStatus()
+                                    };
+                                } else {
+                                    result = {
+                                        message: result.getMessage(),
+                                        statusCode: result.getStatusCode(),
+                                        status: result.getStatus()
+                                    };
+                                }
+                            }else  if (isServiceProvider) {
+                                var operatorSearchParams = {
+                                    query: activeFilterQuery,
+                                    start: 0,
+                                    count: MAX_ALLOWED_RECORDS,
+                                    sortBy: [{
+                                        "field": "operator",
+                                        "sortType": "ASC"
+                                    }]
+                                };
+                                var operatorResult = connector.search(loggedInUser, OPERATORS_TABLE, stringify(operatorSearchParams));
+                                if ( operatorResult.getStatusCode() == 200) {
+                                    var operatorData = JSON.parse(operatorResult.getMessage());
+                                    var operators=[];
+                                    operatorData.forEach(function (record, i) {
+                                        var values = record.values;
+                                        operators.push(values["operator"]);
+                                    });
+                                    results = {
+                                        isServiceProvider: true,
+                                        operators: operators
+                                    };
+                                    result = {
+                                        message: stringify(results),
+                                        statusCode: operatorResult.getStatusCode(),
+                                        status: operatorResult.getStatus()
+                                    };
+                                } else {
+                                    result = {
+                                        message: result.getMessage(),
+                                        statusCode: result.getStatusCode(),
+                                        status: result.getStatus()
+                                    };
+                                }
+                            }else {
+                                result = {
+                                    message: stringify({
+                                        isAdmin: false
+                                    }),
+                                    statusCode: 200,
+                                    status: "success"
+                                };
+                            }
+                            break;
+                        }
+                        case TYPE_LOGIN_CHANNELS_PER_DAY:
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+                            };
+                            result = connector.search(loggedInUser, loginChannelTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var he = [values["day"].substring(5), "HE", values["he_logins"]];
+                                    var ussd = [values["day"].substring(5), "USSD", values["ussd_logins"]];
+                                    var sms = [values["day"].substring(5), "SMS", values["sms_logins"]];
+                                    var ussd_pin = [values["day"].substring(5), "USSDPIN", values["ussd_pin_logins"]];
+                                    results.push(he);
+                                    results.push(ussd);
+                                    results.push(ussd_pin);
+                                    results.push(sms);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+
+                        case TYPE_TOTAL_LOGIN_CHANNELS :
+                        {
+
+                            searchParams = {
+                                query: finalQuery,
+                                aggregateFields: [
+                                    {
+                                        fields: ["he_logins"],
+                                        aggregate: "SUM",
+                                        alias: "he"
+                                    },
+                                    {
+                                        fields: ["ussd_logins"],
+                                        aggregate: "SUM",
+                                        alias: "ussd"
+                                    },
+                                    {
+                                        fields: ["sms_logins"],
+                                        aggregate: "SUM",
+                                        alias: "sms"
+                                    },
+                                    {
+                                        fields: ["ussd_pin_logins"],
+                                        aggregate: "SUM",
+                                        alias: "ussd_pin"
+                                    }
+                                ],
+                                noOfRecords: MAX_ALLOWED_RECORDS
+                            };
+                            result = connector.searchWithAggregates(loggedInUser, loginChannelTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var he = ["HE", values["he"]];
+                                    var ussd = ["USSD", values["ussd"]];
+                                    var sms = ["SMS", values["sms"]];
+                                    var ussd_pin = ["USSDPIN", values["ussd_pin"]];
+                                    if (!(values["he"] == 0 && values["ussd"] == 0 && values["sms"] == 0 && values["ussd_pin"] == 0)) {
+                                        results.push(he);
+                                        results.push(ussd);
+                                        results.push(ussd_pin);
+                                        results.push(sms);
+                                    }
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+
+                        case TYPE_TOTAL_ATTEMPTS_VS_LOGINS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                aggregateFields: [
+                                    {
+                                        fields: ["total_authCount"],
+                                        aggregate: "SUM",
+                                        alias: "Attempts"
+                                    },
+                                    {
+                                        fields: ["total_tokenCount"],
+                                        aggregate: "SUM",
+                                        alias: "Logins"
+                                    }
+                                ],
+                                noOfRecords: MAX_ALLOWED_RECORDS
+                            };
+                            result = connector.searchWithAggregates(loggedInUser, attemptsVsLoginsTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var attempts = ["Attempts", values["Attempts"]];
+                                    var logins = ["Logins", values["Logins"]];
+                                    if (values["Attempts"] != 0) {
+                                        results.push(attempts);
+                                        results.push(logins);
+                                    }
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+
+                        case TYPE_ONNET_ATTEMPTS_VS_LOGINS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+
+                            };
+                            result = connector.search(loggedInUser, attemptsVsLoginsTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var onAuth = [values["day"].substring(5), "Onnet Auth", values["onnet_authCount"]];
+                                    var onToken = [values["day"].substring(5), "Onnet Token", values["onnet_tokenCount"]];
+                                    results.push(onAuth);
+                                    results.push(onToken);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+                        case TYPE_OFFNET_ATTEMPTS_VS_LOGINS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+
+                            };
+                            result = connector.search(loggedInUser, attemptsVsLoginsTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var offAuth = [values["day"].substring(5), "Offnet Auth", values["offnet_authCount"]];
+                                    var offToken = [values["day"].substring(5), "Offnet Token", values["offnet_tokenCount"]];
+                                    results.push(offAuth);
+                                    results.push(offToken);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+                        case TYPE_SUBSCRIBER_GROWTH_PER_OPERATOR_PER_DAY :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: 100,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+                            };
+                            result = connector.search(loggedInUser, subscriberGrowthTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var result = [values["day"].substring(5), values["totalCount"]];
+                                    results.push(result);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+
+                        case  TYPE_DAILY_REGISTRATIONS_PER_DAY :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC" //can be DESC or ASC
+                                }]
+                            };
+                            result = connector.search(loggedInUser, dailyRegistrationTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var result = [values["day"].substring(5), values["regCount"]];
+                                    results.push(result);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+                        case TYPE_ONNET_REGISTRATIONS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+                            };
+                            result = connector.search(loggedInUser, onnetOffnetRegistrationTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var onReg = [values["day"].substring(5), values["onReg"]];
+                                    var onAuth = [values["day"].substring(5), values["onAuth"]];
+                                    results.push(onReg);
+                                    results.push(onAuth);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+
+                        }
+                        case TYPE_OFFNET_REGISTRATIONS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+                            };
+                            result = connector.search(loggedInUser, onnetOffnetRegistrationTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var offReg = [values["day"].substring(5), values["offReg"]];
+                                    var offAuth = [values["day"].substring(5), values["offAuth"]];
+                                    results.push(offReg);
+                                    results.push(offAuth);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+
+                        }
+                        case TYPE_DROPOUTS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+                            };
+                            result = connector.search(loggedInUser, dropoutTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var ussd = [values["day"].substring(5), "USSD", values["ussd_droputs"]];
+                                    var sms = [values["day"].substring(5), "SMS", values["sms_dropouts"]];
+                                    var he = [values["day"].substring(5), "MSISDN", values["msisdn_dropouts"]];
+                                    var onnet = [values["day"].substring(5), "ONNET T&C", values["tnc_onnet_dropouts"]];
+                                    var offnet = [values["day"].substring(5), "OFFNET T&C", values["tnc_offnet_dropouts"]];
+                                    results.push(ussd);
+                                    results.push(sms);
+                                    results.push(he);
+                                    results.push(offnet);
+                                    results.push(onnet);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+
+                        }
+
+                        case TYPE_TOTAL_DROPOUTS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                aggregateFields: [
+                                    {
+                                        fields: ["ussd_droputs"],
+                                        aggregate: "SUM",
+                                        alias: "ussd"
+                                    },
+                                    {
+                                        fields: ["sms_dropouts"],
+                                        aggregate: "SUM",
+                                        alias: "sms"
+                                    },
+                                    {
+                                        fields: ["msisdn_dropouts"],
+                                        aggregate: "SUM",
+                                        alias: "msisdn"
+                                    },
+                                    {
+                                        fields: ["tnc_onnet_dropouts"],
+                                        aggregate: "SUM",
+                                        alias: "tnc_onnet"
+                                    },{
+                                        fields: ["tnc_offnet_dropouts"],
+                                        aggregate: "SUM",
+                                        alias: "tnc_offnet"
+                                    }
+                                ],
+                                noOfRecords: MAX_ALLOWED_RECORDS
+                            };
+                            result = connector.searchWithAggregates(loggedInUser, dropoutTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var ussd = ["USSD", values["ussd"]];
+                                    var sms = ["SMS", values["sms"]];
+                                    var msisdn = ["MSISDN", values["msisdn"]];
+                                    var onnet_tnc = ["ONNET T&C", values["tnc_onnet"]];
+                                    var offnet_tnc = ["OFFNET T&C", values["tnc_offnet"]];
+                                    if (!(values["ussd"] == 0 && values["sms"] == 0 && values["msisdn"] == 0 && values["tnc_onnet"] == 0
+                                            && values["tnc_offnet"] == 0)) {
+                                        results.push(ussd);
+                                        results.push(sms);
+                                        results.push(msisdn);
+                                        results.push(onnet_tnc);
+                                        results.push(offnet_tnc);
+                                    }
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+                        case TYPE_ONNET_SUCCESS_FAIL_LOGINS :
+                        {
+                            var attemptsSearchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+
+                            };
+                            var onnetSuccessSearchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+                            };
+                            result = connector.search(loggedInUser, attemptsVsLoginsTable, stringify(attemptsSearchParams));
+                            var resultAttempts = [];
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var onnetAuth = [values["day"].substring(5), values["onnet_authCount"]];
+                                    resultAttempts.push(onnetAuth);
+                                });
+                            }
+                            result = connector.search(loggedInUser, onnetOffnetRegistrationTable, stringify(onnetSuccessSearchParams));
+                            var resultOnnetSuccess = [];
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var onAuthSuccess = [values["day"].substring(5), values["onAuth"]];
+                                    resultOnnetSuccess.push(onAuthSuccess);
+                                });
+                            }
+                            var finalResults = [];
+                            for (var i=0; i < resultAttempts.length; i++) {
+                                if(resultOnnetSuccess[i]){
+                                    finalResults.push([resultAttempts[i][0], "Success Logins", resultOnnetSuccess[i][1]]);
+                                    finalResults.push([resultAttempts[i][0], "Failed Logins", resultAttempts[i][1] - resultOnnetSuccess[i][1]]);
+                                }
+                            }
+                            result = {
+                                message: stringify(finalResults),
+                                statusCode: result.getStatusCode(),
+                                status: result.getStatus()
+                            };
+                            break;
+                        }
+                        case TYPE_OFFNET_SUCCESS_FAIL_LOGINS :
+                        {
+                            var attemptsSearchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+
+                            };
+                            var offnetSuccessSearchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+                            };
+                            result = connector.search(loggedInUser, attemptsVsLoginsTable, stringify(attemptsSearchParams));
+                            var resultAttempts = [];
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var offnetAuth = [values["day"].substring(5), values["offnet_authCount"]];
+                                    resultAttempts.push(offnetAuth);
+                                });
+                            }
+                            result = connector.search(loggedInUser, onnetOffnetRegistrationTable, stringify(offnetSuccessSearchParams));
+                            var resultOffnetSuccess = [];
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var offAuthSuccess = [values["day"].substring(5), values["offAuth"]];
+                                    resultOffnetSuccess.push(offAuthSuccess);
+                                });
+                            }
+                            var finalResults = [];
+                            for (var i=0; i < resultAttempts.length; i++) {
+                                if(resultOffnetSuccess[i]){
+                                    finalResults.push([resultAttempts[i][0], "Success Logins", resultOffnetSuccess[i][1]]);
+                                    finalResults.push([resultAttempts[i][0], "Failed Logins", resultAttempts[i][1] - resultOffnetSuccess[i][1]]);
+                                }
+                            }
+                            result = {
+                                message: stringify(finalResults),
+                                statusCode: result.getStatusCode(),
+                                status: result.getStatus()
+                            };
+                            break;
+                        }
+                         case TYPE_TOTAL_AUTH_ATTEMPTS :
+                                    {
+                                        searchParams = {
+                                            query: finalQuery,
+                                            start: 0,
+                                            count: MAX_ALLOWED_RECORDS,
+                                            sortBy: [{
+                                                         "field": "_timestamp",
+                                                         "sortType": "ASC"
+                                                     }]
+                                        };
+                                        result = connector.search(loggedInUser, attemptsVsLoginsTable, stringify(searchParams));
+                                        if (result.getStatusCode() == 200) {
+                                            data = JSON.parse(result.getMessage());
+
+
+                                            data.forEach(function (record, i) {
+                                                if(record!=null){
+
+                                                var values = record.values;
+                                                var totalToken = [values["day"].substring(5), values["total_authCount"]];
+                                                results.push(totalToken);
+
+                                                }
+                                            });
+                                            result = {
+                                                message: stringify(results),
+                                                statusCode: result.getStatusCode(),
+                                                status: result.getStatus()
+                                            };
+                                        } else {
+                                            result = {
+                                                message: result.getMessage(),
+                                                statusCode: result.getStatusCode(),
+                                                status: result.getStatus()
+                                            };
+                                        }
+                                        break;
+
+                                    }
+                        case TYPE_TOTAL_SUCCESS_FAIL_LOGINS :
+                        {
+                            var attemptsSearchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+
+                            };
+                            var offnetSuccessSearchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+                            };
+                            result = connector.search(loggedInUser, attemptsVsLoginsTable, stringify(attemptsSearchParams));
+                            var resultAttempts = 0;
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    resultAttempts = resultAttempts + values["total_authCount"];
+                                });
+                            }
+                            result = connector.search(loggedInUser, onnetOffnetRegistrationTable, stringify(offnetSuccessSearchParams));
+                            var resultSuccess = 0;
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var successCount = values["offAuth"] + values["onAuth"];
+                                    resultSuccess = resultSuccess + successCount;
+                                });
+                            }
+                            var finalResults = [];
+                            if (resultSuccess != 0 && resultAttempts != 0) {
+                                finalResults.push(["Success Logins", resultSuccess]);
+                                finalResults.push(["Failed Logins", resultAttempts - resultSuccess]);
+                            }
+                            result = {
+                                message: stringify(finalResults),
+                                statusCode: result.getStatusCode(),
+                                status: result.getStatus()
+                            };
+                            break;
+                        }
+
+                        case  TYPE_SUCCESS_LOGIN_STREAM :
+                        {
+                            var to = new Date().getTime();
+                            var from = to - NEAR_REALTIME_DELAY;
+                            var timeQuery ="*:*"; // "_timestamp :[" + from + " TO " + to + "]";
+                            searchParams = {
+                                query: timeQuery + roleFilterQuery,
+                                start: 0,
+                                count: 1,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "DESC" //can be DESC or ASC
+                                }]
+                            };
+                            result = connector.search(loggedInUser, realtimeLoginTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var result = [record.timestamp, values["loginCount"]];
+                                    results.push(result);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+
+
+                        case TYPE_DAILY_ACTIVE_USERS :
+                        {
+
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+
+                            };
+
+                            result = connector.search(loggedInUser, activeUsersDailyTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var activeUsrCount = [values["day"].substring(5),values["total_usercount"]];
+                                    results.push(activeUsrCount);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+
+                        case TYPE_MONTHLY_ACTIVE_USERS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+
+                            };
+
+                            result = connector.search(loggedInUser, activeUsersMonthlyTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (datarecord, i) {
+                                    var values = datarecord.values;
+                                    var found=false;
+                                    results.forEach(function (resultsrecord, j) {
+                                        if(resultsrecord && resultsrecord[0]==values["month"].substring(5)){
+                                            found=true;
+                                            resultsrecord[1]+=values["total_usercount"];
+                                        }
+                                    });
+                                    if(!found) {
+                                        var activeUsrCount = [values["month"].substring(5), values["total_usercount"]];
+                                        results.push(activeUsrCount);
+                                    }
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+                        case TYPE_TOTAL_TOKENS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+
+                            };
+                            result = connector.search(loggedInUser, attemptsVsLoginsTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var token = [values["day"].substring(5), values["total_tokenCount"]];
+                                    results.push(token);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+                        }
+                        case TYPE_OPERATOR_USSD_LOGS :
+                        {
+                            if (isOperator || isAdmin) {
+                                result = {
+                                    message: true,
+                                    statusCode: 200,
+                                    status: "SUCCESS"
+                                };
+                            } else {
+                                result = {
+                                    message: false,
+                                    statusCode: 200,
+                                    status: "FAILED"
+                                };
+                            }
+                            break;
+                        }
+                        case USSD_ANALYSIS_OPERATORWISE :
+                        {
+                             if (isOperator || (isAdmin && (operatorParam!="undefined" && operatorParam!="" && operatorParam!=null))) {
+                                 result = {
+                                      message: true,
+                                      statusCode: 200,
+                                      status: "SUCCESS"
+                                   };
+                              } else {
+                                 result = {
+                                      message: false,
+                                      statusCode: 200,
+                                      status: "FAILED"
+                                 };
+                              }
+                              break;
+                        }
+						case TYPE_MSISDNS_SUCCESS_FAILED_REPORT :
+                        {
+                             if (isOperator || isAdmin ) {
+                                 result = {
+                                      message: true,
+                                      statusCode: 200,
+                                      status: "SUCCESS"
+                                   };
+                              } else {
+                                 result = {
+                                      message: false,
+                                      statusCode: 200,
+                                      status: "FAILED"
+                                 };
+                              }
+                              break;
+                        }
+						
+                        case TYPE_OPERATOR_HE_FAILURES :
+                        {
+                            if (isOperator) {
+                                result = {
+                                    message: true,
+                                    statusCode: 200,
+                                    status: "SUCCESS"
+                                };
+                            } else {
+                                result = {
+                                    message: false,
+                                    statusCode: 200,
+                                    status: "FAILED"
+                                };
+                            }
+                            break;
+                        }
+						case TYPE_LOGGING_CHECK :
+                        {
+                            
+							result = {
+								message: true,
+								statusCode: 200,
+								status: "SUCCESS"
+							};
+                            
+                            break;
+                        }
+                        default:
+                            result = '{ "status": "Failed", "statusCode": "500", "message": "Unidentified operation" }';
+                    }
+                    if (result != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("value of result: " + stringify(result));
+                            log.debug("status code: " + result["statusCode"]);
+                        }
+                        var statusCode = result["statusCode"];
+                        var status = result["status"];
+                        var message = result["message"];
+                        response.status = statusCode;
+                        var finalResult = {
+                            status: status,
+                            message: message
+                        };
+                        print(finalResult);
+                    }
+                } else {
+                    print('{ "status": "Failed", "statusCode": "500", "message": "Invalid request" }');
+                }
+            } else {
+                print('{ "status": "Failed", "statusCode": "500", "message": "Invalid User" }');
+            }
+        } else {
+            print('{ "status": "Failed", "statusCode": "500", "message": "AnalyticsCachedWebServiceConnector is unavailable" }');
+        }
+    } else {
+        print('{ "status": "Failed", "statusCode": "500", "message": "Operation Not Allowed" }');
+    }
+
+}());
+%>
+

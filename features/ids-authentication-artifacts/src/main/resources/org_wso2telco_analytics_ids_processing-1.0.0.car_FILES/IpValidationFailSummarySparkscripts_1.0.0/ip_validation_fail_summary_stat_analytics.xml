@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>ip_validation_fail_summary_stat_analytics</Name>
+    <Script>
+        create temporary table com_wso2telco_userstatus_ip_range_check using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,_timestamp LONG -i", incrementalParams "user_status_ip_range, DAY");
+
+        create temporary table com_wso2telco_userstatus_meta_ip_range_check using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,msisdn STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i", incrementalParams "user_status_meta_ip_range, DAY");
+
+        create temporary table com_wso2telco_operatoripranges_ip_range_check using CarbonAnalytics options (tableName "COM_WSO2TELCO_OPERATORIPRANGES", schema "id LONG,operator STRING, isEnable BOOLEAN, minValue STRING, maxValue STRING, _timestamp LONG -i" );
+
+
+        create temporary table com_wso2telco_ipfailedsummary using CarbonAnalytics options (tableName "COM_WSO2TELCO_IPFAILEDSUMMARY_REPORT",schema "iprangecheck STRING -i, operator STRING -i, datetime STRING -i, sessionCount STRING -i, _timestamp LONG -i", primaryKeys "iprangecheck,operator,datetime,_timestamp,", mergeSchema "false");
+
+
+        insert into table com_wso2telco_ipfailedsummary select IF(iprangecheck='1',"PASSED","FAILED") as iprangecheck, operator, getDateString(_timestamp) as date,  count(sessionID) as sessionCount, _timestamp
+        from(
+            select max(iprangecheck) as iprangecheck, first(operator) as operator, sessionID ,first(_timestamp) as _timestamp
+            from(
+                    select 
+                    IF(checkIpRange(ipranges.minValue , ipranges.maxValue, operatorforward.forwardedIP),1,0) as iprangecheck, 
+                    operatorforward.operator, 
+                    operatorforward.sessionID, 
+                    getDateTimestamp(operatorforward._timestamp) as _timestamp
+                    FROM
+                    (
+                        select minValue, maxValue, operator, isEnable 
+                        FROM com_wso2telco_operatoripranges_ip_range_check 
+                        where isEnable = true
+                    ) as ipranges
+                    INNER JOIN (
+                        select ustatus.sessionID, ustatus.forwardedIP, ustatus._timestamp, meta.operator , meta.msisdn
+                        from
+                        (
+                            select distinct sessionID, forwardedIP, _timestamp 
+                            from com_wso2telco_userstatus_ip_range_check 
+                            where status='IP_HEADER_NOT_FOUND' or status = 'IP_HEADER_NOT_IN_RANGE'
+                        ) as ustatus 
+                        INNER JOIN (
+                            select sessionID, first(operator) as operator, min(msisdn) as msisdn 
+                            from com_wso2telco_userstatus_meta_ip_range_check 
+                            where msisdn IS NOT NULL and operator IS NOT NULL and msisdn != "false" group by sessionID
+                        ) as meta on meta.sessionID = ustatus.sessionID 
+                    ) as operatorforward on ipranges.operator = operatorforward.operator
+            ) as operatoriprangecheck group by sessionID
+        ) as iprangecheckreport group by iprangecheck, operator, _timestamp;
+
+        INCREMENTAL_TABLE_COMMIT user_status_ip_range;
+        INCREMENTAL_TABLE_COMMIT user_status_meta_ip_range;
+
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>

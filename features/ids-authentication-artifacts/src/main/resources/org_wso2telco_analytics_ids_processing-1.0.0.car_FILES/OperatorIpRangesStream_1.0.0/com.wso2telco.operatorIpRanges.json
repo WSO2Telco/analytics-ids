@@ -1,0 +1,29 @@
+{
+  "name": "com.wso2telco.operatorIpRanges",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  
+  "payloadData": [
+    {
+      "name": "id",
+      "type": "LONG"
+    },
+    {
+      "name": "operator",
+      "type": "STRING"
+    },
+    {
+      "name": "isEnable",
+      "type": "BOOL"
+    },
+    {
+      "name": "minValue",
+      "type": "STRING"
+    },
+    {
+      "name": "maxValue",
+      "type": "STRING"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="RealtimeAuthCountPerAppSink" version="1.0.0" type="analytics/eventstore" serverRole="DataAnalyticsServer">
+    <file>com_wso2telco_success_appwiselogins_stream.xml</file>
+</artifact>

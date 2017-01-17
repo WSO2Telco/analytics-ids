@@ -11,10 +11,12 @@ var view = {
           charts : [
             {type: "bar", range:"true",  y : "Count" }
           ],
-          maxLength: -1,
+          maxLength: 60,
+          barGap: 0.1,
           width: $('#canvas').width(),
           height: $('#canvas').height(),
           padding: { "top": 60, "left": 60, "bottom": 80, "right": 100 },
+          colorScale: [CLR_CHART_DAILYREG],
           xAxisAngle:true
     },
     callbacks: [{

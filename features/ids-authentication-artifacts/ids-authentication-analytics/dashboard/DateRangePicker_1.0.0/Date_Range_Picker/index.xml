@@ -52,11 +52,11 @@
                           </select>
                     </div>
                 </div>
-                <div class="col-8">
+                <div class="col-8" id="date-select-div">
                     <div class="btn-group pull-right" id="date-select">
                         <div class="btn-group pull-right" role="group">
                             <button role="date-update" data-value="LastHour" type="button" class="btn btn-default hidden-xs hidden-sm hidden">Last Hour</button>
-                            <button role="date-update" data-value="LastDay" type="button" class="btn btn-default hidden-xs hidden-sm">Last 24 Hours</button>
+                            <button role="date-update" data-value="LastDay" type="button" class="btn btn-default hidden-xs hidden-sm">Yesterday</button>
                             <button role="date-update" data-value="LastMonth" type="button" class="btn btn-default hidden-xs hidden-sm">Last 30 Days</button>
                             <button role="date-update" data-value="LastYear" type="button" class="btn btn-default hidden-xs hidden-sm hidden">Last Year</button>
                             <button id="btnDropdown" type="button" class="btn btn-default dropdown-toggle hidden-md hidden-lg hidden" data-toggle="dropdown">
@@ -64,9 +64,9 @@
                             </button>
                             <ul class="dropdown-menu btn-dropdown-menu pull-right" role="menu" style="top: 32px; right: 111px;">
                                 <li><a href="javascript:void(0)" role="date-update" data-value="LastHour" class="hidden">Last Hour</a></li>
-                                <li><a href="javascript:void(0)" role="date-update" data-value="LastDay">Last 24 Hours</a></li>
+                                <li><a href="javascript:void(0)" role="date-update" data-value="LastDay">Yesterday</a></li>
                                 <li><a href="javascript:void(0)" role="date-update" data-value="LastMonth"s>Last 30 Days</a></li>
-                                <li><a href="javascript:void(0)" role="date-update" data-value="LastYear" class="hidden">Last 24 Year</a></li>
+                                <li><a href="javascript:void(0)" role="date-update" data-value="LastYear" class="hidden">Last Year</a></li>
                             </ul>
                             <button id="btnCustomRange" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="glyphicon glyphicon-calendar fa fa-calendar"></i> Custom

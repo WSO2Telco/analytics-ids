@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="SpMobileConnectAnalyticsDashboard" version="1.0.0" type="dashboards/dashboard" serverRole="DataAnalyticsServer">
+    <file>mobile-connect-analytics-sp.json</file>
+</artifact>

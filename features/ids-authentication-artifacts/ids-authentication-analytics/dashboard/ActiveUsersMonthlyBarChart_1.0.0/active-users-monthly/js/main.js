@@ -31,6 +31,9 @@ var view = {
                 operator : data["operator"],
                 appID : data["appID"]
             };
+            $( document ).ready(function() {
+                urlAppend(filter)
+            });
             var SERVER_URL = "/portal/apis/telcoanalytics";
             var client = new TelcoAnalyticsClient().init(SERVER_URL);
             client.getMonthlyActiveUsers(filter, function (response) {
@@ -46,6 +49,10 @@ var view = {
         }
     }],
     data: function() {
+        var filter = {};
+        $( document ).ready(function() {
+            urlAppend(filter);
+        });
         var SERVER_URL = "/portal/apis/telcoanalytics";
         var client = new TelcoAnalyticsClient().init(SERVER_URL);
         client.getMonthlyActiveUsers({}, function (response) {
@@ -60,6 +67,18 @@ var view = {
         });
     }
 };
+
+function urlAppend(filter){
+    if(filter==undefined){
+        filter={};
+    }
+    $("#downloadpdf").attr("href","/portal/apis/report" + "?type=23&timeFrom=" + filter["timeFrom"]
+        + "&timeTo=" + filter["timeTo"] + "&operator=" + filter["operator"]
+        + "&appID=" + filter["appID"]+"&download=pdf");
+    $("#downloadxl").attr("href","/portal/apis/report" + "?type=23&timeFrom=" + filter["timeFrom"]
+        + "&timeTo=" + filter["timeTo"] + "&operator=" + filter["operator"]
+        + "&appID=" + filter["appID"]+"&download=xl");
+}
 
 $(function() {
     try {

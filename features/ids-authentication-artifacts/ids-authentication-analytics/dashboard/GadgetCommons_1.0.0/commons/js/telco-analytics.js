@@ -94,7 +94,7 @@ function TelcoAnalyticsClient() {
 
     this.getRealTimeSuccessLogins = function (filter, callback, error) {
         this.getData(filter, TYPE_REALTIME_LOGINS, callback, error);
-    };
+    };var HTTP_GET = "GET";
 
     this.getDailyActiveUsers = function (filter, callback, error) {
         this.getData(filter, TYPE_DAILY_ACTIVE_USERS, callback, error);
@@ -109,9 +109,15 @@ function TelcoAnalyticsClient() {
     };
     
     this.getData = function (filter, type, callback, error) {
+		var timeFrom=filter["timeFrom"];
+		var timeTo=filter["timeTo"]; 
+		if(timeFrom==null && timeTo== null){
+			timeFrom=getISTTimeZoneTime(new Date(moment().startOf('day').subtract(31, 'days')));
+			timeTo=getISTTimeZoneTime(new Date(moment().endOf('day').subtract(1, 'day')));
+		}var HTTP_GET = "GET";
         jQuery.ajax({
-                        url: this.serverUrl + "?type=" + type + "&timeFrom=" + filter["timeFrom"]
-                                + "&timeTo=" + filter["timeTo"] + "&operator=" + filter["operator"]
+                        url: this.serverUrl + "?type=" + type + "&timeFrom=" + timeFrom
+                                + "&timeTo=" + timeTo + "&operator=" + filter["operator"]
                                 + "&appID=" + filter["appID"],
                         type: HTTP_GET,
                         success: function (data) {
@@ -119,10 +125,28 @@ function TelcoAnalyticsClient() {
                         },
                         error: function (msg) {
                             error(msg[RESPONSE_ELEMENT]);
+                            
+                        },
+                        complete: function(xhr, textStatus) {
+                            if(xhr.status==403){
+                            	window.top.location.reload(false);
+                            }
                         }
                     });
     };
 }
+
+    function getISTTimeZoneTime(date){
+        // convert to msec
+        // add local time zonevar HTTP_GET = "GET"; offset
+        // get UTC time in msec
+        var utc = date.getTime() - (date.getTimezoneOffset() * 60000);
+        // create new Date object for different city
+        // using supplied offset
+        var ISTOffset = -330;   // IST offset UTC +5:30
+        var nd = new Date(utc + (60000 * ISTOffset));
+        return nd.getTime();
+    }
 
 TelcoAnalyticsClient.prototype.init = function (svrUrl) {
     this.serverUrl = svrUrl;

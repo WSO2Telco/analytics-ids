@@ -1,17 +1,29 @@
 var href = parent.window.location.href,
-        hrefLastSegment = href.substr(href.lastIndexOf('/') + 1),
-        resolveURI = parent.ues.global.dashboard.id == hrefLastSegment ? '../' : '../../',
-        parentWindow = window.parent.document,
-        gadgetWrapper = $('#' + gadgets.rpc.RPC_ID, parentWindow).closest('.grid-stack-item');
+    hrefLastSegment = href.substr(href.lastIndexOf('/') + 1),
+    resolveURI = parent.ues.global.dashboard.id == hrefLastSegment ? '../' : '../../',
+    parentWindow = window.parent.document,
+    gadgetWrapper = $('#' + gadgets.rpc.RPC_ID, parentWindow).closest('.grid-stack-item');
 
 var TOPIC = "range-selected";
 var publishFilter = function(filter){
+    displayRangeOverflowStatus(filter);
     wso2.gadgets.state.setGlobalState('filter', filter);
     gadgets.Hub.publish(TOPIC, filter);
 }
+
+var displayRangeOverflowStatus = function(filter){
+    //function to check if the date range is applicable for the pre-defined graph parameters and display necessary alert
+    var dayFrom = moment(filter.timeFrom);
+    var dayTo = moment(filter.timeTo);
+    var dayFromByTo = moment(dayTo).subtract(60, 'days').startOf('day'); // moment(dayTo).subtract(2, 'months').startOf('day')
+    if(dayFromByTo.isAfter(dayFrom)){
+        alert("Please note that data for only 60 days is displayed on the graphs due to visibility limitations. The full data set for the selected range is available to be downloaded."); //(from "+ dayFromByTo.format('MMMM D, YYYY hh:mm A') + " to "+ dayTo.format('MMMM D, YYYY hh:mm A') +")
+    }
+}
+
 $(function() {
     var dateLabel = $('#reportrange'),
-            datePickerBtn = $('#btnCustomRange');
+        datePickerBtn = $('#btnCustomRange');
     //if there are url elemements present, use them. Otherwis use last hour
 
     var timeFrom = moment().startOf('day').subtract(31, 'days');
@@ -37,7 +49,6 @@ $(function() {
     }
 
     cb(timeFrom, timeTo);
-
 
     function getISTTimeZoneTime(date){
         // convert to msec
@@ -94,28 +105,42 @@ $(function() {
         var client = new TelcoAnalyticsClient().init(SERVER_URL);
         client.getOperatorsAndAppsLists(filter, function (response) {
             var data = JSON.parse(response.message);
-            if (data.isAdmin) {
+            if (data.isAdmin !=null && data.isAdmin) {
                 $('#dropdown-operator').empty();
                 $('#dropdown-app').empty();
                 $('#dropdown-operator').append(new Option("All operators", "AllOperators"));
                 $('#dropdown-app').append(new Option("All apps", "AllApps"));
-                for (var i in data.operators) {
-                    $('#dropdown-operator').append(new Option(i, i));
+                for (var i=0; i < data.operators.length; i++) {
+                    $('#dropdown-operator').append(new Option(data.operators[i], data.operators[i]));
                 }
-                for (var i in data.apps) {
-                    $('#dropdown-app').append(new Option(i, i));
+                for (var i=0; i < data.apps.length; i++) {
+                    $('#dropdown-app').append(new Option(data.apps[i], data.apps[i]));
                 }
-            } else if (data.isOperator) {
+            } else if (data.isOperator !=null && data.isOperator) {
                 $('#dropdown-operator').hide();
+                $('#date-select-div').removeClass('col-8');
+                $('#date-select-div').addClass('col-10');
 
                 $('#dropdown-app').empty();
                 $('#dropdown-app').append(new Option("All apps", "AllApps"));
-                for (var i in data.apps) {
-                    $('#dropdown-app').append(new Option(i, i));
+                for (var i=0; i < data.apps.length; i++) {
+                    $('#dropdown-app').append(new Option(data.apps[i], data.apps[i]));
+                }
+            } else if (data.isServiceProvider !=null &&  data.isServiceProvider) {
+                $('#dropdown-app').hide();
+                $('#date-select-div').removeClass('col-8');
+                $('#date-select-div').addClass('col-10');
+
+                $('#dropdown-operator').empty();
+                $('#dropdown-operator').append(new Option("All operators", "AllOperators"));
+                for (var i=0; i < data.operators.length; i++) {
+                    $('#dropdown-operator').append(new Option(data.operators[i], data.operators[i]));
                 }
             } else {
                 $('#dropdown-operator').hide();
                 $('#dropdown-app').hide();
+                $('#date-select-div').removeClass('col-8');
+                $('#date-select-div').addClass('col-12');
             }
         }, function (msg) {
 
@@ -137,12 +162,12 @@ $(function() {
     });
 
     $(datePickerBtn).daterangepicker({
-                                         "timePicker": false,
-                                         "autoApply": true,
-                                         "alwaysShowCalendars": true,
-                                         "opens": "left",
-                                        "maxDate": moment().endOf('day').subtract(1, 'days'),
-                                     });
+        "timePicker": false,
+        "autoApply": true,
+        "alwaysShowCalendars": true,
+        "opens": "left",
+        "maxDate": moment().endOf('day').subtract(1, 'days'),
+    });
 
     $("#date-select [role=date-update]").click(function(){
 
@@ -240,7 +265,6 @@ gadgets.HubSettings.onConnect = function() {
 };
 
 function onChartZoomed(data) {
-    console.log(data);
     message = {
         timeFrom: data.timeFrom,
         timeTo: data.timeTo,
@@ -265,7 +289,7 @@ $(window).resize(function() {
 
 $(window).load(function() {
     var datePicker = $('.daterangepicker'),
-            dropdown = $('ul.dropdown-menu');
+        dropdown = $('ul.dropdown-menu');
 
     $('body').click(function(e){
         if ((!dropdown.is(e.target) && dropdown.has(e.target).length === 0)

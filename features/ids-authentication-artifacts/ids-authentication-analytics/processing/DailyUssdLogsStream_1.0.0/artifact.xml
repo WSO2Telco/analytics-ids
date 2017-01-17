@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?><artifact name="DailyUssdLogsStream" version="1.0.0" type="event/stream" serverRole="ComplexEventProcessor">
+    <file>com.wso2telco.dailyussdlogs_1.0.0.json</file>
+</artifact>

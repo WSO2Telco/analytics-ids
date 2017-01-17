@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <artifacts>
-    <artifact name="com.wso2telco.mc.analytics" version="1.0.0" type="carbon/application">
+    <artifact name="org_wso2telco_analytics_ids" version="1.0.0" type="carbon/application">
+	<dependency artifact="DownloadHEFailureReport" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="HEFailedSummaryBreakdownSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DownloadReportHEFailures" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+    <dependency artifact="HEMsisdnNotFoundSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DailyUssdReciever" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DailyUssdLogsStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="OperatorIpRangesReceiver" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="OperatorIpRangesEventSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="OperatorIpRangesStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DailyUssdLogsEventSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="USSDLogsSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="IpValidationFailSummarySparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>		
+	<dependency artifact="DownloadReportMSISDN" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>		
+	<dependency artifact="InsertOperatorsandAppsscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>		
+	<dependency artifact="USSDDropoutsSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>	
 	<dependency artifact="TotalAuthAttempts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
   	<dependency artifact="SuccessFailedMsisdnscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>   
 	<dependency artifact="TotalTokensBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="ActiveUsersDailyMonthlySparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DownloadReport" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DownloadUSSDReport" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DownloadUSSDReportV2" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="ActiveUsersDailyBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="ActiveUsersMonthlyBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="AuthEndpointEventStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
@@ -58,6 +75,7 @@
 	<dependency artifact="RealtimeAuthCountPerOperatorStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="RealtimeAuthCountTotalSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="RealtimeAuthCountTotalStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DefinitionFileDownload" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="SuccessLoginCountExecutionPlan" version="1.0.0" include="true" serverRole="ComplexEventProcessor"/>
     </artifact>
 </artifacts>
