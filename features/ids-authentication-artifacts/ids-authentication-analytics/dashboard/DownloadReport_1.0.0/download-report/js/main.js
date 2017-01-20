@@ -40,13 +40,13 @@ var view = {
     }],
     data: function () {
         var filter = {};
-        wso2.gadgets.state.getGlobalState('filter',function(filter) {
+        //wso2.gadgets.state.getGlobalState('filter',function(filter) {
             
         $( document ).ready(function() {
             urlAppend(filter);
         });
             
-        });
+       // });
     }
 };
 
@@ -80,3 +80,46 @@ gadgets.HubSettings.onConnect = function () {
     }
 };
 
+
+function checkAccess(){
+    var valid=false;
+    var TYPE_LOGGIN_CHECK=25;
+    var SERVER_URL = "/portal/apis/telcoanalytics";
+    var HTTP_GET = "GET";
+    var RESPONSE_ELEMENT = "responseJSON";
+    $.ajax({
+        url: SERVER_URL + "?type=" + TYPE_LOGGIN_CHECK,
+        type: HTTP_GET,
+        /*success: function (data) {
+        	
+            var isLogged = JSON.parse(data.message);
+            if(isLogged){
+                document.getElementById('downloadcsvdr').click();
+            }
+        },
+        error: function (msg) {
+        	var ErrorMesssage = JSON.parse(msg.message);
+        									  
+        	 if(ErrorMesssage=="User is not authenticated."){
+        		 console.log("test works correctly")
+             }else{
+            	 document.getElementById('downloadcsvdr').click();
+             }
+        	
+            error(msg[RESPONSE_ELEMENT]);
+        }*/
+        
+        success: function(data, textStatus, xhr) {
+            var isLogged = JSON.parse(data.message);
+            if(isLogged){
+                document.getElementById('downloadcsvdr').click();
+            }
+        },
+        complete: function(xhr, textStatus) {
+            if(xhr.status==403){
+            	window.top.location.reload(false);
+            }
+        } 
+    });
+    return valid;
+}

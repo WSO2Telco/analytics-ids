@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<analytics-data-purging>
+    <cron-expression>0 0 0 1/1 * ? *</cron-expression>
+    <purge-include-tables>
+        <table>com_wso2telco_summary_total_daily__registrations_aggregations</table>
+        <table>com_wso2telco_summary_operator_daily__registrations_aggregations</table>
+        <table>com_wso2telco_summary_daily__registrations_aggregations</table>
+    </purge-include-tables>
+    <data-retention-days>300</data-retention-days>
+</analytics-data-purging>

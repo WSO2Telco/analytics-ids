@@ -4,6 +4,7 @@
         <Require feature="pubsub-2"/>
         <Require feature="dynamic-height"/>        
         <Require feature="setprefs"/>
+		<Require feature="wso2-gadgets-controls"/>
     </ModulePrefs>
     <Content type="html">
         <![CDATA[
@@ -26,6 +27,7 @@
             <script src="../commons/js/VizGrammar.min.js"></script>
             <script src="../commons/js/colorbrewer.js"></script>
             <script src="../commons/js/VizGrammarSettings.js"></script>
+			  <script src="../commons/libs/bootstrap_3.3.5/js/bootstrap.min.js"></script>
 
             <!-- Custom -->
             <link rel="stylesheet" type="text/css" href="css/custom.css" />
@@ -35,9 +37,57 @@
             <script src="js/outputAdapterUiLibrary.js"></script>
             <script src="js/wso2gadgets.js"></script>
             <script src="js/main.js"></script>
+			<script>
+               wso2.gadgets.controls.addButtonListener('DOWNLOAD', function(e) {
+                   $('#modalPopup').modal({
+						show: 'true'
+				   });
+               });
+           </script>
 
         </head>
         <body>
+
+				<div class="modal fade nano" id="modalPopup" role="dialog">
+							<div class="nano-content">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal">&times;</button>
+											<h4 class="modal-title">Export Data</h4>
+										</div>
+										<div class="modal-body">
+										<br> <br> <br>
+											<table>
+												<tr><td width="20%">
+													<div class="form-group">
+														<label for="file type">Select the Type:</label>
+													</div>
+												</td>
+													<td width="10%">
+
+														   <a class="btn btn-primary btn-md" id="downloadpdf"><i class="fw fw-pdf"></i> PDF</a>
+
+													</td>
+
+													<td width="10%">
+
+														   <a class="btn btn-primary  btn-md" id="downloadxl"><i class="fw fw-xq"></i> EXCEL</a>
+
+													</td></tr></table>
+													<br><br>
+
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+
+										</div>
+									</div>
+								</div>
+							</div>
+			   </div>
+
+
 
             <div id="canvas"></div>
             

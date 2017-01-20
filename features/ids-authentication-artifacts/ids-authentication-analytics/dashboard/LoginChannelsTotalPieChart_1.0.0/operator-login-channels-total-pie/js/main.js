@@ -12,7 +12,7 @@ var view = {
             width: $('#canvas').width(),
             height: $('#canvas').height(),
             padding: { "top": 60, "left": 60, "bottom": 60, "right": 100 },
-            colorScale : ["#C59787", "#438CAD", "#B6688F", "#434343"],
+            colorScale : [CLR_HE, CLR_USSD, CLR_USSDPIN, CLR_SMS],
             percentage : true
     },
     callbacks: [{
@@ -25,6 +25,7 @@ var view = {
     subscriptions: [{
         topic: "subscriber",
         callback: function(topic, data, subscriberData) {
+            wso2.gadgets.controls.showGadget();
             var filter = {
                 timeFrom : data["timeFrom"],
                 timeTo : data["timeTo"],
@@ -43,14 +44,17 @@ var view = {
             }, function (msg) {
 
             });
-        }
+        wso2.gadgets.state.setGadgetState(filter);
+    }
     }],
     data: function() {
         var filter = {};
 
         var SERVER_URL = "/portal/apis/telcoanalytics";
         var client = new TelcoAnalyticsClient().init(SERVER_URL);
-        wso2.gadgets.state.getGlobalState('filter',function(filter) {
+        //wso2.gadgets.state.getGlobalState('filter',function(filter) {
+        wso2.gadgets.state.getGadgetState(function(filter) {
+            wso2.gadgets.controls.showGadget();
 
             client.getTotalLoginChannels(filter || {}, function (response) {
                 var results = JSON.parse(response.message);

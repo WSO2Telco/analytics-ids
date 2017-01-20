@@ -150,6 +150,10 @@ body.dark .message {
     color: #E3E5E6;
 }
 
+a:visited {
+    color: #ffffff !important;
+}
+
 #canvas-tooltip {
     background: #c4c4c4 !important;
     color: #000;

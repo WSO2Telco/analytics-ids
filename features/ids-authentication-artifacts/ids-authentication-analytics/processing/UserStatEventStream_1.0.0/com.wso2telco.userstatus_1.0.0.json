@@ -17,6 +17,10 @@
       "type": "STRING"
     },
     {
+      "name": "forwardedIP",
+      "type": "STRING"
+    },
+    {
       "name": "_timestamp",
       "type": "LONG"
     }

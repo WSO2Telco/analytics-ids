@@ -12,7 +12,7 @@ var view = {
             width: $('#canvas').width(),
             height: $('#canvas').height(),
             padding: { "top": 60, "left": 60, "bottom": 60, "right": 100 },
-            colorScale : ["#C59787", "#438CAD", "#B6688F", "#434343", "#E0CABA"],
+            colorScale : [CLR_USSD, CLR_SMS, CLR_MSISDN, CLR_ONNET_TnC, CLR_OFFNET_TnC],
             percentage : true
     },
     callbacks: [{
@@ -25,6 +25,7 @@ var view = {
     subscriptions: [{
         topic: "subscriber",
         callback: function(topic, data, subscriberData) {
+			wso2.gadgets.controls.showGadget();
             var filter = {
                 timeFrom : data["timeFrom"],
                 timeTo : data["timeTo"],
@@ -44,6 +45,7 @@ var view = {
             }, function (msg) {
 
             });
+			wso2.gadgets.state.setGadgetState(filter);
         }
     }],
     data: function() {
@@ -51,7 +53,9 @@ var view = {
 
         var SERVER_URL = "/portal/apis/telcoanalytics";
         var client = new TelcoAnalyticsClient().init(SERVER_URL);
-        wso2.gadgets.state.getGlobalState('filter',function(filter) {
+        //wso2.gadgets.state.getGlobalState('filter',function(filter) {
+		wso2.gadgets.state.getGadgetState(function(filter) {
+            wso2.gadgets.controls.showGadget();
 
             client.getTotalDropouts(filter || {}, function (response) {
                 var results = JSON.parse(response.message);

@@ -60,15 +60,12 @@
                                                 <label for="file type">Select the Type:</label>
                                             </div>
                                         </td>
-                                            <td width="10%">
 
-                                                   <a class="btn btn-primary btn-md" id="downloadpdfdr"><i class="fw fw-pdf"></i> PDF</a>
 
-                                            </td>
+                                            <td width="20%">
 
-                                            <td width="10%">
-
-                                                   <a  class="btn btn-primary btn-md" id="downloadcsvdr"><i class="fw fw-xq"></i> CSV</a>
+                                                   <a  class="hidden" id="downloadcsvdr"><i class="fw fw-xq"></i> CSV</a>
+                                                   <a  class="btn btn-primary btn-md" id="downloadcsvdrReal" onClick="checkAccess()"><i class="fw fw-xq"></i> CSV</a>
 
                                             </td></tr></table>
                                             <br><br>

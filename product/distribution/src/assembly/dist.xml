@@ -35,5 +35,7 @@
                 <exclude>features/**</exclude>
             </excludes>
         </fileSet>
+        
+        
     </fileSets>
 </assembly>

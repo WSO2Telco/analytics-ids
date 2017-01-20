@@ -2,9 +2,9 @@
 <Analytics>
     <Name>daily_registrations_stat_analytics</Name>
     <Script>
-        create temporary table user_status_raw_daily_reg using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "_timestamp LONG -i",  incrementalParams "user_status_dailyReg, DAY");
+       	create temporary table user_status_raw_daily_reg using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,_timestamp LONG -i",  incrementalParams "user_status_dailyReg, DAY");
 
-        create temporary table user_status_meta_raw_daily_reg using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "_timestamp LONG -i",  incrementalParams "user_status_meta_dailyReg, DAY");
+        create temporary table user_status_meta_raw_daily_reg using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,msisdn STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_dailyReg, DAY");
 
         create temporary table daily_registrations_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_DAILY_REGISTRATIONS", schema "day STRING -i, operator STRING -i, appID STRING -i, regCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
 
@@ -25,7 +25,7 @@
 
         create temporary table daily_registrations_temp using CarbonAnalytics options (tableName "COM_WSO2TELCO_TEMP_DAILY_REGISTRATIONS", schema "day STRING -i, operator STRING -i, appID STRING -i, regCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
 
-        create temporary table daily_registrations_temp2 using CarbonAnalytics options (tableName "COM_WSO2TELCO_TEMP_DAILY_REGISTRATIONS", schema "_timestamp LONG -i", primaryKeys "day, operator, appID");
+        create temporary table daily_registrations_temp2 using CarbonAnalytics options (tableName "COM_WSO2TELCO_TEMP_DAILY_REGISTRATIONS", schema "day STRING -i, operator STRING -i, appID STRING -i, regCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
 
         INSERT INTO TABLE daily_registrations_temp select day,operator, appID, regCount, _timestamp  from daily_registrations_summary;
 
@@ -38,7 +38,7 @@
 
         create temporary table daily_registrations_operator_temp using CarbonAnalytics options (tableName "COM_WSO2TELCO_TEMP_OPERATOR_DAILY_REGISTRATIONS", schema "day STRING -i, operator STRING -i, regCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
 
-        create temporary table daily_registrations_operator_temp2 using CarbonAnalytics options (tableName "COM_WSO2TELCO_TEMP_OPERATOR_DAILY_REGISTRATIONS", schema "_timestamp LONG -i", primaryKeys "day, operator");
+        create temporary table daily_registrations_operator_temp2 using CarbonAnalytics options (tableName "COM_WSO2TELCO_TEMP_OPERATOR_DAILY_REGISTRATIONS", schema "day STRING -i, operator STRING -i, regCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
 
         create temporary table operator_daily_registrations_aggregations using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_DAILY__REGISTRATIONS_AGGREGATIONS", schema "day STRING -i, operator STRING -i, totalCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
 
