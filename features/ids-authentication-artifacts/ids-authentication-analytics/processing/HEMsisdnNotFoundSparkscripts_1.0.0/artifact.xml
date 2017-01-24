@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="HEMsisdnNotFoundSparkscripts" version="1.0.0" type="analytics/spark" serverRole="DataAnalyticsServer">
+    <file>he_msisdn_not_found_stat_analytics.xml</file>
+</artifact>

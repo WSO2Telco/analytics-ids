@@ -9,11 +9,12 @@ var view = {
     chartConfig: {
             x : "Day",
             charts : [{type: "bar",  y : "Count", color: "Type", mode:"group"}],
-            maxLength: 100,
+            maxLength: 60,
+            barGap: 0.1,
             width: $('#canvas').width(),
             height: $('#canvas').height(),
             padding: { "top": 60, "left": 60, "bottom": 80, "right": 100 },
-	        colorScale : ["#C59787", "#438CAD", "#B6688F", "#434343", "#E0CABA"],
+	        colorScale : [CLR_ONNET_TnC, "#438CAD", "#B6688F", "#434343", "#E0CABA"],
             xAxisAngle:true
     },
     callbacks: [{

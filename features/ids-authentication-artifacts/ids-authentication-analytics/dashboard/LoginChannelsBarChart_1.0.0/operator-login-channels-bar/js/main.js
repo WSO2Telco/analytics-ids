@@ -10,12 +10,12 @@ var view = {
             x : "Day",
             charts : [{type: "bar",  y : "Count", color: "Type", mode:"group"}],
             tooltip: {"enabled":true, "color":"#e5f2ff", "type":"symbol", "content":["Day","Type","Count"], "label":true },
-            maxLength: 100,
+            maxLength: 240,
             barGap: 0.1,
             width: $('#canvas').width(),
             height: $('#canvas').height(),
             padding: { "top": 60, "left": 60, "bottom": 80, "right": 150 },
-	    colorScale : ["#C59787", "#438CAD", "#B6688F", "#434343"],
+	        colorScale : [CLR_HE, CLR_USSD, CLR_USSDPIN, CLR_SMS],
             xAxisAngle:true
     },
     callbacks: [{

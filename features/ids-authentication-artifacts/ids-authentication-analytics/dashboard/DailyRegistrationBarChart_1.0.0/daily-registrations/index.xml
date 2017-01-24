@@ -35,6 +35,9 @@
             <!-- Custom -->
             <link rel="stylesheet" type="text/css" href="css/custom.css" />
 
+            <!-- Include Chart UI Constants -->
+            <script src="../commons/js/telco-chartui.js"></script>
+
             <script src="js/carbon-analytics.js"></script>
             <script src="../commons/js/telco-analytics.js"></script>
             <script src="js/outputAdapterUiLibrary.js"></script>

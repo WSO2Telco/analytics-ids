@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<analytics-data-purging>
+    <cron-expression>0 0 0 1/1 * ? *</cron-expression>
+    <purge-include-tables>
+		<table>com_wso2telco_token_endpoint</table>
+        <table>com_wso2telco_userstatus</table>
+        <table>com_wso2telco_userstatus_meta</table>
+		<table>com_wso2telco_authorization_endpoint</table>
+		<table>com_wso2telco_summary_onnet_offnet_types</table>
+		<table>com_wso2telco_onnet_offnet_summary</table>
+		<table>com_wso2telco_onnet_offnet_app_summary</table>		
+		<table>com_wso2telco_onnet_offnet_operator_summary</table>
+		<table>com_wso2telco_onnet_offnet_total_summary</table>
+		<table>com_wso2telco_summary_attempts_n_logins</table>
+		<table>com_wso2telco_summary_operator_attempts_n_logins</table>
+		<table>com_wso2telco_summary_app_attempts_n_logins</table>
+		<table>com_wso2telco_summary_total_attempts_n_logins</table>
+		<table>com_wso2telco_summary_login_channels</table>
+		<table>com_wso2telco_summary_operator_login_channels</table>
+		<table>com_wso2telco_summary_app_login_channels</table>
+		<table>com_wso2telco_summary_total_login_channels</table>
+		<table>com_wso2telco_summary_dropouts_with_types</table>
+		<table>com_wso2telco_summary_dropouts</table>
+		<table>com_wso2telco_summary_app_dropouts</table>
+		<table>com_wso2telco_summary_operator_dropouts</table>
+		<table>com_wso2telco_summary_total_dropouts</table>	
+		<table>com_wso2telco_summary_daily_registrations</table>	
+		<table>com_wso2telco_summary_operator_daily_registrations</table>
+		<table>com_wso2telco_summary_app_daily_registrations</table>
+		<table>com_wso2telco_summary_total_daily_registrations</table>
+		<table>com_wso2telco_temp_daily_registrations</table>
+		<table>com_wso2telco_temp_operator_daily_registrations</table>
+		<table>com_wso2telco_summary_ussd_dropouts</table>
+		<table>com_wso2telco_summary_app_ussd_dropouts</table>
+		<table>com_wso2telco_summary_operator_ussd_dropouts</table>
+		<table>com_wso2telco_summary_total_ussd_dropouts</table>
+		<table>com_wso2telco_summary_msisdns_txn_list_success_and_failed</table>
+		<table>com_wso2telco_operators</table>
+		<table>com_wso2telco_apps</table>
+		<table>com_wso2telco_summary_active_users_daily_monthly</table>
+		<table>com_wso2telco_summary_operator_active_users_daily_monthly</table>
+		<table>com_wso2telco_summary_app_active_users_daily_monthly</table>
+		<table>com_wso2telco_summary_total_active_users_daily_monthly</table>
+    </purge-include-tables>
+    <data-retention-days>120</data-retention-days>
+</analytics-data-purging>

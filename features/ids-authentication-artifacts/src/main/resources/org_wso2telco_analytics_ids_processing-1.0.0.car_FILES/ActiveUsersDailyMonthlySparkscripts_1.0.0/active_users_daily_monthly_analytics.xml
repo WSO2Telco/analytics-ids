@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>active_users_daily_monthly_analytics</Name>
+    <Script>
+		create temporary table user_status_meta_raw_act_usrs using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,msisdn STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_active_users_daily_monthly, DAY");
+
+
+        create temporary table active_users_daily using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_DAILY_MONTHLY",schema "day STRING -i,month STRING -i, operator STRING -i, appID STRING -i,total_usercount LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
+
+		INSERT INTO TABLE active_users_daily SELECT getDateString(dayTimestamp), getMonthString(dayTimestamp), operator, appId, COUNT(msisdn) as total_usercount,dayTimestamp FROM ( select  distinct msisdn, getDateTimestamp(_timestamp) as dayTimestamp, operator, appId from user_status_meta_raw_act_usrs where msisdn IS NOT NULL ) as temp GROUP BY dayTimestamp, operator, appId;
+
+        create temporary table active_users_daily_per_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_ACTIVE_USERS_DAILY_MONTHLY", schema "day STRING -i,month STRING -i, operator STRING -i -f, total_usercount LONG -i, timestamp LONG -i", primaryKeys "day, operator");
+
+        INSERT INTO TABLE active_users_daily_per_operator SELECT day, month, operator, SUM(total_usercount), _timestamp from active_users_daily GROUP BY day, month,_timestamp, operator;
+
+        create temporary table active_users_daily_per_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_ACTIVE_USERS_DAILY_MONTHLY", schema "day STRING -i,month STRING -i, appID STRING -i -f, total_usercount LONG -i, _timestamp LONG -i", primaryKeys "day, appID");
+
+        INSERT INTO TABLE active_users_daily_per_app SELECT day, month, appID, SUM(total_usercount), _timestamp from active_users_daily GROUP BY day, month,_timestamp, appID;
+
+        create temporary table active_users_daily_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_ACTIVE_USERS_DAILY_MONTHLY", schema "day STRING -i,month STRING -i, total_usercount LONG -i, _timestamp LONG -i", primaryKeys "day");
+
+        INSERT INTO TABLE active_users_daily_total SELECT day, month, SUM(total_usercount), _timestamp from active_users_daily GROUP BY day, month, _timestamp;
+
+
+        INCREMENTAL_TABLE_COMMIT user_status_meta_active_users_daily_monthly;                                          
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>

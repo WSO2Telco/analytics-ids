@@ -1,0 +1,52 @@
+{
+  "name": "com.wso2telco.dailyUssdLogs",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+ "payloadData": [
+    {
+      "name": "type",
+      "type": "STRING"
+    },
+    {
+      "name": "sequenceNo",
+      "type": "INT"
+    },
+    {
+      "name": "isOut",
+      "type": "BOOL"
+    },
+    {
+      "name": "msisdn",
+      "type": "LONG"
+    },
+    {
+      "name": "sessionStatus",
+      "type": "BOOL"
+    },
+    {
+      "name": "message",
+      "type": "STRING"
+    },
+    {
+      "name": "operator",
+      "type": "STRING"
+    },
+    {
+      "name": "ussdType",
+      "type": "STRING"
+    },
+    {
+      "name": "timestamp",
+      "type": "LONG"
+    },
+    {
+      "name": "ussdSession",
+      "type": "STRING"
+    },
+    {
+      "name": "messageId",
+      "type": "STRING"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="HEFailedSummaryBreakdownSparkscripts" version="1.0.0" type="analytics/spark" serverRole="DataAnalyticsServer">
+    <file>he_failed_summary_breakdown.xml</file>
+</artifact>

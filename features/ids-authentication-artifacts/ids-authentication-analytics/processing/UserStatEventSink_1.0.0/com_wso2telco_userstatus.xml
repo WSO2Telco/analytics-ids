@@ -4,7 +4,7 @@
         <ColumnDefinition>
             <Name>sessionID</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -12,13 +12,21 @@
         <ColumnDefinition>
             <Name>status</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
         </ColumnDefinition>
         <ColumnDefinition>
             <Name>sourceIP</Name>
+            <IsFacet>false</IsFacet>
+            <EnableIndexing>false</EnableIndexing>
+            <IsPrimaryKey>false</IsPrimaryKey>
+            <EnableScoreParam>false</EnableScoreParam>
+            <Type>STRING</Type>
+        </ColumnDefinition>
+	<ColumnDefinition>
+            <Name>forwardedIP</Name>
             <IsFacet>false</IsFacet>
             <EnableIndexing>false</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>

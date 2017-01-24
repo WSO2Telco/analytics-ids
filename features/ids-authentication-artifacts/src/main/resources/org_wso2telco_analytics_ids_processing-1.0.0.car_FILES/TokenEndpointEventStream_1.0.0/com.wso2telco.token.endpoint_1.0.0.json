@@ -1,0 +1,76 @@
+{
+  "name": "com.wso2telco.token.endpoint",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "authenticatedUser",
+      "type": "STRING"
+    },
+    {
+      "name": "state",
+      "type": "STRING"
+    },
+    {
+      "name": "nonce",
+      "type": "STRING"
+    },
+    {
+      "name": "amr",
+      "type": "STRING"
+    },
+    {
+      "name": "authenticationCode",
+      "type": "STRING"
+    },
+    {
+      "name": "accessToken",
+      "type": "STRING"
+    },
+    {
+      "name": "sourceIP",
+      "type": "STRING"
+    },
+    {
+      "name": "contentType",
+      "type": "STRING"
+    },
+    {
+      "name": "clientID",
+      "type": "STRING"
+    },
+    {
+      "name": "payload",
+      "type": "STRING"
+    },
+    {
+      "name": "refreshToken",
+      "type": "STRING"
+    },
+    {
+      "name": "tokenClaims",
+      "type": "STRING"
+    },
+    {
+      "name": "requestStatus",
+      "type": "STRING"
+    },
+    {
+      "name": "returnedResult",
+      "type": "STRING"
+    },
+    {
+      "name": "statusCode",
+      "type": "STRING"
+    },
+    {
+      "name": "sessionID",
+      "type": "STRING"
+    },
+    {
+      "name": "_timestamp",
+      "type": "LONG"
+    }
+  ]
+}

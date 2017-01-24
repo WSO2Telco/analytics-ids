@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="DropoutsSparkscripts" version="1.0.0" type="analytics/spark" serverRole="DataAnalyticsServer">
+    <file>dropouts_stat_analytics.xml</file>
+</artifact>

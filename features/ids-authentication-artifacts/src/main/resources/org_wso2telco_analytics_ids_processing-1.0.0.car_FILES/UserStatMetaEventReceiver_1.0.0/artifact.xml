@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="UserStatusMetaEventReceiver" version="1.0.0" type="event/receiver" serverRole="DataAnalyticsServer">
+    <file>user_status_meta_event_receiver.xml</file>
+</artifact>

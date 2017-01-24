@@ -11,5 +11,22 @@
             "type": "date-range",
             "description": "This notifies message generated in publisher"
         }
+    },
+    "styles": {
+        "borders": false,
+        "title": false
+    },
+    "toolbarButtons": {
+        "custom": [
+            {
+                "action": "DOWNLOAD",
+                "iconType": "css",
+                "iconClass": "fw-download",
+                "toolTip": "Download"
+            }
+        ],
+        "default": {
+            "maximize": true
+        }
     }
 }
