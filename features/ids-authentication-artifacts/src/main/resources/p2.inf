@@ -2,4 +2,11 @@ instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/);\
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/);\
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/carbonapps/);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/portal/);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/portal/controllers/);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/portal/controllers/apis/);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2telco.analytics.ids.authentication_${feature.version}/org_wso2telco_analytics_ids-1.0.0.car,target:${installFolder}/../../deployment/server/carbonapps/org_wso2telco_analytics_ids-1.0.0.car,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2telco.analytics.ids.authentication_${feature.version}/report.jag,target:${installFolder}/../../deployment/server/jaggeryapps/portal/controllers/apis/report.jag,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2telco.analytics.ids.authentication_${feature.version}/reportext.jag,target:${installFolder}/../../deployment/server/jaggeryapps/portal/controllers/apis/reportext.jag,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2telco.analytics.ids.authentication_${feature.version}/telcoanalytics.jag,target:${installFolder}/../../deployment/server/jaggeryapps/portal/controllers/apis/telcoanalytics.jag,overwrite:true);\
