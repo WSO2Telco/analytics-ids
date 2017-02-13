@@ -10,12 +10,12 @@ var view = {
             x : "Day",
             charts : [{type: "bar",  y : "Count", color: "Type", mode:"group"}],
             tooltip: {"enabled":true, "color":"#e5f2ff", "type":"symbol", "content":["Day","Type","Count"], "label":true },
-            maxLength: 100,
+            maxLength: 240,
             barGap: 0.1,
             width: $('#canvas').width(),
             height: $('#canvas').height(),
             padding: { "top": 60, "left": 60, "bottom": 80, "right": 150 },
-	    colorScale : ["#C59787", "#438CAD", "#B6688F", "#434343"],
+	        colorScale : [CLR_HE, CLR_USSD, CLR_USSDPIN, CLR_SMS],
             xAxisAngle:true
     },
     callbacks: [{
@@ -28,6 +28,7 @@ var view = {
     subscriptions: [{
         topic: "subscriber",
         callback: function(topic, data, subscriberData) {
+			wso2.gadgets.controls.showGadget();
             var filter = {
                 timeFrom : data["timeFrom"],
                 timeTo : data["timeTo"],
@@ -46,6 +47,7 @@ var view = {
             }, function (msg) {
 
             });
+			wso2.gadgets.state.setGadgetState(filter);
         }
     }],
     data: function() {
@@ -53,7 +55,9 @@ var view = {
 
         var SERVER_URL = "/portal/apis/telcoanalytics";
         var client = new TelcoAnalyticsClient().init(SERVER_URL);
-        wso2.gadgets.state.getGlobalState('filter',function(filter) {
+       // wso2.gadgets.state.getGlobalState('filter',function(filter) {
+		wso2.gadgets.state.getGadgetState(function(filter) {
+            wso2.gadgets.controls.showGadget();
 
             client.getLoginChannelsPerDay(filter || {}, function (response) {
                 var results = JSON.parse(response.message);

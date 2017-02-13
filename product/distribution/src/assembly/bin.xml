@@ -546,6 +546,12 @@
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/</outputDirectory>
             <fileMode>644</fileMode>
         </file>
+        
+        <!-- Copying udf xml -->
+        <file>
+            <source>src/repository/conf/spark/spark-udf-config.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/analytics/spark/</outputDirectory>
+        </file>
 
         <!--Gadget Migration Resources-->
         <file>
@@ -814,7 +820,7 @@
             <fileMode>755</fileMode>
         </file>
 
-        <file>
+          <file>
             <source>
                 ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/analytics/spark/carbon-spark-classpath.conf
             </source>
@@ -824,14 +830,14 @@
         </file>
 
         <!--spark udf conf file-->
-        <file>
+       <!-- <file>
             <source>
                 ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/analytics/spark/spark-udf-config.xml
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/analytics/spark/
             </outputDirectory>
             <fileMode>755</fileMode>
-        </file>
+        </file>-->
 
         <!--spark log4j.properties file-->
         <file>

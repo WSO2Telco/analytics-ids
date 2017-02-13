@@ -9,10 +9,12 @@ var view = {
     chartConfig: {
         x : "Day",
         charts : [{type: "bar", range:"true",  y : "Count"}],
-        maxLength: 100,
+        maxLength: 60,
+        barGap: 0.1,
         width: $('#canvas').width(),
         height: $('#canvas').height(),
         padding: { "top": 60, "left": 60, "bottom": 80, "right": 60 },
+        colorScale : [CLR_CHART_TOKENS_PD],
         xAxisAngle:true
     },
     callbacks: [{
@@ -25,6 +27,7 @@ var view = {
     subscriptions: [{
         topic: "subscriber",
         callback: function(topic, data, subscriberData) {
+			wso2.gadgets.controls.showGadget();
             var filter = {
                 timeFrom : data["timeFrom"],
                 timeTo : data["timeTo"],
@@ -48,6 +51,7 @@ var view = {
             }, function (msg) {
 
             });
+			wso2.gadgets.state.setGadgetState(filter);
         }
     }],
     data: function() {
@@ -55,7 +59,9 @@ var view = {
 
         var SERVER_URL = "/portal/apis/telcoanalytics";
         var client = new TelcoAnalyticsClient().init(SERVER_URL);
-        wso2.gadgets.state.getGlobalState('filter',function(filter) {
+       // wso2.gadgets.state.getGlobalState('filter',function(filter) {
+		wso2.gadgets.state.getGadgetState(function(filter) {
+            wso2.gadgets.controls.showGadget();
             client.getTotalTokens(filter || {}, function (response) {
 
                 var results = JSON.parse(response.message);

@@ -8,10 +8,14 @@
     <property name="DASHBOARD_ARTIFACT_DIRECTORY" value="ids-authentication-analytics/dashboard"/>
     <property name="PROCESSING_ARTIFACT_DIRECTORY" value="ids-authentication-analytics/processing"/>
     <property name="ALL_ARTIFACT_LIST_DIRECTORY" value="ids-authentication-analytics/artifact_ids"/>
+	<property name="ANALYTICS_IDS_PROCESSING_ANALYTICS_JAG" value="ids-authentication-analytics/analytics_jag"/>
+	<property name="ANALYTICS_IDS_PROCESSING_REPORT_JAG" value="ids-authentication-analytics/report_jag"/>
 
     <property name="ANALYTICS_IDS_capp" value="org_wso2telco_analytics_ids-1.0.0"/>
+	<property name="ANALYTICS_IDS_JAG" value="analytics_ids_jag-1.0.0"/>
     <property name="ANALYTICS_IDS_DASHBOARD_capp" value="org_wso2telco_analytics_ids_dashboard-1.0.0"/>
     <property name="ANALYTICS_IDS_PROCESSING_capp" value="org_wso2telco_analytics_ids_processing-1.0.0"/>
+	
 
     <target name="clean">
         <delete dir="${target-dir}"/>
@@ -27,6 +31,7 @@
             <zipfileset dir="${PROCESSING_ARTIFACT_DIRECTORY}"/>
             <zipfileset dir="${ALL_ARTIFACT_LIST_DIRECTORY}"/>
         </zip>
+    	
         <zip destfile="${resource-dir}/${ANALYTICS_IDS_DASHBOARD_capp}.car">
             <zipfileset dir="${DASHBOARD_ARTIFACT_DIRECTORY}"/>
         </zip>

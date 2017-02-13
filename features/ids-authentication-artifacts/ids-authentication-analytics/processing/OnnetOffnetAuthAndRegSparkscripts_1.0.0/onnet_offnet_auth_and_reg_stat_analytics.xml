@@ -2,9 +2,9 @@
 <Analytics>
     <Name>onnet_offnet_auth_and_reg_stat_analytics</Name>
     <Script>
-        create temporary table user_status_raw_onnet_offnet_reg_log using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "_timestamp LONG -i",  incrementalParams "user_status_onnet_offnet_reg_log, DAY");
+        create temporary table user_status_raw_onnet_offnet_reg_log using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,_timestamp LONG -i",  incrementalParams "user_status_onnet_offnet_reg_log, DAY");
 
-        create temporary table user_status_meta_raw_onnet_offnet_reg_log using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "_timestamp LONG -i",  incrementalParams "user_status_meta_onnet_offnet_reg_log, DAY");
+        create temporary table user_status_meta_raw_onnet_offnet_reg_log using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,msisdn STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_onnet_offnet_reg_log, DAY");
 
         create temporary table onnetOffnetRegTypes using CarbonAnalytics options(tableName "COM_WSO2TELCO_SUMMARY_ONNET_OFFNET_TYPES", schema "userCount INT -i, type STRING -i, operator STRING -i, appId STRING -i, day STRING -i, _timestamp LONG", primaryKeys "type, operator, appId, day, _timestamp", incrementalParams "onnetRegLoginTypes, DAY", mergeSchema "false");
 
@@ -40,7 +40,6 @@
         INCREMENTAL_TABLE_COMMIT user_status_onnet_offnet_reg_log;
         INCREMENTAL_TABLE_COMMIT user_status_meta_onnet_offnet_reg_log;
         INCREMENTAL_TABLE_COMMIT onnetRegLoginTypes;
-    
     </Script>
     <CronExpression>0 0 0 1/1 * ? *</CronExpression>
 </Analytics>

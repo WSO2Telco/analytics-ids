@@ -4,7 +4,7 @@
         <ColumnDefinition>
             <Name>sessionID</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -20,7 +20,7 @@
         <ColumnDefinition>
             <Name>operator</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -28,7 +28,7 @@
         <ColumnDefinition>
             <Name>appId</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -36,7 +36,7 @@
         <ColumnDefinition>
             <Name>msisdn</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -44,7 +44,7 @@
         <ColumnDefinition>
             <Name>isMSISDNHeader</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>BOOLEAN</Type>
@@ -52,7 +52,7 @@
         <ColumnDefinition>
             <Name>userAgent</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -60,7 +60,7 @@
         <ColumnDefinition>
             <Name>consumerKey</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -68,7 +68,7 @@
         <ColumnDefinition>
             <Name>state</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -76,7 +76,7 @@
         <ColumnDefinition>
             <Name>nonce</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -84,7 +84,7 @@
         <ColumnDefinition>
             <Name>scope</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -92,7 +92,7 @@
         <ColumnDefinition>
             <Name>acrValue</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -100,7 +100,7 @@
         <ColumnDefinition>
             <Name>loginHint</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -108,7 +108,7 @@
         <ColumnDefinition>
             <Name>isNewUser</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>BOOLEAN</Type>
@@ -116,7 +116,7 @@
         <ColumnDefinition>
             <Name>telcoScope</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
@@ -124,7 +124,7 @@
         <ColumnDefinition>
             <Name>status</Name>
             <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
+            <EnableIndexing>true</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
