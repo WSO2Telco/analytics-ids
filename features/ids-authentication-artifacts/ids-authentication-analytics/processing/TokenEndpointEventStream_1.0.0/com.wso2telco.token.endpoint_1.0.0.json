@@ -29,10 +29,6 @@
       "type": "STRING"
     },
     {
-      "name": "sourceIP",
-      "type": "STRING"
-    },
-    {
       "name": "contentType",
       "type": "STRING"
     },
@@ -41,19 +37,11 @@
       "type": "STRING"
     },
     {
-      "name": "payload",
-      "type": "STRING"
-    },
-    {
       "name": "refreshToken",
       "type": "STRING"
     },
     {
       "name": "tokenClaims",
-      "type": "STRING"
-    },
-    {
-      "name": "requestStatus",
       "type": "STRING"
     },
     {
