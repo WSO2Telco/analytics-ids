@@ -50,14 +50,6 @@
             <Type>STRING</Type>
         </ColumnDefinition>
         <ColumnDefinition>
-            <Name>sourceIP</Name>
-            <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
-            <IsPrimaryKey>false</IsPrimaryKey>
-            <EnableScoreParam>false</EnableScoreParam>
-            <Type>STRING</Type>
-        </ColumnDefinition>
-        <ColumnDefinition>
             <Name>contentType</Name>
             <IsFacet>false</IsFacet>
             <EnableIndexing>false</EnableIndexing>
@@ -74,14 +66,6 @@
             <Type>STRING</Type>
         </ColumnDefinition>
         <ColumnDefinition>
-            <Name>payload</Name>
-            <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
-            <IsPrimaryKey>false</IsPrimaryKey>
-            <EnableScoreParam>false</EnableScoreParam>
-            <Type>STRING</Type>
-        </ColumnDefinition>
-        <ColumnDefinition>
             <Name>refreshToken</Name>
             <IsFacet>false</IsFacet>
             <EnableIndexing>false</EnableIndexing>
@@ -91,14 +75,6 @@
         </ColumnDefinition>
         <ColumnDefinition>
             <Name>tokenClaims</Name>
-            <IsFacet>false</IsFacet>
-            <EnableIndexing>false</EnableIndexing>
-            <IsPrimaryKey>false</IsPrimaryKey>
-            <EnableScoreParam>false</EnableScoreParam>
-            <Type>STRING</Type>
-        </ColumnDefinition>
-        <ColumnDefinition>
-            <Name>requestStatus</Name>
             <IsFacet>false</IsFacet>
             <EnableIndexing>false</EnableIndexing>
             <IsPrimaryKey>false</IsPrimaryKey>
