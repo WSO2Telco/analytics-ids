@@ -71,6 +71,10 @@
     {
       "name": "_timestamp",
       "type": "LONG"
+    },
+    {
+      "name": "transactionId",
+      "type": "STRING"
     }
   ]
 }

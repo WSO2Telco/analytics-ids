@@ -129,6 +129,14 @@
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
         </ColumnDefinition>
+        <ColumnDefinition>
+            <Name>transactionId</Name>
+            <IsFacet>false</IsFacet>
+            <EnableIndexing>true</EnableIndexing>
+            <IsPrimaryKey>false</IsPrimaryKey>
+            <EnableScoreParam>false</EnableScoreParam>
+            <Type>STRING</Type>
+        </ColumnDefinition>
     </TableSchema>
     <Source>
         <StreamId>com.wso2telco.userstatus.meta:1.0.0</StreamId>
