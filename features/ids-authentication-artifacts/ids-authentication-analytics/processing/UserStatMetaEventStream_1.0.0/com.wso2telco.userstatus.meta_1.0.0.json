@@ -21,10 +21,6 @@
       "type": "STRING"
     },
     {
-      "name": "msisdn",
-      "type": "STRING"
-    },
-    {
       "name": "isMSISDNHeader",
       "type": "BOOL"
     },

@@ -27,6 +27,10 @@
     {
        "name": "transactionId",
        "type": "STRING"
+    },
+    {
+        "name": "msisdn",
+        "type": "STRING"
     }
   ]
 }
