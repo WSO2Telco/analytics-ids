@@ -41,6 +41,14 @@
             <EnableScoreParam>false</EnableScoreParam>
             <Type>STRING</Type>
         </ColumnDefinition>
+        <ColumnDefinition>
+            <Name>msisdn</Name>
+            <IsFacet>false</IsFacet>
+            <EnableIndexing>true</EnableIndexing>
+            <IsPrimaryKey>false</IsPrimaryKey>
+            <EnableScoreParam>false</EnableScoreParam>
+            <Type>STRING</Type>
+        </ColumnDefinition>
     </TableSchema>
     <Source>
         <StreamId>com.wso2telco.userstatus:1.0.0</StreamId>
