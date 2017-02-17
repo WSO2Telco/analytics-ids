@@ -98,14 +98,6 @@
             <Type>STRING</Type>
         </ColumnDefinition>
         <ColumnDefinition>
-            <Name>isNewUser</Name>
-            <IsFacet>false</IsFacet>
-            <EnableIndexing>true</EnableIndexing>
-            <IsPrimaryKey>false</IsPrimaryKey>
-            <EnableScoreParam>false</EnableScoreParam>
-            <Type>BOOLEAN</Type>
-        </ColumnDefinition>
-        <ColumnDefinition>
             <Name>telcoScope</Name>
             <IsFacet>false</IsFacet>
             <EnableIndexing>true</EnableIndexing>
