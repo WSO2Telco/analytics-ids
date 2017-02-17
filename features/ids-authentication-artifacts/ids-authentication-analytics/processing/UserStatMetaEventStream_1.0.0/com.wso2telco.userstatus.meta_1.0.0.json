@@ -53,10 +53,6 @@
       "type": "STRING"
     },
     {
-      "name": "isNewUser",
-      "type": "BOOL"
-    },
-    {
       "name": "telcoScope",
       "type": "STRING"
     },
