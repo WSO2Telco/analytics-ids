@@ -21,20 +21,20 @@
       "type": "STRING"
     },
     {
-      "name": "_timestamp",
-      "type": "LONG"
-    },
-    {
        "name": "transactionId",
        "type": "STRING"
     },
     {
-        "name": "msisdn",
-        "type": "STRING"
+       "name": "msisdn",
+       "type": "STRING"
     },
     {
        "name": "isNewUser",
        "type": "BOOL"
-     }
+    },
+    {
+      "name": "_timestamp",
+      "type": "LONG"
+    }
   ]
 }
