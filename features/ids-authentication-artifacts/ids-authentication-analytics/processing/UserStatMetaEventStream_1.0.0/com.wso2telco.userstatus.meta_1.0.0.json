@@ -61,12 +61,12 @@
       "type": "STRING"
     },
     {
-      "name": "_timestamp",
-      "type": "LONG"
+       "name": "transactionId",
+       "type": "STRING"
     },
     {
-      "name": "transactionId",
-      "type": "STRING"
+      "name": "_timestamp",
+      "type": "LONG"
     }
   ]
 }
