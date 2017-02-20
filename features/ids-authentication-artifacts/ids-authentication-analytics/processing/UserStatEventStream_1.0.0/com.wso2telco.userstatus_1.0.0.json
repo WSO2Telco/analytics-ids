@@ -31,6 +31,10 @@
     {
         "name": "msisdn",
         "type": "STRING"
-    }
+    },
+    {
+       "name": "isNewUser",
+       "type": "BOOL"
+     }
   ]
 }
