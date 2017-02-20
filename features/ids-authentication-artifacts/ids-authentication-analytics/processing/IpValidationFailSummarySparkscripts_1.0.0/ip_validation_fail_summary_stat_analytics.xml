@@ -2,9 +2,9 @@
 <Analytics>
     <Name>ip_validation_fail_summary_stat_analytics</Name>
     <Script>
-        create temporary table com_wso2telco_userstatus_ip_range_check using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,_timestamp LONG -i", incrementalParams "user_status_ip_range, DAY");
+        create temporary table com_wso2telco_userstatus_ip_range_check using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING, msisdn STRING,_timestamp LONG -i", incrementalParams "user_status_ip_range, DAY");
 
-        create temporary table com_wso2telco_userstatus_meta_ip_range_check using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,msisdn STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i", incrementalParams "user_status_meta_ip_range, DAY");
+        create temporary table com_wso2telco_userstatus_meta_ip_range_check using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i", incrementalParams "user_status_meta_ip_range, DAY");
 
         create temporary table com_wso2telco_operatoripranges_ip_range_check using CarbonAnalytics options (tableName "COM_WSO2TELCO_OPERATORIPRANGES", schema "id LONG,operator STRING, isEnable BOOLEAN, minValue STRING, maxValue STRING, _timestamp LONG -i" );
 
@@ -28,19 +28,24 @@
                         where isEnable = true
                     ) as ipranges
                     INNER JOIN (
-                        select ustatus.sessionID, ustatus.forwardedIP, ustatus._timestamp, meta.operator , meta.msisdn
+                        select ustatus.sessionID, ustatus.forwardedIP, ustatus._timestamp, meta.operator , ustatus.msisdn
                         from
                         (
-                            select distinct sessionID, forwardedIP, _timestamp 
-                            from com_wso2telco_userstatus_ip_range_check 
-                            where status='IP_HEADER_NOT_FOUND' or status = 'IP_HEADER_NOT_IN_RANGE'
-                        ) as ustatus 
+                        select ip_failed_info.sessionID, ip_failed_info.forwardedIP, ip_failed_info._timestamp, msisdn_events.msisdn
+                        from
+                        (select distinct sessionID, forwardedIP, _timestamp
+                        from com_wso2telco_userstatus_ip_range_check
+                        where status='IP_HEADER_NOT_FOUND' or status = 'IP_HEADER_NOT_IN_RANGE') as ip_failed_info
+                        INNER JOIN
+                        (select distinct sessionID, msisdn
+                        from com_wso2telco_userstatus_ip_range_check
+                        where status = 'MSISDN_SET_TO_HEADER' and msisdn IS NOT NULL) as msisdn_events on ip_failed_info.sessionID=msisdn_events.sessionID
+                        ) as ustatus
                         INNER JOIN (
-                            select sessionID, first(operator) as operator, min(msisdn) as msisdn 
-                            from com_wso2telco_userstatus_meta_ip_range_check 
-                            where msisdn IS NOT NULL and operator IS NOT NULL and msisdn != "false" group by sessionID
-                        ) as meta on meta.sessionID = ustatus.sessionID 
-                    ) as operatorforward on ipranges.operator = operatorforward.operator
+                        select sessionID, first(operator) as operator
+                        from com_wso2telco_userstatus_meta_ip_range_check group by sessionID
+                        ) as meta on meta.sessionID = ustatus.sessionID
+        ) as operatorforward on ipranges.operator = operatorforward.operator
             ) as operatoriprangecheck group by sessionID
         ) as iprangecheckreport group by iprangecheck, operator, _timestamp;
 
