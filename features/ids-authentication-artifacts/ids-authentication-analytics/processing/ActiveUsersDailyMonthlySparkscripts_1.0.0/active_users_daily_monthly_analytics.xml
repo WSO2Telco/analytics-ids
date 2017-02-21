@@ -2,17 +2,17 @@
 <Analytics>
     <Name>active_users_daily_monthly_analytics</Name>
     <Script>
-		create temporary table user_status_meta_raw_act_usrs using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,msisdn STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_active_users_daily_monthly, DAY");
+		create temporary table user_status_meta_raw_act_usrs using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_active_users_daily_monthly, DAY");
 
 create temporary table active_users_daily using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_DAILY",schema "day STRING -i, operator STRING -i, appID STRING -i,total_usercount LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
 
 
 
         INSERT INTO TABLE active_users_daily 
-		SELECT getDateString(dayTimestamp), operator, appId, COUNT(msisdn) as total_usercount,dayTimestamp 
+		SELECT getDateString(dayTimestamp), operator, appId, COUNT(*) as total_usercount,dayTimestamp
 		FROM ( 
-				select  distinct min(msisdn) as msisdn, getDateTimestamp(first(_timestamp)) as dayTimestamp, first(operator) as operator, first(appId) as appId
-				from user_status_meta_raw_act_usrs where msisdn IS NOT NULL GROUP BY sessionID
+				select getDateTimestamp(first(_timestamp)) as dayTimestamp, first(operator) as operator, first(appId) as appId
+				from user_status_meta_raw_act_usrs where sessionID IS NOT NULL GROUP BY sessionID
 			) as temp GROUP BY dayTimestamp, operator, appId;
 
 
@@ -20,20 +20,20 @@ create temporary table active_users_daily using CarbonAnalytics options (tableNa
         create temporary table active_users_daily_per_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_ACTIVE_USERS_DAILY", schema "day STRING -i, operator STRING -i -f, total_usercount LONG -i, timestamp STRING -i,  _timestamp LONG -i", primaryKeys "day, operator");
 
         INSERT INTO TABLE active_users_daily_per_operator
-		SELECT getDateString(dayTimestamp), operator, COUNT(msisdn) as total_usercount,dayTimestamp ,dayTimestamp 
+		SELECT getDateString(dayTimestamp), operator, COUNT(*) as total_usercount,dayTimestamp ,dayTimestamp
 		FROM ( 
-				select  distinct min(msisdn) as msisdn, getDateTimestamp(first(_timestamp)) as dayTimestamp, first(operator) as operator
-				from user_status_meta_raw_act_usrs where msisdn IS NOT NULL GROUP BY sessionID
+				select getDateTimestamp(first(_timestamp)) as dayTimestamp, first(operator) as operator
+				from user_status_meta_raw_act_usrs where sessionID IS NOT NULL GROUP BY sessionID
 			) as temp GROUP BY dayTimestamp, operator;
 
 
         create temporary table active_users_daily_per_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_ACTIVE_USERS_DAILY", schema "day STRING -i, appID STRING -i -f, total_usercount LONG -i, _timestamp LONG -i", primaryKeys "day, appID");
 
         INSERT INTO TABLE active_users_daily_per_app 
-		SELECT getDateString(dayTimestamp), appId, COUNT(msisdn) as total_usercount,dayTimestamp 
+		SELECT getDateString(dayTimestamp), appId, COUNT(*) as total_usercount,dayTimestamp
 		FROM ( 
-				select  distinct min(msisdn) as msisdn, getDateTimestamp(first(_timestamp)) as dayTimestamp, first(appId) as appId
-				from user_status_meta_raw_act_usrs where msisdn IS NOT NULL GROUP BY sessionID
+				select  getDateTimestamp(first(_timestamp)) as dayTimestamp, first(appId) as appId
+				from user_status_meta_raw_act_usrs where sessionID IS NOT NULL GROUP BY sessionID
 			) as temp GROUP BY dayTimestamp, appId;
 
 		
@@ -43,10 +43,10 @@ create temporary table active_users_daily using CarbonAnalytics options (tableNa
 
 
         INSERT INTO TABLE active_users_daily_total
-		SELECT getDateString(dayTimestamp), COUNT(msisdn) as total_usercount,dayTimestamp 
+		SELECT getDateString(dayTimestamp), COUNT(*) as total_usercount,dayTimestamp
 		FROM ( 
-				select  distinct min(msisdn) as msisdn, getDateTimestamp(first(_timestamp)) as dayTimestamp 
-				from user_status_meta_raw_act_usrs where msisdn IS NOT NULL GROUP BY sessionID
+				select    getDateTimestamp(first(_timestamp)) as dayTimestamp
+				from user_status_meta_raw_act_usrs where sessionID IS NOT NULL GROUP BY sessionID
 			) as temp GROUP BY dayTimestamp;
 
 
@@ -55,10 +55,10 @@ create temporary table active_users_daily using CarbonAnalytics options (tableNa
 
 
         INSERT INTO TABLE active_users_monthly
-			SELECT getMonthString(monthTimestamp), operator, appId, COUNT(msisdn) as total_usercount, monthTimestamp
+			SELECT getMonthString(monthTimestamp), operator, appId, COUNT(*) as total_usercount, monthTimestamp
 			FROM (  
-					select  distinct min(msisdn) as msisdn, getMonthTimestamp(first(_timestamp)) as monthTimestamp, first(operator) as operator, first(appId) as appId
-					from user_status_meta_raw_act_usrs where msisdn IS NOT NULL GROUP BY sessionID
+					select getMonthTimestamp(first(_timestamp)) as monthTimestamp, first(operator) as operator, first(appId) as appId
+					from user_status_meta_raw_act_usrs where sessionID IS NOT NULL GROUP BY sessionID
 				) as temp GROUP BY monthTimestamp,operator, appId;
 
 
@@ -69,10 +69,10 @@ create temporary table active_users_daily using CarbonAnalytics options (tableNa
 
 
         INSERT INTO TABLE active_users_monthly_per_operator
-			SELECT getMonthString(monthTimestamp), operator, COUNT(msisdn) as total_usercount, monthTimestamp, monthTimestamp
+			SELECT getMonthString(monthTimestamp), operator, COUNT(*) as total_usercount, monthTimestamp, monthTimestamp
 			FROM (  
-					select  distinct min(msisdn) as msisdn, getMonthTimestamp(first(_timestamp)) as monthTimestamp, first(operator) as operator
-					from user_status_meta_raw_act_usrs where msisdn IS NOT NULL GROUP BY sessionID
+					select  getMonthTimestamp(first(_timestamp)) as monthTimestamp, first(operator) as operator
+					from user_status_meta_raw_act_usrs where sessionID IS NOT NULL GROUP BY sessionID
 				) as temp GROUP BY monthTimestamp,operator;
 			
 
@@ -81,10 +81,10 @@ create temporary table active_users_daily using CarbonAnalytics options (tableNa
 
 
         INSERT INTO TABLE active_users_monthly_per_app 
-				SELECT getMonthString(monthTimestamp),  appId, COUNT(msisdn) as total_usercount, monthTimestamp
+				SELECT getMonthString(monthTimestamp),  appId, COUNT(*) as total_usercount, monthTimestamp
 				FROM (  
-						select  distinct min(msisdn) as msisdn, getMonthTimestamp(first(_timestamp)) as monthTimestamp, first(appId) as appId
-						from user_status_meta_raw_act_usrs where msisdn IS NOT NULL GROUP BY sessionID
+						select  getMonthTimestamp(first(_timestamp)) as monthTimestamp, first(appId) as appId
+						from user_status_meta_raw_act_usrs where sessionID IS NOT NULL GROUP BY sessionID
 					) as temp GROUP BY monthTimestamp, appId;
 			
 
@@ -94,10 +94,10 @@ create temporary table active_users_daily using CarbonAnalytics options (tableNa
 
 
         INSERT INTO TABLE active_users_monthly_total
-				SELECT getMonthString(monthTimestamp), COUNT(msisdn) as total_usercount, monthTimestamp
+				SELECT getMonthString(monthTimestamp), COUNT(*) as total_usercount, monthTimestamp
 				FROM (  
-						select  distinct min(msisdn) as msisdn, getMonthTimestamp(first(_timestamp)) as monthTimestamp
-						from user_status_meta_raw_act_usrs where msisdn IS NOT NULL GROUP BY sessionID
+						select getMonthTimestamp(first(_timestamp)) as monthTimestamp
+						from user_status_meta_raw_act_usrs where sessionID IS NOT NULL GROUP BY sessionID
 					) as temp GROUP BY monthTimestamp;
 
 
