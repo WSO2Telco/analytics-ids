@@ -2,9 +2,9 @@
 <Analytics>
     <Name>daily_registrations_stat_analytics</Name>
     <Script>
-       	create temporary table user_status_raw_daily_reg using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,_timestamp LONG -i",  incrementalParams "user_status_dailyReg, DAY");
+        create temporary table user_status_raw_daily_reg using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,_timestamp LONG,msisdn STRING,isNewUser BOOLEAN -i",  incrementalParams "user_status_dailyReg, DAY");
 
-        create temporary table user_status_meta_raw_daily_reg using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,msisdn STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_dailyReg, DAY");
+        create temporary table user_status_meta_raw_daily_reg using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_dailyReg, DAY");
 
         create temporary table daily_registrations_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_DAILY_REGISTRATIONS", schema "day STRING -i, operator STRING -i, appID STRING -i, regCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
 
@@ -15,7 +15,7 @@
         create temporary table daily_registrations_total_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_DAILY_REGISTRATIONS", schema "day STRING -i, regCount LONG -i, _timestamp LONG -i", primaryKeys "day");
 
 
-		INSERT INTO TABLE daily_registrations_summary SELECT getDateString(allrecs._timestamp) as day, allrecs.operator, allrecs.appId, sum(scount), allrecs._timestamp as _timestamp from (	select * from (	select count(distinct temp2.sessionID) as scount , temp2.operator as operator,temp2.appId as appId, temp2._timestamp as _timestamp from ( select distinct temp.sessionID as sessionID,user_status_meta_raw_daily_reg.operator as operator, user_status_meta_raw_daily_reg.appId as appId, getDateTimestamp(user_status_meta_raw_daily_reg._timestamp) as _timestamp from 	( select distinct sessionID from user_status_raw_daily_reg where status = "LOGIN_SUCCESS" 	intersect		select distinct sessionID from user_status_raw_daily_reg where ( status ="HE_AUTH_SUCCESS" or status ="HE_AUTH_PROCESSING_FAIL" ) ) as temp left join user_status_meta_raw_daily_reg on temp.sessionID =user_status_meta_raw_daily_reg.sessionID where user_status_meta_raw_daily_reg.sessionID IS NOT NULL and user_status_meta_raw_daily_reg.isNewUser = true AND user_status_meta_raw_daily_reg.isMSISDNHeader = true and operator IS NOT NULL and appId IS NOT NULL  ) as temp2  group by temp2.operator, temp2.appId, temp2._timestamp ) as s1  union all 	select * from (	select count(distinct temp3.sessionID) as scount , temp3.operator as operator, temp3.appId as appId, temp3._timestamp as _timestamp 	from (	select distinct temp.sessionID as sessionID,user_status_meta_raw_daily_reg.operator as operator, user_status_meta_raw_daily_reg.appId as appId, getDateTimestamp(user_status_meta_raw_daily_reg._timestamp) as _timestamp from ( select distinct sessionID from user_status_raw_daily_reg where status = "LOGIN_SUCCESS" 	intersect	select distinct sessionID from user_status_raw_daily_reg where ( status="MSISDN_AUTH_PROCESSING_FAIL" or status = "MSISDN_AUTH_SUCCESS" )	) as temp 	left join user_status_meta_raw_daily_reg on temp.sessionID = user_status_meta_raw_daily_reg.sessionID where user_status_meta_raw_daily_reg.sessionID IS NOT NULL and user_status_meta_raw_daily_reg.isNewUser = true AND user_status_meta_raw_daily_reg.isMSISDNHeader = false and operator IS NOT NULL and appId IS NOT NULL ) as temp3	group by temp3.operator, temp3.appId, temp3._timestamp	) as s2 ) as allrecs group by allrecs.operator, allrecs.appId, allrecs._timestamp; 
+        INSERT INTO TABLE daily_registrations_summary SELECT first(getDateString(raw._timestamp)) as day,first(meta.operator) as operator,first(meta.appId) as appId, count(distinct(raw.sessionID)) as regCount, first(raw._timestamp) as _timestamp FROM user_status_raw_daily_reg as raw LEFT JOIN user_status_meta_raw_daily_reg as meta ON meta.sessionID=raw.sessionID WHERE raw.status='LOGIN_SUCCESS' and raw.isNewUser=true GROUP BY getDateString(raw._timestamp);
 
         INSERT INTO TABLE daily_registrations_operator_summary SELECT day, operator, SUM(regCount), _timestamp FROM daily_registrations_summary GROUP BY day, operator, _timestamp;
 
@@ -33,7 +33,7 @@
 
         INSERT INTO TABLE daily_registrations_temp2 SELECT getDateString(31516200000), da.operator, da.appID, da.totalCount, 31516200000 FROM  daily_registrations_aggregations as da JOIN (SELECT min(_timestamp) as minTimestamp from daily_registrations_temp) temp on da._timestamp = (temp.minTimestamp - 86400000);
 
-        INSERT INTO TABLE daily_registrations_aggregations SELECT dt1.day, dt1.operator, dt1.appID, SUM(dt2.regCount), dt1._timestamp FROM  daily_registrations_temp as dt1 INNER JOIN daily_registrations_temp2 as dt2 ON dt1._timestamp >= dt2._timestamp AND dt1.operator = dt2.operator AND dt1.appID = dt2.appID GROUP BY dt1.day, dt1.operator, dt1.appID, dt1._timestamp;
+        INSERT INTO TABLE daily_registrations_aggregations SELECT dt1.day, dt1.operator, dt1.appID, SUM(dt2.regCount), dt1._timestamp FROM  daily_registrations_temp as dt1 INNER JOIN daily_registrations_temp2 as dt2 ON dt1._timestamp = dt2._timestamp AND dt1.operator = dt2.operator AND dt1.appID = dt2.appID GROUP BY dt1.day, dt1.operator, dt1.appID, dt1._timestamp;
 
 
         create temporary table daily_registrations_operator_temp using CarbonAnalytics options (tableName "COM_WSO2TELCO_TEMP_OPERATOR_DAILY_REGISTRATIONS", schema "day STRING -i, operator STRING -i, regCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
@@ -48,7 +48,7 @@
 
         INSERT INTO TABLE daily_registrations_operator_temp2 SELECT getDateString(31516200000), da.operator, da.totalCount, 31516200000 FROM  operator_daily_registrations_aggregations as da JOIN (SELECT min(_timestamp) as minTimestamp from daily_registrations_operator_temp) temp on da._timestamp = (temp.minTimestamp - 86400000);
 
-        INSERT INTO TABLE operator_daily_registrations_aggregations SELECT dt1.day, dt1.operator,SUM(dt2.regCount), dt1._timestamp FROM  daily_registrations_operator_temp as dt1 INNER JOIN daily_registrations_operator_temp2 as dt2 ON dt1._timestamp >= dt2._timestamp AND dt1.operator = dt2.operator GROUP BY dt1.day, dt1.operator, dt1._timestamp;
+        INSERT INTO TABLE operator_daily_registrations_aggregations SELECT dt1.day, dt1.operator,SUM(dt2.regCount), dt1._timestamp FROM  daily_registrations_operator_temp as dt1 INNER JOIN daily_registrations_operator_temp2 as dt2 ON dt1._timestamp = dt2._timestamp AND dt1.operator = dt2.operator GROUP BY dt1.day, dt1.operator, dt1._timestamp;
 
         INSERT INTO TABLE total_daily_registrations_aggregations SELECT day, SUM(totalCount), _timestamp from operator_daily_registrations_aggregations GROUP BY day, _timestamp;
 
