@@ -61,7 +61,7 @@ var view = {
         var SERVER_URL = "/portal/apis/telcoanalytics";
         var client = new TelcoAnalyticsClient().init(SERVER_URL);
       //  wso2.gadgets.state.getGlobalState('filter',function(filter) {
-		wso2.gadgets.state.getGadgetState(function(filter) {
+		//wso2.gadgets.state.getGadgetState(function(filter) {
             wso2.gadgets.controls.showGadget();
             client.getTotalAuthCount(filter || {}, function (response) {
                 $( document ).ready(function() {
@@ -77,7 +77,7 @@ var view = {
             }, function (msg) {
 
             });
-        });
+       // });
     }
 };
 

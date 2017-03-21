@@ -996,24 +996,24 @@
 									data[4] = JSON.parse(resultHEFailuers.getMessage());
 									var dateTreeSet = new Packages.java.util.TreeSet;
 									var map = new Packages.java.util.TreeMap;
-									var dataExport = carbon.server.osgiService('com.wso2telco.analytics.ids.report.generator.MsisdnReportGenerationService');
+									//var dataExport = carbon.server.osgiService('com.wso2telco.analytics.ids.report.generator.MsisdnReportGenerationService');
 									
 									for (var i = 0; i < data[0].length ; i++) { 
-										var day=String(dataExport.checkNull(data[0][i].values["day"]));
+										var day=String(data[0][i].values["day"]);
 										dateTreeSet.add(day);
 										var list = new Packages.java.util.ArrayList();
 										for (var j = 0; j < 23 ; j++) {
 											list.add(j,"0");
 										}
 										map.put(day,list);
-										list.add(0,dataExport.checkNull(data[0][i].values["he_logins"]));
-										var ussd = dataExport.checkNull(data[0][i].values["ussd_pin_logins"])+dataExport.checkNull(data[0][i].values["ussd_logins"]);
+										list.add(0,data[0][i].values["he_logins"]);
+										var ussd = data[0][i].values["ussd_pin_logins"]+data[0][i].values["ussd_logins"];
 										list.add(1,ussd);
-										list.add(2,dataExport.checkNull(data[0][i].values["sms_logins"]));
+										list.add(2,data[0][i].values["sms_logins"]);
 										list.add(3,data[0][i].values["total_count"]);
 									}
 									for (var i = 0; i < data[1].length ; i++) {
-										var day=String(dataExport.checkNull(data[1][i].values["day"]));
+										var day=String(data[1][i].values["day"]);
 										dateTreeSet.add(day);
 										var list=null;
 										if (map.containsKey(day)) {
@@ -1034,7 +1034,7 @@
 									}
 									
 									for (var i = 0; i < data[4].length ; i++) {
-										var day=String(dataExport.checkNull(data[4][i].values["day"]));
+										var day=String(data[4][i].values["day"]);
 										dateTreeSet.add(day);
 										var list=null;
 										if (map.containsKey(day)) {
@@ -1055,7 +1055,7 @@
 									}
 									
 									for (var i = 0; i < data[2].length ; i++) {
-										var day=String(dataExport.checkNull(data[2][i].values["day"]));
+										var day=String(data[2][i].values["day"]);
 										dateTreeSet.add(day);
 										var list=null;
 										if (map.containsKey(day)) {
@@ -1076,7 +1076,7 @@
 									}
 									
 									for (var i = 0; i < data[3].length ; i++) {
-										var day=String(dataExport.checkNull(data[3][i].values["day"]));
+										var day=String(data[3][i].values["day"]);
 										dateTreeSet.add(day);
 										var list=null;
 										if (map.containsKey(day)) {
