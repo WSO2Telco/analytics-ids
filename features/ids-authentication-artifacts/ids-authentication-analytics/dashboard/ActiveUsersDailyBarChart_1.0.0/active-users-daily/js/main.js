@@ -38,14 +38,12 @@ var view = {
             var client = new TelcoAnalyticsClient().init(SERVER_URL);
             client.getDailyActiveUsers(filter, function (response) {
                 var results = JSON.parse(response.message);
-
                 var onNetDropouts = [];
                 for (var i=0; i < results.length; i++) {
                         onNetDropouts.push(results[i]); //we are only pushing onnet dropouts
                 }
                 wso2gadgets.onDataReady(onNetDropouts);
             }, function (msg) {
-
             });
         }
     }],

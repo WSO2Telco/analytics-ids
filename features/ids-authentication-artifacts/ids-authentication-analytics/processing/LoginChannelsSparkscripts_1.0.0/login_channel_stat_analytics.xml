@@ -7,10 +7,10 @@
         create temporary table loginChannels using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_LOGIN_CHANNELS", schema "day STRING -i, operator STRING -i, appID STRING -i, ussd_logins LONG -i,ussd_pin_logins LONG -i,sms_logins LONG -i, he_logins LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID", incrementalParams "login_channels, DAY");
 
         INSERT INTO TABLE loginChannels SELECT min(day), operator, appID,
-        SUM(IF(status = 'USSDAuthenticator',1,0)) as ussd_logins,
-        SUM(IF(status = 'USSDPinAuthenticator' OR status = 'USSDPINAuthenticator',1,0)) as ussd_pin_logins,
-        SUM(IF(status = 'SMSAuthenticator',1,0)) as sms_logins,
-        SUM(IF(status = 'HeaderEnrichment' OR status = 'HeaderEnrichmentAuthenticator',1,0)) as he_logins,
+        SUM(IF(status = 'USSD_OK',1,0)) as ussd_logins,
+        SUM(IF(status = 'USSD_PIN' OR status = 'USSDPINAuthenticator',1,0)) as ussd_pin_logins,
+        SUM(IF(status = 'SMS_URL_OK',1,0)) as sms_logins,
+        SUM(IF(status = 'HE_OK',1,0)) as he_logins,
         count(*) as total_logins, _timestamp 
 		FROM (	SELECT sessionID,getDateString(max(_timestamp)) as day, min(operator) as operator, min(appID) as appID, getAuthenticator(max(authenticatorMethods)) as status, getDateTimestamp(max(_timestamp)) as _timestamp 	FROM auth_endpoint_login_channel WHERE isAuthenticated = true and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL group by sessionID ) temp GROUP BY operator, appID, _timestamp;
 
