@@ -27,7 +27,6 @@ var view = {
     subscriptions: [{
         topic: "subscriber",
         callback: function(topic, data, subscriberData) {
-			wso2.gadgets.controls.showGadget();
             var filter = {
                 timeFrom : data["timeFrom"],
                 timeTo : data["timeTo"],
@@ -43,7 +42,6 @@ var view = {
             client.getTotalAuthCount(filter, function (response) {
 
                 var results = JSON.parse(response.message);
-                console.log(results);
                 var onNetDropouts = [];
                 for (var i=0; i < results.length; i++) {
                         onNetDropouts.push(results[i]); //we are only pushing onnet dropouts
@@ -52,7 +50,6 @@ var view = {
             }, function (msg) {
 
             });
-			wso2.gadgets.state.setGadgetState(filter);
         }
     }],
     data: function() {
@@ -60,9 +57,7 @@ var view = {
 
         var SERVER_URL = "/portal/apis/telcoanalytics";
         var client = new TelcoAnalyticsClient().init(SERVER_URL);
-      //  wso2.gadgets.state.getGlobalState('filter',function(filter) {
-		//wso2.gadgets.state.getGadgetState(function(filter) {
-            wso2.gadgets.controls.showGadget();
+       // wso2.gadgets.state.getGlobalState('filter',function(filter) {
             client.getTotalAuthCount(filter || {}, function (response) {
                 $( document ).ready(function() {
 
