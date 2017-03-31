@@ -28,14 +28,14 @@
                 "attributes": {}
             },
             "oidcConfiguration" : {
-                "enabled" : true,
+                "enabled" : false,
                 "destination" :"https://localhost:9444/portal",
                 "tokenEndpointURI" : "https://localhost:9443/oauth2/token",
                 "userInfoEndpointURI" : "https://localhost:9443/oauth2/userinfo",
                 "callbackurl" : "https://localhost:9444/portal/oidc-login",
                 "idpLogOutUrl" : "https://localhost:9443/oidc/logout",
                 "requiredIdpSessionTermination" : true, //need to idp session termination once logour from DAS
-                "mappedClaimNameToPickUser" : "uid", //'uid' and 'msisdn' are supported
+                "mappedClaimNameToPickUser" : "msisdn", //'uid' and 'msisdn' are supported, when needed create uid claim and map to username
                 "clientConfiguration" : {
                     "clientId" : "tze931oLSB7JOAnotfW2Ufw5XLga",
                     "clientSecret" : "zOlz7r6BfOOWwtgAHVXUyIJft84a"
