@@ -1,0 +1,26 @@
+body.dark svg.marks .mark-group .mark-text text {
+    fill: #c3cbdb !important;
+}
+table {
+    border-collapse:collapse;
+    table-layout:fixed; width:100%;
+}
+
+table td {
+    word-wrap:break-word; margin:0px !important;
+}
+table .filenametd {
+    margin:0px !important
+}
+.btn-danger:focus, .btn-danger:hover {
+    color: #333 !important;
+    text-decoration: none;
+}
+table .form-group {
+    margin-top: 15px;
+}
+.has-error {
+    color: #a94442;
+    border-color:#a94442;
+    border-width: 3px;
+}
