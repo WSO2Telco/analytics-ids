@@ -79,6 +79,26 @@
                     <button class="btn btn-lg btn-primary btn-block ues-signin" type="submit">
                         <%= i18n.localize("login.label")%></button>
                 </form>
+
+                 <form class="ues-signin-form2" action="<%= tenantedUrlPrefix%>oidc-acs" method="post">
+
+
+        <%
+        var configs = require('/configs/portal.js').config();
+        var oidcEnabled =  configs.authentication.methods.oidcConfiguration.enabled;
+        %>
+
+
+        <% if(oidcEnabled){ %>
+        <div class="form-group">
+            <label for="ues-msisdn" class="sr-only">msisdn</label>
+            <input type="text" name="msisdn" class="form-control ues-msisdn" placeholder="msisdn" required autofocus>
+        </div>
+        <button class="btn-block ues-signin-mobile-connect" type="submit">
+        <img src="../../portal/images/openID-connect-button.png" align="center" /></button>
+        </form>
+    <% } %>
+
                 <% if (message) { %>
                 <div class="alert alert-danger" role="alert"><%= i18n.localize(message)%></div>
                 <% } %>
