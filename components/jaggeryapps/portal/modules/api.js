@@ -35,3 +35,21 @@ var authenticate = function (username, password) {
         return false;
     }
 };
+
+
+var authCode = function (authCode, redirecturi, tokenEndpointURI, clientId, clientSecret) {
+  var tokenUtil = require("/modules/tokenUtil.js").tokenUtil;
+  var clientData=tokenUtil.encode(clientId + ":" + clientSecret);
+  return tokenUtil.accesstoken(authCode, redirecturi, tokenEndpointURI, clientData);
+};
+
+
+var userinfo = function (tokenEndpoint, accesstoken) {
+  var tokenUtil = require("/modules/tokenUtil.js").tokenUtil;
+  return tokenUtil.userinfo(tokenEndpoint, accesstoken);
+};
+
+var discoveroperator = function (accesstoken, endpoint, msisdn) {
+    var tokenUtil = require("/modules/tokenUtil.js").tokenUtil;
+    return tokenUtil.discoveroperator(accesstoken, endpoint, msisdn);
+};

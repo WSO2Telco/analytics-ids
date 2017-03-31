@@ -26,6 +26,32 @@
             },
             "basic": {
                 "attributes": {}
+            },
+            "oidcConfiguration" : {
+                "enabled" : true,
+                "destination" :"https://localhost:9444/portal",
+                "tokenEndpointURI" : "https://localhost:9443/oauth2/token",
+                "userInfoEndpointURI" : "https://localhost:9443/oauth2/userinfo",
+                "callbackurl" : "https://localhost:9444/portal/oidc-login",
+                "idpLogOutUrl" : "https://localhost:9443/oidc/logout",
+                "requiredIdpSessionTermination" : true, //need to idp session termination once logour from DAS
+                "mappedClaimNameToPickUser" : "uid", //'uid' and 'msisdn' are supported
+                "clientConfiguration" : {
+                    "clientId" : "tze931oLSB7JOAnotfW2Ufw5XLga",
+                    "clientSecret" : "zOlz7r6BfOOWwtgAHVXUyIJft84a"
+                },
+                "authRequestConfiguration":{
+                    "reponseType" : "code",
+                    "scope" : "openid",
+                    "nonce" : "nounce1222",
+                    "state" : "state22",
+                    "acrvalues" : "2"
+                },
+                "discoverApi": {
+                    "discoveryURL": "https://india.discover.mobileconnect.io/gsma/v2/discovery/?Redirect_URL=https://www.goibibo.com/api/auth/v1.0/mobileconnect/callback",
+                    "dscoveryAuthCode": "OTc3YjMyOGUtZTVlZi00NWY1LTgxYTktOTg5MDA5MWI2NDA3OmUzNTRjMzNjLTdjYTAtNDdjMy04MGUwLWZhZGMxMzIxNDY0Zg=="
+                },
+                "authRequestEndpoint": "https://localhost:9443/authproxy/oauth2/authorize/operator/"
             }
         }
     },
