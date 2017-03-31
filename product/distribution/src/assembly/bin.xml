@@ -199,6 +199,15 @@
         </fileSet>
         <!-- END - Multitenancy related files -->
 
+        <!-- copying jaggeryapps -->
+        <fileSet>
+            <directory>../jaggeryapps/portal</directory>
+            <outputDirectory>  ${pom.artifactId}-${pom.version}/repository/deployment/server/jaggeryapps/</outputDirectory>
+            <includes>
+                <include>*/**</include>
+            </includes>
+        </fileSet>
+
         <!-- Analytics related config -->
         <fileSet>
             <directory>
