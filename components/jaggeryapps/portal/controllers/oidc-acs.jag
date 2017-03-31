@@ -17,7 +17,7 @@
     var operator = discoveroperator.operator;
 
     //When testing this functionality uncomment this line
-    operator='spark';
+    //operator='spark';
 
     if(operator == ""){
         response.sendError(404, 'requested MSISDN is not registered');
