@@ -19,6 +19,8 @@
  */
 (function () {
 
+ var configs = require('/configs/portal.js').config();
+
     var sanitizeDestination = function (destination) {
         if (!destination) {
             return "/portal/";
@@ -29,6 +31,14 @@
     var usr = require('/modules/user.js');
     usr.logout();
     var destination = sanitizeDestination(request.getParameter("destination"));
-    response.sendRedirect(destination);
+
+    //if oidc is enabled and need IdP session termination then terminate IdP session, else redirect to login page
+    if(configs.authentication.methods.oidcConfiguration.enabled && configs.authentication.methods.oidcConfiguration.requiredIdpSessionTermination){
+        include('/extensions/authentication/oidc-logout.jag');
+    } else {
+        response.sendRedirect(destination);
+    }
+
+
 }());
 %>

@@ -263,6 +263,99 @@ var tokenUtil = function () {
         }
     }
 
+
+
+        /**
+         * Get an AccessToken
+         * @param authtoken  autherize code
+         * @param redirecturi    callback url
+         * @param tokenEndpoint  idp token endpoint
+         * @param clientData     {{clientId:"", clientSecret:""}}
+         * @returns {{accessToken: *, refreshToken: *, idToken: *}}
+         */
+        module.accesstoken = function (authtoken, redirecturi, tokenEndpoint, clientData) {
+            var xhr = new XMLHttpRequest();
+            xhr.open(constants.HTTP_POST, tokenEndpoint, false);
+            xhr.setRequestHeader(constants.CONTENT_TYPE_IDENTIFIER, constants.APPLICATION_X_WWW_FOR_URLENCODED);
+            xhr.setRequestHeader(constants.AUTHORIZATION_HEADER, constants.BASIC_PREFIX + clientData);
+            var url = "grant_type=authorization_code&code=" + authtoken + "&redirect_uri=" +  redirecturi;
+            xhr.send(url);
+            var tokenPair = {};
+            if (xhr.status == 200) {
+                 var data = parse(xhr.responseText);
+                 tokenPair.accessToken = data.access_token;
+                 tokenPair.refreshToken = data.refresh_token;
+                 tokenPair.idToken = data.id_token;
+            } else if (xhr.status == 400) {
+                tokenPair = session.get(constants.ACCESS_TOKEN_PAIR_IDENTIFIER);
+            } else {
+                throw "Error in obtaining Access token";
+            }
+            return tokenPair;
+        };
+
+                 /**
+                 * Get user information
+                 * @param tokenEndpoint  userinfo token endpoint
+                 * @param accesstoken     oauth access token
+                 * @returns {{userid: *}}
+                 */
+                module.userinfo = function (tokenEndpoint, accesstoken) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open(constants.HTTP_POST, tokenEndpoint, false);
+                    xhr.setRequestHeader(constants.CONTENT_TYPE_IDENTIFIER, constants.APPLICATION_X_WWW_FOR_URLENCODED);
+                    xhr.setRequestHeader(constants.AUTHORIZATION_HEADER, constants.BEARER_PREFIX + accesstoken);
+                    xhr.send("schema=openid");
+                    var tokenPair = {};
+                    if (xhr.status == 200) {
+                         var data = parse(xhr.responseText);
+                         if(configs.authentication.methods.oidcConfiguration.mappedClaimNameToPickUser == "msisdn"){
+                            tokenPair.userid =  data.msisdn;
+                         } else if(configs.authentication.methods.oidcConfiguration.mappedClaimNameToPickUser == "uid"){
+                            tokenPair.userid =  data.uid;
+                         } else {
+                            tokenPair.userid =  null;
+                         }
+                    } else if (xhr.status == 400) {
+                        tokenPair = session.get(constants.ACCESS_TOKEN_PAIR_IDENTIFIER);
+                    } else {
+                        throw "Error in obtaining user information";
+                    }
+                    return tokenPair;
+                };
+
+
+
+        /**
+         * Get operator via discovery api
+         * @param accesstoken  access token
+         * @param endpoint  idp token endpoint
+         * @param msisdn
+         * @returns {{operator: *}}
+         */
+        module.discoveroperator = function (accesstoken, endpoint, msisdn) {
+            var xhr = new XMLHttpRequest();
+            xhr.open(constants.HTTP_POST, endpoint);
+            xhr.setRequestHeader(constants.CONTENT_TYPE_IDENTIFIER, constants.APPLICATION_X_WWW_FOR_URLENCODED);
+            xhr.setRequestHeader(constants.AUTHORIZATION_HEADER, constants.BASIC_PREFIX + accesstoken);
+            var data = "MSISDN=" + msisdn;
+            xhr.send(data);
+            var tokenPair = {};
+            if (xhr.status == 200) {
+                 var data = parse(xhr.responseText);
+                 tokenPair.operator = data.response.serving_operator;
+            } else if (xhr.status == 400) {
+                tokenPair = session.get(constants.ACCESS_TOKEN_PAIR_IDENTIFIER);
+            } else if (xhr.status == 404) {
+                tokenPair.operator = "";
+            } else {
+                throw "Error in obtaining operator details via discovery api";
+            }
+            return tokenPair;
+         };
+
+
+
     /**
      * Set access token into xml http request header
      * @param xhr     xml http request
