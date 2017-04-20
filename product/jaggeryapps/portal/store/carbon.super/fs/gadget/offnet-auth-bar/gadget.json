@@ -1,0 +1,15 @@
+{
+    "id": "offnet-auth-bar",
+    "title": "Offnet Authorizations",
+    "type": "gadget",
+    "thumbnail": "store://gadget/usa-business-revenue/index.png",
+    "data": {
+        "url": "store://gadget/offnet-auth-bar/index.xml"
+    },
+    "listen": {
+        "subscriber": {
+            "type": "date-range",
+            "description": "This notifies message generated in publisher"
+        }
+    }
+}

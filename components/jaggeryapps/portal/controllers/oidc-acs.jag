@@ -1,0 +1,48 @@
+<html>
+    <body>
+    Waiting for responses from identity server and validate response and forward to requested URI.
+        <%
+(function () {
+
+    var log = new Log();
+    var configs = require('/configs/portal.js').config();
+    var api = require('/modules/api.js');
+
+
+    var discoveryURL = configs.authentication.methods.oidcConfiguration.discoverApi.discoveryURL;
+    var discoveryAuthCode = configs.authentication.methods.oidcConfiguration.discoverApi.dscoveryAuthCode;
+    var msisdn = request.getParameter("msisdn");
+
+    var discoveroperator = api.discoveroperator(discoveryAuthCode, discoveryURL, msisdn);
+    var operator = discoveroperator.operator;
+
+    //When testing this functionality uncomment this line
+    //operator='spark';
+
+    if(operator == ""){
+        response.sendError(404, 'requested MSISDN is not registered');
+         return;
+    }
+
+    var responseType = configs.authentication.methods.oidcConfiguration.authRequestConfiguration.reponseType;
+    var scope = configs.authentication.methods.oidcConfiguration.authRequestConfiguration.scope;
+    var nonce = configs.authentication.methods.oidcConfiguration.authRequestConfiguration.nonce;
+    var state = configs.authentication.methods.oidcConfiguration.authRequestConfiguration.state;
+    var acrValues = configs.authentication.methods.oidcConfiguration.authRequestConfiguration.acrvalues;
+    var redirectUri = configs.authentication.methods.oidcConfiguration.callbackurl;
+    var clientId = configs.authentication.methods.oidcConfiguration.clientConfiguration.clientId;
+    var authRequestEndpoint = configs.authentication.methods.oidcConfiguration.authRequestEndpoint;
+
+    if (log.isDebugEnabled()) {
+        log.debug( authRequestEndpoint + "" + operator + "?response_type=" + responseType + "&scope=" + scope + "&nonce=" + nonce + "&state=" + state + "&acr_values=" + acrValues +  "&redirect_uri=" + redirectUri + "&client_id=" + clientId + "&login_hint=" + msisdn);
+    }
+
+    var authRequest = authRequestEndpoint + "" + operator + "?response_type=" + responseType + "&scope=" + scope + "&nonce=" + nonce + "&state=" + state + "&acr_values=" + acrValues +  "&redirect_uri=" + redirectUri + "&client_id=" + clientId + "&login_hint=" + msisdn;
+    response.sendRedirect(authRequest);
+
+}());
+%>
+</body>
+</html>
+
+
