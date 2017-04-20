@@ -1,0 +1,24 @@
+{
+    "id": "total-tokens-v2",
+    "title": "Total Token V2",
+    "type": "gadget",
+    "thumbnail": "store://gadget/usa-business-revenue/index.png",
+    "data": {
+        "url": "store://gadget/total-tokens-v2/index.xml"
+    },
+    "listen": {
+        "subscriber": {
+            "type": "date-range",
+            "description": "This notifies message generated in publisher"
+        }
+    },
+    "styles": {
+        "borders": false,
+        "title": false
+    },
+    "toolbarButtons": {
+        "default": {
+            "maximize": true
+        }
+    }
+}

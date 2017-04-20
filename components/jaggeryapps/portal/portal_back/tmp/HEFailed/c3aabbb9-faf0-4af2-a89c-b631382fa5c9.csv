@@ -1,0 +1,27 @@
+Operator,vodafone
+APP ID,ALL
+From Date,Mon Apr 03 2017 00:00:00 GMT+0530 (IST)
+To Date,Tue Apr 04 2017 23:59:59 GMT+0530 (IST)
+
+Date Time,Operator,App ID,MSISDN,Source IP
+2017-04-03 09:32:35 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 09:36:31 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 09:45:10 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 09:45:53 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 09:54:36 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 09:56:56 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 09:58:13 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:00:43 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:01:24 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:01:30 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:01:35 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:03:40 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:04:10 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:04:33 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:04:47 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:05:20 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:05:24 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:05:29 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:05:49 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:55:01 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2
+2017-04-03 10:55:36 AM,vodafone,admin_sparkapp,919643077830,203.94.95.2

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="Publisher" description="Publisher">
+        <Require feature="pubsub-2"/>
+        <Require feature="dynamic-height"/>
+        <Require feature="setprefs"/>
+        <Require feature="wso2-gadgets-controls"/>
+    </ModulePrefs>
+
+    <Content type="html">
+        <![CDATA[
+<head>
+
+<!-- Theme -->
+<link rel="stylesheet" type="text/css" href="../commons/libs/bootstrap_3.3.5/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../commons/libs/font-wso2_1.0.0/css/font-wso2.min.css" />
+<link rel="stylesheet" type="text/css" href="../commons/libs/theme-wso2_1.0/css/theme-wso2.css" />
+<link rel="stylesheet" type="text/css" href="../commons/css/gadget.css" />
+
+<!-- jQuery -->
+<script src="../commons/js/jquery-1.10.2.js"></script>
+<script src="../commons/libs/bootstrap_3.3.5/js/bootstrap.min.js"></script>
+<script src="../commons/js/moment.min.js"></script>
+<script src="../commons/js/gadget-utils.js"></script>
+
+<!-- Custom -->
+<link rel="stylesheet" type="text/css" href="css/custom.css" />
+
+<script src="js/carbon-analytics.js"></script>
+<script src="../commons/js/telco-analytics.js"></script>
+<script src="js/outputAdapterUiLibrary.js"></script>
+<script src="js/wso2gadgets.js"></script>
+<script src="js/main.js"></script>
+
+
+</head>
+<body>
+
+	<div class="modal fade nano" id="popUpDownload" role="dialog">
+		<div class="nano-content">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button class="close" data-dismiss="modal" type="button">×</button>
+						<h4 class="modal-title">Export Data</h4>
+					</div>
+					<div class="modal-body">
+						<br>
+						<h4>It will take some time to export due to size,Please be patient!</h4>
+					</div>
+
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">OK</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade nano" id="popupDayValidation" role="dialog">
+		<div class="nano-content">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">×</button>
+					</div>
+					<div class="modal-body">
+						<h4 class="modal-title">Report creation only allowed for maximum of 2 days period</h4>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade nano" id="modalPopup" role="dialog">
+		<div class="nano-content">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">×</button>
+						<h4 class="modal-title">Export Data</h4>
+					</div>
+					<div class="modal-body">
+						<br> <br> <br>
+						<table id="fileTable"></table>
+						<br><br>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade nano" id="popupCheckAccess" role="dialog">
+            <div class="nano-content">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <h4 class="modal-title">Operation Not Permitted</h4>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+	<br><br>
+    <div class="clearfix add-padding-top-4x">
+		<div class="col-10 add-padding-top-4x add-padding-left-4x" >
+			<label for="usr">FileName:</label>
+			<input maxlength="50"  type="text" id="fileName" class="form-control" id="usr" onkeyup="$(this).val($(this).val().replace(/[^a-z0-9_\s]/gi, '').replace(/[_\s]/g, ''))">
+		</div>
+
+		<div class="col-4 add-padding-top-4x add-padding-left-4x" >
+			<a class="btn btn-primary btn-md" href="#" onClick="checkLoged()">Generate Report</a>
+			<a type="submit" class="hidden" href="#" onClick="checkAccess()" id="downloadcsvdrReal">Generate Report</a>
+             <a  class="hidden" id="download"></a>
+		</div>
+		<div class="col-4 add-padding-top-4x add-padding-left-4x" >
+			<a type="submit" class="btn btn-primary btn-md" id="downloadreport" >View All Reports</a></div>
+		</div>
+	</div>
+
+	<div class="clearfix add-padding-top-4x">
+		<div class="alert alert-info">
+			<strong>Note!</strong>
+			Report creation only allowed for maximum of 2 days period
+		</div>
+	</div>
+
+
+
+</body>
+
+        ]]>
+    </Content>
+</Module>

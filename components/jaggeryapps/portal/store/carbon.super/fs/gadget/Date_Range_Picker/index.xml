@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="Date Range Picker" description="g1" height="250">
+        <Require feature="pubsub-2"/>
+        <Require feature="dynamic-height"/>
+        <Require feature="wso2-gadgets-state"/>
+    </ModulePrefs>
+    <Content type="html">
+        <![CDATA[
+        <head>
+
+            <!-- Theme -->
+            <link rel="stylesheet" type="text/css" href="../commons/libs/bootstrap_3.3.5/css/bootstrap.min.css" />
+            <link rel="stylesheet" type="text/css" href="../commons/libs/font-wso2_1.0.0/css/font-wso2.min.css" />
+            <link rel="stylesheet" type="text/css" href="../commons/libs/theme-wso2_1.0/css/theme-wso2.css" />
+            <link rel="stylesheet" type="text/css" href="../commons/css/gadget.css" />
+
+            <!-- jQuery -->
+            <script src="../commons/js/jquery-1.10.2.js"></script>
+            <script src="../commons/js/moment.min.js"></script>
+            <script src="../commons/js/gadget-utils.js"></script>
+
+            <!-- Include Date Range Picker -->
+            <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+            <link rel="stylesheet" type="text/css" href="css/daterangepicker.css" />
+            <script type="text/javascript" src="js/daterangepicker.js"></script>
+
+            <!-- Custom -->
+            <link rel="stylesheet" type="text/css" href="css/custom.css" />
+
+            <script src="js/carbon-analytics.js"></script>
+            <script src="../commons/js/telco-analytics.js"></script>
+            <script src="js/outputAdapterUiLibrary.js"></script>
+            <script src="js/wso2gadgets.js"></script>
+            <script src="js/main.js"></script>
+
+        </head>
+        <body>
+
+            <div class="clearfix">
+                <div class="col-2">
+                    <div class="dropdown">
+                          <select id="dropdown-operator" class="form-control">
+                              <option selected value="base">All operators</option>
+                          </select>
+                    </div>
+                </div>
+                <div class="col-2 add-padding-left-1x">
+                    <div class="dropdown">
+                          <select id="dropdown-app" class="form-control">
+                              <option selected value="base">All apps</option>
+                          </select>
+                    </div>
+                </div>
+                <div class="col-8" id="date-select-div">
+                    <div class="btn-group pull-right" id="date-select">
+                        <div class="btn-group pull-right" role="group">
+                            <button role="date-update" data-value="LastHour" type="button" class="btn btn-default hidden-xs hidden-sm hidden">Last Hour</button>
+                            <button role="date-update" data-value="LastDay" type="button" class="btn btn-default hidden-xs hidden-sm">Yesterday</button>
+                            <button role="date-update" data-value="LastMonth" type="button" class="btn btn-default hidden-xs hidden-sm">Last 30 Days</button>
+                            <button role="date-update" data-value="LastYear" type="button" class="btn btn-default hidden-xs hidden-sm hidden">Last Year</button>
+                            <button id="btnDropdown" type="button" class="btn btn-default dropdown-toggle hidden-md hidden-lg hidden" data-toggle="dropdown">
+                                <span>Last Hour</span> <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu btn-dropdown-menu pull-right" role="menu" style="top: 32px; right: 111px;">
+                                <li><a href="javascript:void(0)" role="date-update" data-value="LastHour" class="hidden">Last Hour</a></li>
+                                <li><a href="javascript:void(0)" role="date-update" data-value="LastDay">Yesterday</a></li>
+                                <li><a href="javascript:void(0)" role="date-update" data-value="LastMonth"s>Last 30 Days</a></li>
+                                <li><a href="javascript:void(0)" role="date-update" data-value="LastYear" class="hidden">Last Year</a></li>
+                            </ul>
+                            <button id="btnCustomRange" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="glyphicon glyphicon-calendar fa fa-calendar"></i> Custom
+                                <b class="caret"></b>
+                            </button>
+                        </div>
+                        <div class="clearfix hidden-sm hidden-md hidden-lg"></div>
+                        <span id="reportrange" class="btn-label"></span>
+                    </div>
+                </div>
+            </div>
+
+        </body>
+        ]]>
+    </Content>
+</Module>

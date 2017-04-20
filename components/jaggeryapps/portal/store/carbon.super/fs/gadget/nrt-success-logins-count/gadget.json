@@ -1,0 +1,15 @@
+{
+    "id": "nrt-success-logins-count",
+    "title": "Realtime success login count",
+    "type": "gadget",
+    "thumbnail": "store://gadget/nrt-success-logins-count/index.png",
+    "data": {
+        "url": "store://gadget/nrt-success-logins-count/index.xml"
+    },
+    "listen": {
+        "subscriber": {
+            "type": "date-range",
+            "description": "This notifies message generated in publisher"
+        }
+    }
+}

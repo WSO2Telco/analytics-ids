@@ -1,0 +1,19 @@
+Operator,vodafone
+APP,GoIbiboPP_GoIbiboPP
+From,Wed Mar 01 2017 05:30:00 GMT+0530 (IST),,To,Wed Apr 12 2017 11:29:00 GMT+0530 (IST)
+
+Date,Auth Code Success-HE,Auth Code Success-USSD,Auth Code Success-SMS,Auth Code Success-Total,Auth Code Fail-Onnet T&C,Auth Code Fail-Offnet T&C,Auth Code Fail-USSD,Auth Code Fail-SMS,Auth Code Fail-MSISDN,Auth Code Fail-Total,Auth Attempts-Total,Auth Attempts-Onnet,Auth Attempts-Offnet,Auth Attempts-New User,Auth Attempts-Repeat User,Total-Token API Call,Total-Registration Count,HE Failures - IP Validation(Source IP Mismatch),HE Failures - MSISDN Header missed(GGSN Configuration),HE Failures - Originating from Proxy(Data Saving Mode),HE Failures - Wrong Endpoint,Header-Loginhint Mismatch
+2017-03-07,0,0,0,0,0,0,0,0,0,0,4.0,4.0,0.0,undefined,4.0,undefined,0,0,0,0,0,0
+2017-03-08,0,0,0,0,0,0,0,0,0,0,3.0,3.0,0.0,undefined,3.0,undefined,0,0,0,0,0,0
+2017-03-09,0,0,0,0,0,0,0,0,0,0,2.0,1.0,1.0,undefined,2.0,undefined,0,0,0,0,0,0
+2017-03-16,0,0,0,0,0,0,0,0,0,0,1.0,1.0,0.0,undefined,1.0,undefined,0,0,0,0,0,0
+2017-03-17,0,0,0,0,0,0,0,0,0,0,1.0,1.0,0.0,undefined,1.0,undefined,0,0,0,0,0,0
+2017-03-18,1,0.0,0,1.0,0,0,0,0,0,0,1.0,1.0,0.0,undefined,1.0,undefined,0,0,0,0,0,0
+2017-03-20,1,0.0,0,1.0,0,0,0,0,0,0,1.0,1.0,0.0,undefined,1.0,undefined,0,0,0,0,0,0
+2017-03-21,0,0,0,0,0,0,0,0,0,0,1.0,1.0,0.0,undefined,1.0,undefined,0,0,0,0,0,0
+2017-03-22,0,0,0,0,0,0,0,0,0,0,1.0,1.0,0.0,undefined,1.0,undefined,0,0,0,0,0,0
+2017-03-23,0,0,0,0,0,0,0,0,0,0,1.0,1.0,0.0,undefined,1.0,undefined,0,0,0,0,0,0
+2017-03-24,0,0,0,0,0,0,0,0,0,0,3.0,3.0,0.0,undefined,3.0,undefined,0,0,0,0,0,0
+2017-03-28,6,0.0,0,6.0,0,0,0,0,0,0,6.0,6.0,0.0,1.0,5.0,undefined,1.0,0,0,0,0,0
+2017-04-05,1,0.0,0,1.0,0,0,0,0,0,0,1.0,1.0,0.0,1.0,undefined,undefined,1.0,0,0,0,0,0
+2017-04-07,2,0.0,0,2.0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
