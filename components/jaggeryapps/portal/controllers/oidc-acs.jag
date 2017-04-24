@@ -12,6 +12,10 @@
     var discoveryURL = configs.authentication.methods.oidcConfiguration.discoverApi.discoveryURL;
     var discoveryAuthCode = configs.authentication.methods.oidcConfiguration.discoverApi.dscoveryAuthCode;
     var msisdn = request.getParameter("msisdn");
+    if(isNaN(msisdn)){
+        response.sendRedirect(configs.authentication.methods.oidcConfiguration.destination);
+        return;
+    }
 
     var discoveroperator = api.discoveroperator(discoveryAuthCode, discoveryURL, msisdn);
     var operator = discoveroperator.operator;
@@ -22,6 +26,14 @@
     if(operator == ""){
         response.sendError(404, 'requested MSISDN is not registered');
          return;
+    }
+
+    if(operator =="tata"){
+        operator = "tatadocomo";
+    } else if(operator =="vodafone_india") {
+        operator = "vodafone";
+    } else if (operator =="uninor") {
+        operator = "telenor";
     }
 
     var responseType = configs.authentication.methods.oidcConfiguration.authRequestConfiguration.reponseType;
