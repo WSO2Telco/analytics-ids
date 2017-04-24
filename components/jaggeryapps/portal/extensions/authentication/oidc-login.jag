@@ -27,6 +27,12 @@
     var usr = require('/modules/user.js');
     var carbon = require('carbon');
     var constants = require("/modules/constants.js");
+    var error = request.getParameter("error");
+    var destination =  configs.authentication.methods.oidcConfiguration.destination;
+    if(error == "access_denied"){
+        response.sendRedirect(destination);
+        return;
+    }
 
     var authorizationCode = request.getParameter("code");
     var tokenEndpointURI = configs.authentication.methods.oidcConfiguration.tokenEndpointURI;
@@ -80,7 +86,7 @@
             var idpLogOutUrl = configs.authentication.methods.oidcConfiguration.idpLogOutUrl;
             response.sendRedirect(idpLogOutUrl);
         } else {
-            response.sendRedirect("/portal/controllers/error-pages/sso-error.jag");
+            response.sendRedirect(destination);
         }
         return;
     }
@@ -90,7 +96,6 @@
     session.put("Loged", "true");
     session.put('authToken', accessToken);
 
-    var destination =  configs.authentication.methods.oidcConfiguration.destination;
     response.sendRedirect(destination);
 
 }());
