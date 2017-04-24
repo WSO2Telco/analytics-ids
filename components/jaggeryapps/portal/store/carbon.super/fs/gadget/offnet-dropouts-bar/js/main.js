@@ -15,7 +15,7 @@ var view = {
             width: $('#canvas').width(),
             height: $('#canvas').height(),
             padding: { "top": 60, "left": 60, "bottom": 80, "right": 100 },
-	        colorScale : ["#C59787", "#438CAD", "#B6688F", "#434343", "#E0CABA"],
+	        colorScale : [CLR_USSD, CLR_SMS, CLR_MSISDN, CLR_OFFNET_TnC, "#E0CABA"],
             xAxisAngle:true
     },
     callbacks: [{

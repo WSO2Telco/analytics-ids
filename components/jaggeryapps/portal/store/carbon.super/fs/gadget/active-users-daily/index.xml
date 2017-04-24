@@ -5,7 +5,6 @@
         <Require feature="dynamic-height"/>        
         <Require feature="setprefs"/>
         <Require feature="wso2-gadgets-controls"/>
-        <Require feature="wso2-gadgets-state"/>
     </ModulePrefs>
     <Content type="html">
         <![CDATA[

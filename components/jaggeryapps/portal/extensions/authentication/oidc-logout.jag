@@ -20,6 +20,21 @@
 (function () {
     var configs = require('/configs/portal.js').config();
     var idpLogOutUrl = configs.authentication.methods.oidcConfiguration.idpLogOutUrl;
+
+    var commonAuthLogout = "true";
+    var type = "oidc";
+    var sessionDataKey ="sessionDataKey";
+    var commonAuthCallerPath = configs.authentication.methods.oidcConfiguration.destination;
+    var relyingParty = configs.authentication.methods.oidcConfiguration.clientConfiguration.spName;
+
+    idpLogOutUrl = idpLogOutUrl + "?commonAuthLogout=" + commonAuthLogout + "&type=" + type + "&sessionDataKey=" + sessionDataKey +"&commonAuthCallerPath=" + commonAuthCallerPath + "&relyingParty=" + relyingParty;
+
+     if (log.isDebugEnabled()) {
+        log.debug("IdP logout url : " + idpLogOutUrl);
+     }
     response.sendRedirect(idpLogOutUrl);
+
+
+
 }());
 %>

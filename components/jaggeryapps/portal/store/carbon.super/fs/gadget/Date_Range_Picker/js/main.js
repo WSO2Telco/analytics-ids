@@ -50,7 +50,6 @@ $(function() {
 
     cb(timeFrom, timeTo);
 
-
     function getISTTimeZoneTime(date){
         // convert to msec
         // add local time zone offset
@@ -266,7 +265,6 @@ gadgets.HubSettings.onConnect = function() {
 };
 
 function onChartZoomed(data) {
-    console.log(data);
     message = {
         timeFrom: data.timeFrom,
         timeTo: data.timeTo,

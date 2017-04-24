@@ -19,7 +19,7 @@
 
 <!-- jQuery -->
 <script src="../commons/js/jquery-1.10.2.js"></script>
-<script src="../commons/libs/bootstrap_3.3.5/js/bootstrap.min.js"></script>
+<script src="../commons/js/bootstrap.min.js"></script>
 <script src="../commons/js/moment.min.js"></script>
 <script src="../commons/js/gadget-utils.js"></script>
 

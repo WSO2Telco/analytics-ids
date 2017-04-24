@@ -8,10 +8,14 @@
     var configs = require('/configs/portal.js').config();
     var api = require('/modules/api.js');
 
-
     var discoveryURL = configs.authentication.methods.oidcConfiguration.discoverApi.discoveryURL;
     var discoveryAuthCode = configs.authentication.methods.oidcConfiguration.discoverApi.dscoveryAuthCode;
     var msisdn = request.getParameter("msisdn");
+
+    if(msisdn.length != 12 || isNaN(msisdn)){
+        response.sendRedirect(configs.authentication.methods.oidcConfiguration.destination);
+        return;
+    }
 
     var discoveroperator = api.discoveroperator(discoveryAuthCode, discoveryURL, msisdn);
     var operator = discoveroperator.operator;
@@ -24,6 +28,14 @@
          return;
     }
 
+    if(operator =="tata"){
+        operator = "tatadocomo";
+    } else if(operator =="vodafone_india") {
+        operator = "vodafone";
+    } else if (operator =="uninor") {
+        operator = "telenor";
+    }
+
     var responseType = configs.authentication.methods.oidcConfiguration.authRequestConfiguration.reponseType;
     var scope = configs.authentication.methods.oidcConfiguration.authRequestConfiguration.scope;
     var nonce = configs.authentication.methods.oidcConfiguration.authRequestConfiguration.nonce;
@@ -32,12 +44,16 @@
     var redirectUri = configs.authentication.methods.oidcConfiguration.callbackurl;
     var clientId = configs.authentication.methods.oidcConfiguration.clientConfiguration.clientId;
     var authRequestEndpoint = configs.authentication.methods.oidcConfiguration.authRequestEndpoint;
+    authRequestEndpoint = authRequestEndpoint.replace("{operator}", operator);
 
+    var maxAge = "3600";
+    var responseType = "code";
+
+    var authRequest = authRequestEndpoint + "?response_type=" + responseType + "&scope=" + scope + "&nonce=" + nonce + "&state=" + state + "&acr_values=" + acrValues +  "&redirect_uri=" + redirectUri + "&client_id=" + clientId + "&max_age=" + maxAge + "&login_hint=" + msisdn;
     if (log.isDebugEnabled()) {
-        log.debug( authRequestEndpoint + "" + operator + "?response_type=" + responseType + "&scope=" + scope + "&nonce=" + nonce + "&state=" + state + "&acr_values=" + acrValues +  "&redirect_uri=" + redirectUri + "&client_id=" + clientId + "&login_hint=" + msisdn);
+        log.debug(authRequest);
     }
 
-    var authRequest = authRequestEndpoint + "" + operator + "?response_type=" + responseType + "&scope=" + scope + "&nonce=" + nonce + "&state=" + state + "&acr_values=" + acrValues +  "&redirect_uri=" + redirectUri + "&client_id=" + clientId + "&login_hint=" + msisdn;
     response.sendRedirect(authRequest);
 
 }());

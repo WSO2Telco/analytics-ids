@@ -28,17 +28,18 @@
                 "attributes": {}
             },
             "oidcConfiguration" : {
-                "enabled" : false,
-                "destination" :"https://localhost:9444/portal",
-                "tokenEndpointURI" : "https://localhost:9443/oauth2/token",
-                "userInfoEndpointURI" : "https://localhost:9443/oauth2/userinfo",
-                "callbackurl" : "https://localhost:9444/portal/oidc-login",
-                "idpLogOutUrl" : "https://localhost:9443/oidc/logout",
+                "enabled" : true,
+                "destination" :"https://analytics.preprod.wso2telco.com/portal",
+                "tokenEndpointURI" : "https://mconnect.preprod.wso2telco.com/oauth2/token",
+                "userInfoEndpointURI" : "http://mconnect.preprod.wso2telco.com/oauth2/userinfo?schema=openid",
+                "callbackurl" : "https://analytics.preprod.wso2telco.com/portal/oidc-login",
+                "idpLogOutUrl" : "https://mconnect.preprod.wso2telco.com/commonauth",
                 "requiredIdpSessionTermination" : true, //need to idp session termination once logour from DAS
-                "mappedClaimNameToPickUser" : "msisdn", //'uid' and 'msisdn' are supported, when needed create uid claim and map to username
+                "mappedClaimNameToPickUser" : "uid", //'uid' and 'msisdn' are supported, when needed create uid claim and map to username
                 "clientConfiguration" : {
-                    "clientId" : "tze931oLSB7JOAnotfW2Ufw5XLga",
-                    "clientSecret" : "zOlz7r6BfOOWwtgAHVXUyIJft84a"
+                    "spName" : "DAS_PORTAL_MCX",
+                    "clientId" : "zXxcrcdOpIKukWmmJY93AydNuc4a",
+                    "clientSecret" : "qp2RxiOMkY_fjWOm8yvDnWfQCawa"
                 },
                 "authRequestConfiguration":{
                     "reponseType" : "code",
@@ -51,7 +52,7 @@
                     "discoveryURL": "https://india.discover.mobileconnect.io/gsma/v2/discovery/?Redirect_URL=https://www.goibibo.com/api/auth/v1.0/mobileconnect/callback",
                     "dscoveryAuthCode": "OTc3YjMyOGUtZTVlZi00NWY1LTgxYTktOTg5MDA5MWI2NDA3OmUzNTRjMzNjLTdjYTAtNDdjMy04MGUwLWZhZGMxMzIxNDY0Zg=="
                 },
-                "authRequestEndpoint": "https://localhost:9443/authproxy/oauth2/authorize/operator/"
+                "authRequestEndpoint": "https://mconnect.preprod.wso2telco.com/{operator}/oauth2/authorize"
             }
         }
     },

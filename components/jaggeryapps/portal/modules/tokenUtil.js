@@ -302,20 +302,15 @@ var tokenUtil = function () {
                  */
                 module.userinfo = function (tokenEndpoint, accesstoken) {
                     var xhr = new XMLHttpRequest();
-                    xhr.open(constants.HTTP_POST, tokenEndpoint, false);
+                    xhr.open(constants.HTTP_GET, tokenEndpoint, false);
                     xhr.setRequestHeader(constants.CONTENT_TYPE_IDENTIFIER, constants.APPLICATION_X_WWW_FOR_URLENCODED);
                     xhr.setRequestHeader(constants.AUTHORIZATION_HEADER, constants.BEARER_PREFIX + accesstoken);
-                    xhr.send("schema=openid");
+                    xhr.send();
+
                     var tokenPair = {};
                     if (xhr.status == 200) {
-                         var data = parse(xhr.responseText);
-                         if(configs.authentication.methods.oidcConfiguration.mappedClaimNameToPickUser == "msisdn"){
-                            tokenPair.userid =  data.msisdn;
-                         } else if(configs.authentication.methods.oidcConfiguration.mappedClaimNameToPickUser == "uid"){
-                            tokenPair.userid =  data.uid;
-                         } else {
-                            tokenPair.userid =  null;
-                         }
+                        var data = parse(xhr.responseText);
+                        tokenPair.userid =  data.msisdn;
                     } else if (xhr.status == 400) {
                         tokenPair = session.get(constants.ACCESS_TOKEN_PAIR_IDENTIFIER);
                     } else {

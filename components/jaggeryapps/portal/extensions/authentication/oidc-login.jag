@@ -27,6 +27,12 @@
     var usr = require('/modules/user.js');
     var carbon = require('carbon');
     var constants = require("/modules/constants.js");
+    var destination =  configs.authentication.methods.oidcConfiguration.destination;
+    var error = request.getParameter("error");
+    if(error == "access_denied"){
+        response.sendRedirect(destination);
+        return;
+    }
 
     var authorizationCode = request.getParameter("code");
     var tokenEndpointURI = configs.authentication.methods.oidcConfiguration.tokenEndpointURI;
@@ -52,18 +58,37 @@
         } else {
             response.sendError(404, 'User Info not found');
         }
+        return;
      }
 
-    var username;
-    if(userinfo.userid == null || userinfo.userid == ""){
-        if(isIdpSessionTernminateEnabled){
-            include('/extensions/authentication/oidc-logout.jag');
+        var username;
+        if(userinfo.userid == null || userinfo.userid == ""){
+            if(isIdpSessionTernminateEnabled){
+                include('/extensions/authentication/oidc-logout.jag');
+            } else {
+                response.sendError(404, 'User claims are not set');
+            }
+            return;
         } else {
-            response.sendError(404, 'User claims are not set');
+            username = userinfo.userid;
         }
-        return;
-    } else {
-        username = userinfo.userid;
+
+    //if the config value is to get the user by uid, reset the username depend on claim attribute
+    if(configs.authentication.methods.oidcConfiguration.mappedClaimNameToPickUser == "uid"){
+        var userRealmService = carbon.server.osgiService('org.wso2.carbon.user.api.UserRealmService');
+        var tenantId = -1234;
+        var userRealm = userRealmService.getTenantUserRealm(tenantId);
+        var userStore = userRealm.getUserStoreManager();
+        username = userStore.getUserClaimValue(username, 'urn:scim:schemas:core:1.0:userName', null);
+
+        if(username == null || username == ""){
+            if(isIdpSessionTernminateEnabled){
+                include('/extensions/authentication/oidc-logout.jag');
+            } else {
+                response.sendError(404, 'User claims are not set');
+            }
+            return;
+        }
     }
 
     var user = carbon.server.tenantUser(username);
@@ -80,7 +105,7 @@
             var idpLogOutUrl = configs.authentication.methods.oidcConfiguration.idpLogOutUrl;
             response.sendRedirect(idpLogOutUrl);
         } else {
-            response.sendRedirect("/portal/controllers/error-pages/sso-error.jag");
+            response.sendRedirect(destination);
         }
         return;
     }
@@ -90,7 +115,6 @@
     session.put("Loged", "true");
     session.put('authToken', accessToken);
 
-    var destination =  configs.authentication.methods.oidcConfiguration.destination;
     response.sendRedirect(destination);
 
 }());

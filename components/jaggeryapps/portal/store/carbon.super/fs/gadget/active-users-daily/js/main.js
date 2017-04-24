@@ -25,7 +25,6 @@ var view = {
     subscriptions: [{
         topic: "subscriber",
         callback: function(topic, data, subscriberData) {
-			wso2.gadgets.controls.showGadget();
             var filter = {
                 timeFrom : data["timeFrom"],
                 timeTo : data["timeTo"],
@@ -48,7 +47,6 @@ var view = {
             }, function (msg) {
 
             });
-			wso2.gadgets.state.setGadgetState(filter);
         }
     }],
     data: function() {
@@ -58,8 +56,6 @@ var view = {
         });
         var SERVER_URL = "/portal/apis/telcoanalytics";
         var client = new TelcoAnalyticsClient().init(SERVER_URL);
-		wso2.gadgets.state.getGadgetState(function(filter) {
-        wso2.gadgets.controls.showGadget();
         client.getDailyActiveUsers({}, function (response) {
             var results = JSON.parse(response.message);
             var onNetDropouts = [];
@@ -70,7 +66,6 @@ var view = {
         }, function (msg) {
 
         });
-		});
     }
 };
 

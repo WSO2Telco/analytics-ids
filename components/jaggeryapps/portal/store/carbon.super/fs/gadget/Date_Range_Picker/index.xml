@@ -73,7 +73,6 @@
                                 <b class="caret"></b>
                             </button>
                         </div>
-                        <div class="clearfix hidden-sm hidden-md hidden-lg"></div>
                         <span id="reportrange" class="btn-label"></span>
                     </div>
                 </div>
