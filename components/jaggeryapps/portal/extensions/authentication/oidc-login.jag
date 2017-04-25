@@ -79,8 +79,13 @@
         var tenantId = -1234;
         var userRealm = userRealmService.getTenantUserRealm(tenantId);
         var userStore = userRealm.getUserStoreManager();
-        username = userStore.getUserClaimValue(username, 'urn:scim:schemas:core:1.0:userName', null);
-
+        try {
+            username = userStore.getUserClaimValue(username, 'urn:scim:schemas:core:1.0:userName', null);
+        } catch(e){
+            log.error(e.message);
+            response.sendRedirect(destination);
+            return;
+        }
         if(username == null || username == ""){
             if(isIdpSessionTernminateEnabled){
                 include('/extensions/authentication/oidc-logout.jag');
