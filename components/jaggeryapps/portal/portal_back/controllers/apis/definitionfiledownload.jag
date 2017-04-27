@@ -1,0 +1,85 @@
+<% 
+
+//Login Check
+//Following was extracted from telcoanalytics.jag and altered accordingly
+
+
+    var ADMIN_ROLE = "gsmaadmin";
+    var OPERATOR_ROLE_PREFIX = "operator_";
+    var SERVICE_PROVIDER_ROLE_PREFIX = "serviceprovider_";
+	var CONTENT_TYPE_JSON = "application/json";
+    var USER_TOKEN = "user";
+    var TENANT_DOMAIN = "domain";
+    var CONST_AT = "@";
+    var USERNAME = "username";
+    var ROLES = "roles";
+    var HTTP_USER_NOT_AUTHENTICATED = 403;
+    var HTTP_INTERNAL_ERROR = 500;
+
+    var log = new Log();
+
+    var loggedInUser = null;
+    var roles = null;
+
+	var token = session.get(USER_TOKEN);
+    if (token != null) {
+        loggedInUser = token[USERNAME] + CONST_AT + token[TENANT_DOMAIN];
+        roles = token[ROLES];
+    } else {
+        if (log.isDebugEnabled()) {
+            log.debug("user is not authenticated!");
+        }
+       
+       /* response.status = HTTP_USER_NOT_AUTHENTICATED;
+        print('{ "status": "Failed", "message": "User is not authenticated." }');
+        return; */
+
+       response.sendError(HTTP_USER_NOT_AUTHENTICATED, "User is not authenticated.");
+    }
+
+ 	var isAdmin = false;
+    var isDashboardViewer = false;
+    var isOperator = false;
+    var isServiceProvider = false;
+
+    for (var role in roles) {
+        if (roles[role].toLowerCase().startsWith(OPERATOR_ROLE_PREFIX)) {
+            isDashboardViewer = true;
+            isOperator = true ;
+            break;
+
+        } else if (roles[role].toLowerCase().startsWith(SERVICE_PROVIDER_ROLE_PREFIX)) {
+            isDashboardViewer = true;
+            isServiceProvider =true;
+            break;
+        } else if (roles[role].toLowerCase().equals(ADMIN_ROLE)) {
+            isDashboardViewer = true;
+            isAdmin = true;
+            break;
+        }
+    }
+
+
+/* If authenticated, Download the file */
+
+    if (isDashboardViewer){
+    	var url = "../../resources/WSO2Telco_DashboardDefinitions_V0.1.pdf";
+		var targetFileName = "WSO2Telco_DashboardDefinitions_V0.1";
+		var targetFileExtension = ".pdf";
+
+		var file = new File(url);
+        if(file.isExists()){
+            response.contentType = "application/octet-stream";
+            response.addHeader("content-disposition", "attachment; filename="  + targetFileName +  targetFileExtension);          
+            file.open("r");
+            print(file.getStream());
+            file.close();
+        }else{
+            response.sendError(HTTP_INTERNAL_ERROR, "File not found.");
+        }
+    }
+
+
+
+
+%>

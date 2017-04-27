@@ -1,0 +1,108 @@
+{
+    "store": {
+        "types": ["fs"]
+    },
+    "gadgetGeneration" :{
+        "isCreateGadgetEnable": false,
+        "ignoreProviders": ["rt"]
+    },
+    "authentication": {
+        "activeMethod": "basic",
+        "methods": {
+            "sso": {
+                "attributes": {
+                    "issuer": "portal",
+                    "identityProviderURL": "https://localhost:9443/samlsso",
+                    "responseSigningEnabled": true,
+                    "validateAssertionValidityPeriod": true,
+                    "validateAudienceRestriction": true,
+                    "assertionSigningEnabled": true,
+                    "acs": "https://localhost:9444/portal/acs",
+                    "identityAlias": "wso2carbon",
+                    "defaultNameIDPolicy": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+                    "useTenantKey": false,
+                    "isPassive": false
+                }
+            },
+            "basic": {
+                "attributes": {}
+            },
+            "oidcConfiguration" : {
+                "enabled" : true,
+                "destination" :"https://analytics.preprod.wso2telco.com/portal",
+                "tokenEndpointURI" : "https://mconnect.preprod.wso2telco.com/oauth2/token",
+                "userInfoEndpointURI" : "http://mconnect.preprod.wso2telco.com/oauth2/userinfo?schema=openid",
+                "callbackurl" : "https://analytics.preprod.wso2telco.com/portal/oidc-login",
+                "idpLogOutUrl" : "https://mconnect.preprod.wso2telco.com/commonauth",
+                "requiredIdpSessionTermination" : true, //need to idp session termination once logour from DAS
+                "mappedClaimNameToPickUser" : "uid", //'uid' and 'msisdn' are supported, when needed create uid claim and map to username
+                "clientConfiguration" : {
+                    "spName" : "DAS_PORTAL_MCX",
+                    "clientId" : "zXxcrcdOpIKukWmmJY93AydNuc4a",
+                    "clientSecret" : "qp2RxiOMkY_fjWOm8yvDnWfQCawa"
+                },
+                "authRequestConfiguration":{
+                    "reponseType" : "code",
+                    "scope" : "openid",
+                    "nonce" : "nounce1222",
+                    "state" : "state22",
+                    "acrvalues" : "2"
+                },
+                "discoverApi": {
+                    "discoveryURL": "https://india.discover.mobileconnect.io/gsma/v2/discovery/?Redirect_URL=https://www.goibibo.com/api/auth/v1.0/mobileconnect/callback",
+                    "dscoveryAuthCode": "OTc3YjMyOGUtZTVlZi00NWY1LTgxYTktOTg5MDA5MWI2NDA3OmUzNTRjMzNjLTdjYTAtNDdjMy04MGUwLWZhZGMxMzIxNDY0Zg=="
+                },
+                "authRequestEndpoint": "https://mconnect.preprod.wso2telco.com/{operator}/oauth2/authorize",
+                "testMsisdn": "912222222222"
+            }
+        }
+    },
+    "authorization": {
+        "activeMethod": "",
+        "methods": {
+            "oauth": {
+                "attributes": {
+                    "idPServer": "%https.ip%/oauth2/token",
+                    "dynamicClientProperties": {
+                        "callbackUrl": "%https.ip%/portal",
+                        "clientName": "portal",
+                        "owner": "admin",
+                        "applicationType": "JaggeryApp",
+                        "grantType": "password refresh_token urn:ietf:params:oauth:grant-type:saml2-bearer",
+                        "saasApp": false,
+                        "dynamicClientRegistrationEndPoint": "%https.ip%/dynamic-client-web/register/",
+                        "tokenScope": "Production"
+                    }
+                }
+            }
+        }
+    },
+    "designers": [
+        "Internal/everyone"
+    ],
+    "tenantPrefix": "/t",
+    "shareStore": false,
+    "theme": "basic",
+    "cacheTimeoutSeconds": "5",
+    "cacheSizeBytes": "1073741824",
+    "defaultDashboardRedirect": false,
+    "isCreateGadgetEnable": true,
+    "isSecureVaultEnabled" : false,
+    "assets": {
+        "gadget": {
+            "fileSizeLimit": 5
+        },
+        "layout": {
+            "fileSizeLimit": 1
+        }
+    },
+    "oauth": {
+        "username": "admin",
+        "password": "Y4ap9v4#"
+    },
+    "host": {
+        "hostname": "india.analytics.wso2telco.com",
+        "port": "443",
+        "protocol": "https"
+    }
+}

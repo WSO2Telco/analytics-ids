@@ -1,0 +1,4 @@
+#date-select{
+    max-width:100%;
+    min-width: 100%; /* Override 600px assigned in daterangepicker.css and limit width to container*/
+}

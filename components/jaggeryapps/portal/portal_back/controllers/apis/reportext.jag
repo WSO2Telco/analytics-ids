@@ -1,0 +1,830 @@
+<%
+(function () {
+	var TYPE = "type";
+	var LOGIN_CHANNELS_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_LOGIN_CHANNELS";
+	var ATTEMPTS_VS_LOGINS_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_ATTEMPTS_N_LOGINS";
+	var SUBSCRIBER_BASE_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_DAILY__REGISTRATIONS_AGGREGATIONS";
+	var DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_DAILY_REGISTRATIONS";
+	var ONNET_OFFNET_REGISTRATIONS_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_ONNET_OFFNET_OPERATOR_SUMMARY";
+	var DROPOUTS_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_DROPOUTS";
+	var REALTIME_LOGINS_PER_OPERATOR = "COM_WSO2TELCO_SUCCESS_OPERATORWISELOGINS_STREAM";
+	var USSD_DROPOUTS_PER_OPERATOR_PER_DAY_TABLE ="COM_WSO2TELCO_SUMMARY_OPERATOR_USSD_DROPOUTS";
+	var COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS="COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS";
+	var LOGIN_CHANNELS_PER_APP_TABLE = "COM_WSO2TELCO_SUMMARY_APP_LOGIN_CHANNELS";
+	var ATTEMPTS_VS_LOGINS_PER_APP_TABLE = "COM_WSO2TELCO_SUMMARY_APP_ATTEMPTS_N_LOGINS";
+	var DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_APP_DAILY_REGISTRATIONS";
+	var ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_ONNET_OFFNET_APP_SUMMARY";
+	var DROPOUTS_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_APP_DROPOUTS";
+	var REALTIME_LOGINS_PER_APP = "COM_WSO2TELCO_SUCCESS_APPWISELOGINS_STREAM";
+	var USSD_DROPOUTS_PER_APP ="COM_WSO2TELCO_SUMMARY_APP_USSD_DROPOUTS";
+	var LOGIN_CHANNELS_TOTAL_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_LOGIN_CHANNELS";
+	var ATTEMPTS_VS_LOGINS_TOTAL_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_ATTEMPTS_N_LOGINS";
+	var DAILY_REGISTRATION_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_DAILY_REGISTRATIONS";
+	var ONNET_OFFNET_REGISTRATIONS_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_ONNET_OFFNET_TOTAL_SUMMARY";
+	var SUBSCRIBER_BASE_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_DAILY__REGISTRATIONS_AGGREGATIONS";
+	var DROPOUTS_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_DROPOUTS";
+	var REALTIME_LOGINS_TOTAL = "COM_WSO2TELCO_SUCCESS_LOGINS_STREAM";
+	var USSD_DROPOUTS_TOTAL = "COM_WSO2TELCO_SUMMARY_TOTAL_USSD_DROPOUTS";
+	var LOGIN_CHANNELS_PER_APP_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_LOGIN_CHANNELS";
+	var ATTEMPTS_VS_LOGINS_PER_APP_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_ATTEMPTS_N_LOGINS";
+	var DAILY_REGISTRATION_PER_APP_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_DAILY_REGISTRATIONS";
+	var ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_ONNET_OFFNET_SUMMARY";
+	var DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_DROPOUTS";
+	var REALTIME_LOGINS_PER_OPERATOR_PER_APP = "COM_WSO2TELCO_SUCCESS_APPWISEOPERATORWISELOGINS_STREAM";
+	var USSD_DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_USSD_DROPOUTS";
+	var ACTIVE_USERS_MSISDN_DAILY_TABLE = "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_MSISDN_DAILY";
+	var MSISDNS_SUCCESS_FAILED = "COM_WSO2TELCO_SUMMARY_MSISDNS_TXN_LIST_SUCCESS_AND_FAILED";
+	var HE_MSISDN_NOT_FOUND = "COM_WSO2TELCO_SUMMARY_HE_MSISDN_NOT_FOUND";
+	var COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE="COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_PER_OPERATER";
+	var HE_BREAKDOWNS= "COM_WSO2TELCO_SUMMARY_HE_BREAKDOWNS";
+	var OPERATOR_HE_BREAKDOWNS="COM_WSO2TELCO_SUMMARY_OPERATOR_HE_BREAKDOWNS";
+	var APP_HE_BREAKDOWNS="COM_WSO2TELCO_SUMMARY_APP_HE_BREAKDOWNS";
+	var TOTAL_HE_BREAKDOWNS="COM_WSO2TELCO_SUMMARY_TOTAL_HE_BREAKDOWNS";
+	var WRONG_END_POINT_TABLE = "COM_WSO2TELCO_SUMMARY_WRONG_END_POINTS";
+	var USER_REG_API_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_OFFLINE_USER_REGISTRATIONS_DAILY";
+	var USER_REG_SP_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_DAILY_REGISTRATIONS";
+ 	var USER_REG_API_TOTAL_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_OFFLINE_USER_REGISTRATION_TOTAL";
+	var USER_REG_SP_TOTAL_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_USER_REGISTRATION_SP_TOTAL";
+	var TIME_FROM_PARAM = "timeFrom";
+	var FILE_NAME_PARAM = "fileName";
+	var TIME_TO_PARAM = "timeTo";
+	var OPERATOR_PARAM = "operator";
+	var APP_PARAM = "appID";
+	var SUCCESS_PARAM= "success";
+	var AUTH_TYPE_PARAM= "authtype";
+	var EXTRA="extra";
+	var DOWNLOAD_PARAM = "download";
+	var ADMIN ="admin";
+	var ADMIN_ROLE = "gsmaadmin";
+	var OPERATOR_ROLE_PREFIX = "operator_";
+	var SERVICE_PROVIDER_ROLE_PREFIX = "serviceprovider_";
+	var CONTENT_TYPE_JSON = "application/json";
+	var USER_TOKEN = "user";
+	var TENANT_DOMAIN = "domain";
+	var CONST_AT = "@";
+	var USERNAME = "username";
+	var ROLES = "roles";
+	var HTTP_USER_NOT_AUTHENTICATED = 403;
+	var HTTP_INTERNAL_ERROR = 500;
+	var JS_MAX_VALUE = "9007199254740992";
+	var JS_MIN_VALUE = "-9007199254740992";
+	var MAX_ALLOWED_RECORDS = "1000000";
+	var TYPE_LOGIN_CHANNELS_PER_DAY = 1;//
+	var TYPE_DAILY_REGISTRATIONS_PER_DAY = 2;//
+	var TYPE_TOTAL_LOGIN_CHANNELS = 6;//
+	var TYPE_ONNET_REGISTRATIONS = 7;
+	var TYPE_DROPOUTS = 9;//
+	var TYPE_TOTAL_DROPOUTS = 13;//
+	var TYPE_OPERATOR_HE_FAILURES_REPORT =14;//
+	var TYPE_OFFNET_SUCCESS_FAIL_LOGINS = 15;
+	var TYPE_MSISDN_LIST = 17;//
+	var TYPE_OPERATOR_USSD_REPORT=18;//
+	var TYPE_TOTAL_TOKENS = 19;//
+	var TYPE_TOTAL_AUTH_ATTEMPTS=20;//
+	var TYPE_DETAIL_REPORT =21;//
+	var TYPE_MSISDNS_SUCCESS_FAILED_REPORT =22;//
+	var USSD_ANALYSIS_OPERATORWISE=23;
+	var TYPE_WRONG_EP=24;
+	var TYPE_USER_REG=25;
+	var log = new Log();
+	var carbon = require('carbon');
+	var utils = require('/modules/utils.js');
+	var AnalyticsCachedJSServiceConnector = Packages.org.wso2.carbon.analytics.jsservice.AnalyticsJSServiceConnector;
+	var loggedInUser = null;
+	var roles = null;
+	var loginChannelTable = null;
+	var realtimeLoginTable = null;
+	var attemptsVsLoginsTable = null;
+	var msisdnTable = null;
+	var detailMsisdnReport=null;
+	var dailyRegistrationTable = null;
+	var ussdDropoutsTable = null;
+	var subscriberGrowthTable = null;
+	var onnetOffnetRegistrationTable = null;
+	var heBreackdownTable = null;
+	var USSDLogsTable=null;
+	var dropoutTable = null;
+	var msisdn_hash = null;
+	var hefailedtable=null;
+	var ussdAnalytics=null;
+	var userRegApi=null;
+	var userRegSP=null;
+	var wronghit=null;
+	response.contentType = CONTENT_TYPE_JSON;
+	var token = session.get(USER_TOKEN);
+	if (token != null) {
+		loggedInUser = token[USERNAME] + CONST_AT + token[TENANT_DOMAIN];
+		roles = token[ROLES];
+	}else {
+		if (log.isDebugEnabled()) {
+			log.debug("user is not authenticated!");
+		}
+		response.status = HTTP_USER_NOT_AUTHENTICATED;
+		print('{ "status": "Failed", "message": "User is not authenticated." }');
+		return;
+	}
+	var connector = new AnalyticsCachedJSServiceConnector();
+	var type = 0;
+	var typeParam = request.getParameter(TYPE);
+	if (typeParam != null) {
+		type = parseInt(typeParam);
+	}
+	if (type == 0) {
+		if (log.isDebugEnabled()) {
+			log.debug("operation type is not specified!");
+		}
+		response.status = HTTP_INTERNAL_ERROR;
+		print('{ "status": "Failed", "message": "Operation type is not specified" }');
+		return;
+	}
+	var timeFromParam = request.getParameter(TIME_FROM_PARAM);
+	var fileName = request.getParameter(FILE_NAME_PARAM);
+	var downloadParam = request.getParameter(DOWNLOAD_PARAM);
+	var timeToParam = request.getParameter(TIME_TO_PARAM);
+	var operatorParam = request.getParameter(OPERATOR_PARAM);
+	var extra = request.getParameter(EXTRA);
+	var appParam = request.getParameter(APP_PARAM);
+	var requestMethod = request.getMethod();
+	var timeFilterQuery = null;
+	var operatorQuery = null;
+	var serviceProviderQuery = null;
+	var roleFilterQuery = null;
+	var isAdmin = false;
+	var isDashboardViewer = false;
+	var timeDiff=null;
+	var isOperator=false;
+	if (timeFromParam != "undefined" && timeToParam != "undefined") {
+		timeFilterQuery = "_timestamp :[" + timeFromParam + " TO " + timeToParam + "]";
+		timeDiff = timeToParam - timeFromParam;
+	} else {
+		var day=new Packages.java.util.Date;
+		var time=day.getTime();
+		JS_MAX_VALUE=time;
+		JS_MIN_VALUE=JS_MAX_VALUE-(30*24*60*60*1000);
+		timeFilterQuery = "_timestamp :[" + JS_MIN_VALUE + " TO " + JS_MAX_VALUE + "]";
+		timeDiff = JS_MAX_VALUE - JS_MIN_VALUE;
+	}
+	for (var role in roles) {
+		if (roles[role].toLowerCase().startsWith(OPERATOR_ROLE_PREFIX)) {
+			msisdn_hash = false;
+			operatorParam=roles[role].substring(OPERATOR_ROLE_PREFIX.length).toLowerCase();
+			operatorQuery = " AND operator: \"" +operatorParam + "\"";
+			if ( appParam != null && appParam != "undefined" && appParam != "") {
+				roleFilterQuery = operatorQuery +  " AND appID: \"" + appParam + "\"";
+				dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				loginChannelTable = LOGIN_CHANNELS_PER_APP_PER_OPERATOR_TABLE;
+				attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_PER_OPERATOR_TABLE;
+				onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
+				dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				ussdDropoutsTable = USSD_DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				msisdnTable=ACTIVE_USERS_MSISDN_DAILY_TABLE;
+				detailMsisdnReport=MSISDNS_SUCCESS_FAILED;
+				ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+				heBreackdownTable=HE_BREAKDOWNS;
+			} else if (appParam != null && appParam == "undefined" || appParam == "") {
+				roleFilterQuery = operatorQuery;
+				dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
+				loginChannelTable = LOGIN_CHANNELS_PER_OPERATOR_TABLE;
+				attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_OPERATOR_TABLE;
+				subscriberGrowthTable = SUBSCRIBER_BASE_PER_OPERATOR_PER_DAY_TABLE;
+				onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_OPERATOR_PER_DAY_TABLE;
+				realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR;
+				dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
+				ussdDropoutsTable = USSD_DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
+				msisdnTable=ACTIVE_USERS_MSISDN_DAILY_TABLE;
+				detailMsisdnReport=MSISDNS_SUCCESS_FAILED;
+				heBreackdownTable=OPERATOR_HE_BREAKDOWNS;
+				ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+				userRegApi=USER_REG_API_TABLE;
+				userRegSP=USER_REG_SP_TABLE;
+			}
+			hefailedtable=HE_MSISDN_NOT_FOUND;
+			isDashboardViewer = true;
+			isOperator = true ;
+			USSDLogsTable=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS;
+			ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+			wronghit=WRONG_END_POINT_TABLE;
+			break;
+		}  else if (roles[role].toLowerCase().startsWith(SERVICE_PROVIDER_ROLE_PREFIX)) {
+			appParam=roles[role].substring(SERVICE_PROVIDER_ROLE_PREFIX.length);
+			serviceProviderQuery = " AND appID: \"" + appParam  + "\"";
+			msisdn_hash = true;
+			if ( operatorParam != "undefined" && operatorParam != "") {
+				roleFilterQuery = serviceProviderQuery +  " AND operator: \"" + operatorParam + "\"";
+				dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				loginChannelTable = LOGIN_CHANNELS_PER_APP_PER_OPERATOR_TABLE;
+				attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_PER_OPERATOR_TABLE;
+				onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
+				dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				ussdDropoutsTable= USSD_DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				heBreackdownTable=HE_BREAKDOWNS;
+				ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+			} else if (operatorParam == "undefined" || operatorParam == "") {
+				roleFilterQuery =  serviceProviderQuery +" AND -operator: \"" + "spark" + "\"";
+				dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
+				loginChannelTable = LOGIN_CHANNELS_PER_APP_TABLE;
+				attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_TABLE;
+				onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_DAY_TABLE;
+				realtimeLoginTable = REALTIME_LOGINS_PER_APP;
+				dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
+				ussdDropoutsTable = USSD_DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
+				heBreackdownTable=APP_HE_BREAKDOWNS;
+				ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+			}
+			ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+			isDashboardViewer = true;
+			break;
+		} else if (roles[role].toLowerCase().equals(ADMIN_ROLE)) {
+			msisdn_hash = true;
+			if (operatorParam != "undefined" && operatorParam != "" && appParam != "undefined" && appParam != "") {
+				roleFilterQuery = " AND operator: \"" + operatorParam + "\" AND appID: \"" + appParam + "\"";
+				dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				loginChannelTable = LOGIN_CHANNELS_PER_APP_PER_OPERATOR_TABLE;
+				attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_PER_OPERATOR_TABLE;
+				msisdnTable=ACTIVE_USERS_MSISDN_DAILY_TABLE;
+				detailMsisdnReport=MSISDNS_SUCCESS_FAILED;
+				onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
+				dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				ussdDropoutsTable= USSD_DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
+				ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+				heBreackdownTable=HE_BREAKDOWNS;
+			} else if (operatorParam != "undefined" && operatorParam != "" && (appParam == "undefined" || appParam == "")) {
+				roleFilterQuery = " AND operator: \"" + operatorParam + "\"";
+				dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
+				loginChannelTable = LOGIN_CHANNELS_PER_OPERATOR_TABLE;
+				attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_OPERATOR_TABLE;
+				msisdnTable=ACTIVE_USERS_MSISDN_DAILY_TABLE;
+				detailMsisdnReport=MSISDNS_SUCCESS_FAILED;
+				subscriberGrowthTable = SUBSCRIBER_BASE_PER_OPERATOR_PER_DAY_TABLE;
+				onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_OPERATOR_PER_DAY_TABLE;
+				realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR;
+				dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
+				ussdDropoutsTable = USSD_DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
+				heBreackdownTable=OPERATOR_HE_BREAKDOWNS;
+				ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+				userRegApi=USER_REG_API_TABLE;
+				userRegSP=USER_REG_SP_TABLE;
+		
+				
+			} else if ((operatorParam == "undefined" || operatorParam == "") && appParam != "undefined" && appParam != "") {
+				roleFilterQuery = "AND appID: \"" + appParam + "\""+" AND -operator: \"" + "spark" + "\"";
+				dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
+				loginChannelTable = LOGIN_CHANNELS_PER_APP_TABLE;
+				attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_PER_APP_TABLE;
+				msisdnTable=ACTIVE_USERS_MSISDN_DAILY_TABLE;
+				detailMsisdnReport=MSISDNS_SUCCESS_FAILED;
+				onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_APP_PER_DAY_TABLE;
+				realtimeLoginTable = REALTIME_LOGINS_PER_APP;
+				dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
+				ussdDropoutsTable = USSD_DROPOUTS_PER_APP;
+				heBreackdownTable=APP_HE_BREAKDOWNS;
+				ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+			} else if ((operatorParam == "undefined" || operatorParam == "") && (appParam == "undefined" || appParam == "")) {
+				roleFilterQuery = " AND -operator: \"" + "spark" + "\"";
+				dailyRegistrationTable = DAILY_REGISTRATION_TOTAL_PER_DAY_TABLE;
+				loginChannelTable = LOGIN_CHANNELS_TOTAL_TABLE;
+				attemptsVsLoginsTable = ATTEMPTS_VS_LOGINS_TOTAL_TABLE;
+				msisdnTable=ACTIVE_USERS_MSISDN_DAILY_TABLE;
+				detailMsisdnReport=MSISDNS_SUCCESS_FAILED;
+				subscriberGrowthTable = SUBSCRIBER_BASE_TOTAL_PER_DAY_TABLE;
+				onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_TOTAL_PER_DAY_TABLE;
+				realtimeLoginTable = REALTIME_LOGINS_TOTAL;
+				dropoutTable = DROPOUTS_TOTAL_PER_DAY_TABLE;
+				ussdDropoutsTable = USSD_DROPOUTS_TOTAL;
+				heBreackdownTable=TOTAL_HE_BREAKDOWNS;
+				ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+				userRegApi=USER_REG_API_TABLE;
+				userRegSP=USER_REG_SP_TABLE;
+			}
+			USSDLogsTable=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS;
+			ussdAnalytics=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_OPERATORWISE;
+			hefailedtable=HE_MSISDN_NOT_FOUND;
+			isDashboardViewer = true;
+			wronghit=WRONG_END_POINT_TABLE;
+			isAdmin = true;
+			break;
+		}
+	}
+	if (isDashboardViewer){
+		if (connector != null) {
+			if (loggedInUser != null){
+				var finalQuery = timeFilterQuery + roleFilterQuery; //order matters
+				if (finalQuery != null){
+					var searchParams = null;
+					var result = null;
+					var results = [];
+					var data = null;
+					switch (type) {
+
+				case USSD_ANALYSIS_OPERATORWISE :
+							{
+								if( isOperator || isAdmin){
+									var operatorquery="";
+									var operatorStr="ALL";
+									if(operatorParam != null && operatorParam !="" && operatorParam != "undefined"){
+										operatorquery+="  AND operator:\""+operatorParam+"\"";
+										operatorStr=operatorParam;
+									}
+									var ussdlogquery=timeFilterQuery + operatorquery;
+									searchParams = {
+										query: ussdlogquery,
+										start: 0,
+										count: MAX_ALLOWED_RECORDS,
+										sortBy: [{
+											"field": "_timestamp",
+											"sortType": "ASC"
+										}]
+									};
+									var resultUSSDLogs = connector.search(loggedInUser, ussdAnalytics, stringify(searchParams));
+									if (resultUSSDLogs!=null && resultUSSDLogs.getStatusCode() == 200) {
+										var ussddata = JSON.parse(resultUSSDLogs.getMessage());
+										response.contentType = "application/octet-stream";
+										var UUID = Packages.java.util.UUID;
+										var uuidFile = UUID.randomUUID().toString();
+										var file = new File("../../tmp/"+uuidFile+".csv");
+										file.open("w+");
+
+										if(timeFromParam=="undefined"||timeFromParam==""){
+											timeFromParam="NA";
+										}else{
+											var fromDate =  new Date(parseFloat(timeFromParam));
+											timeFromParam=fromDate.toString();
+										}
+										if(timeToParam=="undefined"||timeToParam==""){
+											timeToParam="NA";
+										}else{
+											var toDate =  new Date(parseFloat(timeToParam));
+											timeToParam = toDate.toString();
+										}
+										response.addHeader("Content-Disposition", "attachment; filename="+operatorStr+"_report"+".csv");
+										file.write("Operator,"+operatorStr+"\n");
+										file.write("From,"+timeFromParam+",,"+"To,"+timeToParam+"\n\n");
+										var firstLine="Day,Operator,";
+										var dayMap = new Packages.java.util.TreeMap;
+										var messageSet = new Packages.java.util.TreeSet;
+										ussddata.forEach(function (record, i) {
+											var values = record.values;
+											var day=values["day"];
+											var operator=values["operator"];
+											var message=values["message"];
+											var count=values["count"];
+											var code=values["code"];
+											var messageWithCode=null;
+											if (code!="undefined" && code!= null && code!=""){
+												messageWithCode=message+"-"+code;
+											}else{
+												messageWithCode=message;
+											}
+
+											if (!dayMap.containsKey(day)) {
+												var operatorMapForDay = new Packages.java.util.TreeMap;
+												dayMap.put(day,operatorMapForDay);
+											}
+											var operatorMapForDay=dayMap.get(day);
+											if (!operatorMapForDay.containsKey(operator)) {
+												var messageMapForoperator = new Packages.java.util.TreeMap;
+												operatorMapForDay.put(operator,messageMapForoperator);
+											}
+											var  messageMapForoperator=operatorMapForDay.get(operator);
+											messageMapForoperator.put(messageWithCode,count);
+											messageSet.add(messageWithCode);
+										});
+										for(var i=0;i<messageSet.toArray().length;i++) {
+											firstLine+=messageSet.toArray()[i]+",";
+										}
+										if (messageSet.toArray().length==0){
+											firstLine="No records available";
+										}
+										var dayMApKeys=dayMap.keySet().toArray();
+										var content=firstLine+"\n";
+										for(var i=0;i<dayMApKeys.length;i++) {
+											var operatorMap=dayMap.get(dayMApKeys[i]);
+											var operatorMapKeys=operatorMap.keySet().toArray();
+											for(var j=0;j<operatorMapKeys.length;j++) {
+												content+=dayMApKeys[i]+","+operatorMapKeys[j]+",";
+												var messageMapForoperator=operatorMap.get(operatorMapKeys[j]);
+												var messageMapForoperatorKeys=messageSet.toArray();
+												for(var k=0;k<messageMapForoperatorKeys.length;k++) {
+													if (messageMapForoperator.get(messageMapForoperatorKeys[k])==null) {
+														content+="0"+",";
+													}else{
+														content+=messageMapForoperator.get(messageMapForoperatorKeys[k])+",";
+													}
+												}
+												content+="\n";
+											}
+										}
+										file.write(content);
+										print(file.getStream());
+										file.close();
+										file.del();
+									}
+								}
+								break;
+							}
+							case TYPE_WRONG_EP :
+							{
+								if(isOperator){
+									var operator;
+									var app;
+									var timeFrom;
+									var timeTo;
+
+									if(operatorParam==null || operatorParam=="undefined"||operatorParam==""){
+										operator="ALL";
+									}else{
+										operator=operatorParam;
+									}
+									if(appParam==null || appParam=="undefined"||appParam==""){
+										app ="ALL";
+									}else{
+										app = appParam;
+									}
+									if(timeFromParam==null || timeFromParam=="undefined"||timeFromParam==""){
+										timeFrom="ALL";
+									}else{
+										var fromDate =  new Date(parseFloat(timeFromParam));
+										timeFrom=fromDate.toString();
+									}
+									if(timeToParam==null || timeToParam=="undefined"||timeToParam==""){
+										timeTo="ALL";
+									}else{
+										var toDate =  new Date(parseFloat(timeToParam));
+										timeTo = toDate.toString();
+									}
+									var dataExport = carbon.server.osgiService('com.wso2telco.analytics.ids.report.generator.WrongEndPointReportGenerationService');
+									if(requestMethod=="GET"){
+										var fileString = dataExport.getFilenames("/storage-pool/WrongEndpoints/"+loggedInUser);
+										var files = JSON.parse(fileString);
+										if(fileName=="list"){
+											print(fileString);
+										}
+										else{
+											response.contentType = "application/octet-stream";
+											var csvName = fileName.split("_");
+											response.addHeader("Content-Disposition", "attachment; filename="+csvName[0]+".csv");
+											var path = "/storage-pool/WrongEndpoints/"+loggedInUser+"/"+fileName;
+											dataExport.moveFile(path,fileName);
+											var pathTmpfolder = "../../tmp/WrongEndpoints/"+fileName;
+											var file1 = new File(pathTmpfolder);
+											file1.open('r');
+											print(file1.getStream());
+											file1.close();
+											file1.del();
+										}
+									}
+									else if(requestMethod=="POST"){
+										var difDays = timeDiff / (1000  * 60 * 60 * 24);
+										if(difDays<=2){
+											var rc = new Packages.com.wso2telco.analytics.ids.report.generator.WrongEndPointReportComponents;
+											rc.setOperator(operator);
+											rc.setAppName(app);
+											rc.setTenantId(-1234);
+											rc.setToDate(timeTo);
+											rc.setAcs(true);
+											rc.setFromDate(timeFrom);
+											rc.setTableName(wronghit);
+											rc.setSearchParams(finalQuery);
+											rc.setUserFileName(fileName);
+											rc.setSaveFilePath("/storage-pool/WrongEndpoints/");
+											rc.setLoggedInUser(loggedInUser);
+											rc.setMsisdnHash(msisdn_hash);
+											dataExport.generate(rc);
+										}
+									}else if(requestMethod=="DELETE"){
+										var path = "/storage-pool/WrongEndpoints/"+loggedInUser+"/"+fileName;
+										dataExport.moveFile(path,fileName);
+										var pathTmpfolder = "../../tmp/WrongEndpoints/"+fileName;
+										var file1 = new File(pathTmpfolder);
+										file1.del();
+									}
+								}
+								break;
+							}
+							case TYPE_USER_REG :
+							{
+								if( isOperator || isAdmin){
+									var operatorquery="";
+									var operatorStr="ALL";
+									if(operatorParam != null && operatorParam !="" && operatorParam != "undefined"){
+										operatorquery+="  AND operator:\""+operatorParam+"\"";
+										operatorStr=operatorParam;
+									}
+									var userRegistration=timeFilterQuery + operatorquery;
+									searchParams = {
+										query: userRegistration,
+										start: 0,
+										count: MAX_ALLOWED_RECORDS,
+										sortBy: [{
+											"field": "_timestamp",
+											"sortType": "ASC"
+										}]
+									};
+									var resultUserRegOff = connector.search(loggedInUser, userRegApi, stringify(searchParams));
+									var resultUserRegSp=connector.search(loggedInUser, userRegSP, stringify(searchParams));
+ 									var resultUserRegOffTotal = connector.search(loggedInUser, USER_REG_API_TOTAL_TABLE, stringify(searchParams));
+									var resultUserRegSpTotal=connector.search(loggedInUser, USER_REG_SP_TOTAL_TABLE, stringify(searchParams));
+ 
+									if (resultUserRegOff!=null && resultUserRegOff.getStatusCode() == 200 && resultUserRegSp!=null && resultUserRegSp.getStatusCode() == 200 &&
+										resultUserRegOffTotal != null && resultUserRegOffTotal.getStatusCode() == 200 && resultUserRegSpTotal!=null && 
+										resultUserRegSpTotal.getStatusCode() == 200) {
+										
+										var regDataOff = JSON.parse(resultUserRegOff.getMessage());
+										var regDataSp = JSON.parse(resultUserRegSp.getMessage());
+										var regDataOffTotal = JSON.parse(resultUserRegOffTotal.getMessage());
+										var regDataSpTotal = JSON.parse(resultUserRegSpTotal.getMessage());
+										
+										response.contentType = "application/octet-stream";
+										var UUID = Packages.java.util.UUID;
+										var uuidFile = UUID.randomUUID().toString();
+										var file = new File("../../tmp/"+uuidFile+".csv");
+										file.open("w+");
+
+										if(timeFromParam=="undefined"||timeFromParam==""){
+											timeFromParam="NA";
+										}else{
+											var fromDate =  new Date(parseFloat(timeFromParam));
+											timeFromParam=fromDate.toString();
+										}
+										if(timeToParam=="undefined"||timeToParam==""){
+											timeToParam="NA";
+										}else{
+											var toDate =  new Date(parseFloat(timeToParam));
+											timeToParam = toDate.toString();
+										}
+										response.addHeader("Content-Disposition", "attachment; filename="+operatorStr+"_report"+".csv");
+										file.write("Operator,"+operatorStr+"\n");
+										file.write("From,"+timeFromParam+",,"+"To,"+timeToParam+"\n\n");
+										var firstLine="Day/Operator,";
+										var dayMap = new Packages.java.util.TreeMap;
+										var countSet = new Packages.java.util.TreeSet;
+										var operatorSet= new Packages.java.util.TreeSet;
+										var operatorSpTotal=new Packages.java.util.TreeMap;
+										var operatorOffTotal=new Packages.java.util.TreeMap;
+										regDataOff.forEach(function (record, i) {
+											var values = record.values;
+											var day=values["day"];
+											var operator=values["operator"];
+											var count=values["total_usercount"];
+
+											if (!dayMap.containsKey(day)) {
+												var operatorMapForDay = new Packages.java.util.TreeMap;
+												dayMap.put(day,operatorMapForDay);
+											}
+											if (!operatorSet.contains(operator)) {
+													operatorSet.add(operator);
+												}
+											var operatorMapForDay=dayMap.get(day);
+											if (!operatorMapForDay.containsKey(operator)) {
+												
+												var countMapForoperator = new Packages.java.util.TreeMap;
+												operatorMapForDay.put(operator,countMapForoperator);
+											}
+											var  countMapForoperator=operatorMapForDay.get(operator);
+											countMapForoperator.put("offline",count);
+										});										
+										regDataSp.forEach(function (record, i) {
+											var values = record.values;
+											var day=values["day"];
+											var operator=values["operator"];
+											var count=values["regCount"];
+
+											if (!dayMap.containsKey(day)) {
+												var operatorMapForDay = new Packages.java.util.TreeMap;
+												dayMap.put(day,operatorMapForDay);
+											}
+											var operatorMapForDay=dayMap.get(day);
+											if (!operatorSet.contains(operator)) {
+													operatorSet.add(operator);
+												}
+											if (!operatorMapForDay.containsKey(operator)) {
+												
+												var countMapForoperator = new Packages.java.util.TreeMap;
+												operatorMapForDay.put(operator,countMapForoperator);
+											}
+											var  countMapForoperator=operatorMapForDay.get(operator);
+											countMapForoperator.put("SP",count);											
+										});
+										regDataOffTotal.forEach(function (record, i) {
+											var values = record.values;
+											var operator=values["operator"];
+											var count=values["total_usercount"];
+											if (!operatorSet.contains(operator)) {
+													operatorSet.add(operator);
+											}
+											if (!operatorOffTotal.containsKey(operator)) {
+												operatorOffTotal.put(operator,count);
+											}										
+										});
+										regDataSpTotal.forEach(function (record, i) {
+											var values = record.values;
+											var operator=values["operator"];
+											var count=values["total_usercount"];
+											if (!operatorSet.contains(operator)) {
+													operatorSet.add(operator);
+											}
+											if (!operatorSpTotal.containsKey(operator)) {
+												operatorSpTotal.put(operator,count);
+											}											
+										});
+ 
+ 
+										for(var i=0;i<operatorSet.toArray().length;i++) {
+											firstLine+=operatorSet.toArray()[i]+",,";
+										}
+										var secondLine=",";
+										for(var i=0;i<operatorSet.toArray().length;i++) {
+											secondLine+="SP"+","+"Offline"+",";
+										}
+										if (operatorSet.toArray().length==0){
+											firstLine="No records available";
+										}
+										var dayMapKeys=dayMap.keySet().toArray();
+										var content=firstLine+"\n"+secondLine+"\n";
+										for(var i=0;i<dayMapKeys.length;i++) {
+											var operatorMap=dayMap.get(dayMapKeys[i]);
+											var operatorMapKeys=operatorSet.toArray();
+											content+=dayMapKeys[i]+",";
+											for(var j=0;j<operatorMapKeys.length;j++) {
+												var valueMap=operatorMap.get(operatorMapKeys[j]);
+												if(valueMap!=null){
+													var spValue=valueMap.get("SP");
+													var offlineValue=valueMap.get("offline");
+													if (spValue==null) {
+														content+="0"+",";
+													}else{
+														content+=spValue+",";
+													}
+													if (offlineValue==null) {
+														content+="0"+",";
+													}else{
+														content+=offlineValue+",";
+													}
+												}else{
+													content+="0,0,"
+												}
+											}
+											content+="\n";
+										}
+										var operatorMapKeys=operatorSet.toArray();
+										content+="Total,";
+										for(var j=0;j<operatorMapKeys.length;j++) {
+											
+											var operatorSpTotalValue=operatorSpTotal.get(operatorMapKeys[j]);
+											var operatorofflineTotalValue=operatorOffTotal.get(operatorMapKeys[j]);
+											if (operatorSpTotalValue==null) {
+												content+="0"+",";
+											}else{
+												content+=operatorSpTotalValue+",";
+											}
+											if (operatorofflineTotalValue==null) {
+												content+="0"+",";
+											}else{
+												content+=operatorofflineTotalValue+",";
+											}
+											
+										}		
+										file.write(content);
+										print(file.getStream());
+										file.close();
+										file.del();
+									}
+								}
+								break;
+							}
+							
+						default:
+							result = '{ "status": "Failed", "statusCode": "500", "message": "Unidentified operation" }';
+					}
+					if (result != null) {
+						if (log.isDebugEnabled()) {
+							log.debug("value of result: " + stringify(result));
+							log.debug("status code: " + result["statusCode"]);
+						}
+						var statusCode = result["statusCode"];
+						var status = result["status"];
+						var message = result["message"];
+						response.status = statusCode;
+						var finalResult = {
+							status: status,
+							message: message
+						};
+						print(finalResult);
+					}
+				} else {
+					print('{ "status": "Failed", "statusCode": "500", "message": "Invalid request" }');
+				}
+			} else {
+				print('{ "status": "Failed", "statusCode": "500", "message": "Invalid User" }');
+			}
+		} else {
+			print('{ "status": "Failed", "statusCode": "500", "message": "AnalyticsCachedWebServiceConnector is unavailable" }');
+		}
+	} else {
+		print('{ "status": "Failed", "statusCode": "500", "message": "Operation Not Allowed" }');
+	}
+	function getFile(map,col1,col2,gadgetName){
+		response.contentType = "application/octet-stream";
+		var paraMap = new Packages.java.util.HashMap;
+		if(operatorParam=="undefined"||operatorParam==""){
+			paraMap.put("operator","ALL");
+		}else{
+			paraMap.put("operator",operatorParam);
+		}
+		if(timeFromParam=="undefined"||timeFromParam==""){
+			paraMap.put("from","NA");
+		}else{
+			var fromDate =  new Date(parseFloat(timeFromParam));
+			paraMap.put("from",fromDate.toString());
+		}
+		if(appParam=="undefined"||appParam==""){
+			paraMap.put("app","ALL");
+		}else{
+
+			paraMap.put("app",appParam);
+		}
+		if(timeToParam=="undefined"||timeToParam==""){
+			paraMap.put("to","NA");
+		}else{
+			var toDate =  new Date(parseFloat(timeToParam));
+			paraMap.put("to",toDate.toString());
+		}
+		var pfdGen = carbon.server.osgiService('com.wso2telco.analytics.ids.report.generator.MsisdnReportGenerationService');
+		var fileName = "";
+		if(downloadParam=="xl"){
+			paraMap.put("colhedding1",col1);
+			paraMap.put("colhedding2",col2);
+			response.addHeader("Content-Disposition", "attachment; filename="+operatorParam+"_"+gadgetName+".xls");
+			fileName = pfdGen.getUuid()+".xls";
+			pfdGen.generatExcel("/repository/deployment/server/jaggeryapps/portal/tmp/","/repository/deployment/server/jaggeryapps/portal/resources/report",map,paraMap);
+		}else if(downloadParam=="pdf"){
+			paraMap.put("colhedding1",col1);
+			paraMap.put("colhedding2",col2);
+			response.addHeader("Content-Disposition", "attachment; filename="+operatorParam+"_"+gadgetName+".pdf");
+			fileName = pfdGen.getUuid()+".pdf";
+			pfdGen.generatPdf("/repository/deployment/server/jaggeryapps/portal/tmp/","/repository/deployment/server/jaggeryapps/portal/resources/report",map,paraMap);
+		}else if(downloadParam=="drPdf"){
+			response.addHeader("Content-Disposition", "attachment; filename="+operatorParam+"_"+gadgetName+".pdf");
+			fileName = pfdGen.getUuid()+".pdf";
+			paraMap.put("date","Date");
+			paraMap.put("col1","HE");
+			paraMap.put("col2","USSD");
+			paraMap.put("col3","SMS");
+			paraMap.put("col4","Auth_Code_Success");
+			paraMap.put("col5","Onnet T&C");
+			paraMap.put("col6","Offnet T&C");
+			paraMap.put("col7","USSD");
+			paraMap.put("col8","SMS");
+			paraMap.put("col9","MSISDN");
+			paraMap.put("col10","Auth_Code_Fail");
+			paraMap.put("col11","Cancelled");
+			paraMap.put("col12","Invalid option");
+			paraMap.put("col13","Network failure");
+			paraMap.put("col14","Timeout");
+			paraMap.put("col15","Auth Count Total");
+			paraMap.put("col16","Onnet");
+			paraMap.put("col17","Offnet");
+			paraMap.put("col18","New user");
+			paraMap.put("col19","Repeat user");
+			paraMap.put("col20","Token API Call");
+			paraMap.put("col21","Registration Count");
+			pfdGen.generatPdfDR("/repository/deployment/server/jaggeryapps/portal/tmp/","/repository/deployment/server/jaggeryapps/portal/resources/report2",map,paraMap);
+		}else if(downloadParam=="drXl"){
+			response.addHeader("Content-Disposition", "attachment; filename="+operatorParam+"_"+gadgetName+".xls");
+			fileName = pfdGen.getUuid()+".xls";
+			paraMap.put("date","Date");
+			paraMap.put("col1","HE");
+			paraMap.put("col2","USSD");
+			paraMap.put("col3","SMS");
+			paraMap.put("col4","Auth_Code_Success");
+			paraMap.put("col5","Onnet T&C");
+			paraMap.put("col6","Offnet T&C");
+			paraMap.put("col7","USSD");
+			paraMap.put("col8","SMS");
+			paraMap.put("col9","MSISDN");
+			paraMap.put("col10","Auth_Code_Fail");
+			paraMap.put("col11","Token API Call");
+			paraMap.put("col12","Auth Count");
+			paraMap.put("col13","Registration Count");
+			pfdGen.generatExcelDR("/repository/deployment/server/jaggeryapps/portal/tmp/","/repository/deployment/server/jaggeryapps/portal/resources/report2",map,paraMap);
+		}else if(downloadParam=="msisdnPdf"){
+			response.addHeader("Content-Disposition", "attachment; filename="+operatorParam+"_"+gadgetName+".pdf");
+			fileName = pfdGen.getUuid()+".pdf";
+			paraMap.put("date","Date");
+			paraMap.put("col1","MSISDN");
+			paraMap.put("col2","Status");
+			paraMap.put("col3","Failed Reason");
+			pfdGen.generatPdfMsisdn("/repository/deployment/server/jaggeryapps/portal/tmp/","/repository/deployment/server/jaggeryapps/portal/resources/reportMsisdn",map,paraMap);
+		}
+		var path = "../../tmp/"+fileName;
+		var file1 = new File(path);
+		file1.open('r');
+		print(file1.getStream());
+		file1.close();
+		file1.del();
+	}
+}());
+%>
