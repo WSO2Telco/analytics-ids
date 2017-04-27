@@ -52,7 +52,8 @@
                     "discoveryURL": "https://india.discover.mobileconnect.io/gsma/v2/discovery/?Redirect_URL=https://www.goibibo.com/api/auth/v1.0/mobileconnect/callback",
                     "dscoveryAuthCode": "OTc3YjMyOGUtZTVlZi00NWY1LTgxYTktOTg5MDA5MWI2NDA3OmUzNTRjMzNjLTdjYTAtNDdjMy04MGUwLWZhZGMxMzIxNDY0Zg=="
                 },
-                "authRequestEndpoint": "https://mconnect.preprod.wso2telco.com/{operator}/oauth2/authorize"
+                "authRequestEndpoint": "https://mconnect.preprod.wso2telco.com/{operator}/oauth2/authorize",
+                "testMsisdn": "912222222222"
             }
         }
     },

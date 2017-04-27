@@ -20,8 +20,11 @@
     var discoveroperator = api.discoveroperator(discoveryAuthCode, discoveryURL, msisdn);
     var operator = discoveroperator.operator;
 
-    //When testing this functionality uncomment this line
-    //operator='spark';
+    //Use for test purposes
+    if(msisdn === configs.authentication.methods.oidcConfiguration.testMsisdn){
+        operator='spark';
+    }
+
 
     if(operator == ""){
         response.sendError(404, 'requested MSISDN is not registered');
