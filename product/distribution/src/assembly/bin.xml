@@ -309,7 +309,7 @@
             </includes>
         </fileSet>
 
-	<!-- Start of Telco MIG DAS Dashboard portal Jaggery app -->
+    <!-- Start of Telco MIG DAS Dashboard portal Jaggery app -->
         <fileSet>
             <directory>../../components/jaggeryapps/portal</directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaggeryapps/portal</outputDirectory>
@@ -318,12 +318,13 @@
 
         <!-- Dashboard portal Jaggery app. Should be copied to <DAS_HOME>/repository/deployment/server/jaggeryapps -->
         <!-- TODO remove exclusions after upgrading to carbon-dashboards 1.0.19 -->
-        <fileSet>
+        <!--fileSet>
             <directory>
                 ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/deployment/server/jaggeryapps/portal
             </directory>
+
             <outputDirectory>${pom.artifactId}-${project.version}/repository/deployment/server/jaggeryapps/portal</outputDirectory>
-        </fileSet>
+        </fileSet-->
         <!-- END UES related dashboard artifacts -->
 
 
@@ -366,9 +367,9 @@
                 ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/deployment/server/jaggeryapps/
             </directory>
             <outputDirectory>${pom.artifactId}-${project.version}/repository/deployment/server/jaggeryapps</outputDirectory>
-            <includes>
-                <include>**/*.*</include>
-            </includes>
+            <excludes>
+                <exclude>portal/**</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/dbscripts/ml/</directory>
@@ -702,7 +703,7 @@
             <fileMode>644</fileMode>
         </file>
 
-		<!-- Analytics REST APIs WebApp -->
+        <!-- Analytics REST APIs WebApp -->
         <file>
             <source>
                 ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/deployment/server/webapps/analytics.war
@@ -1104,36 +1105,36 @@
         </file>
 
 
-        <file>
+        <!--file>
             <source>
                 ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/data/report.jrxml
             </source>
-            <outputDirectory>${pom.artifactId}-${project.version}</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${project.version}</outputDirectory-->
             <!--commented since this tag causes issues in maven assembly plugin when copying zip formats-->
             <!--filtered>true</filtered-->
-            <fileMode>644</fileMode>
-        </file>
+            <!--fileMode>644</fileMode>
+        </file-->
 
         <!-- Analytics JS APIs artifacts -->
-        <file>
+        <!--file>
             <source>
                 ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/deployment/server/jaggeryapps/portal/controllers/apis/analytics.jag
             </source>
-            <outputDirectory>${pom.artifactId}-${project.version}/repository/deployment/server/jaggeryapps/portal/controllers/apis</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${project.version}/repository/deployment/server/jaggeryapps/portal/controllers/apis</outputDirectory-->
             <!--commented since this tag causes issues in maven assembly plugin when copying zip formats-->
             <!--filtered>true</filtered-->
-            <fileMode>644</fileMode>
-        </file>
+            <!--fileMode>644</fileMode>
+        </file-->
 
-        <file>
+        <!--file>
             <source>
                 ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/deployment/server/jaggeryapps/portal/js/carbon-analytics.js
             </source>
-            <outputDirectory>${pom.artifactId}-${project.version}/repository/deployment/server/jaggeryapps/portal/js</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${project.version}/repository/deployment/server/jaggeryapps/portal/js</outputDirectory-->
             <!--commented since this tag causes issues in maven assembly plugin when copying zip formats-->
             <!--filtered>true</filtered-->
-            <fileMode>644</fileMode>
-        </file>
+            <!--fileMode>644</fileMode>
+        </file-->
         <!--END Analytics JS APIs artifacts -->
 
     </files>

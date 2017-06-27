@@ -1,15 +1,7 @@
 instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/);\
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/);\
-org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/);\
-org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/portal/);\
-org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/portal/js/);\
-org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/portal/tmp/);\
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/carbonapps/);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2telco.analytics.report.generator_${feature.version}/org_wso2telco_analytics_ids_report-alert-generation-1.0.0.car,target:${installFolder}/../../deployment/server/carbonapps/org_wso2telco_analytics_ids_report-alert-generation-1.0.0.car,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2telco.analytics.report.generator_${feature.version}/report.jrxml,target:${installFolder}/../../data/report.jrxml,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../deployment/server/jaggeryapps/portal/js/ds-ajax-api.js,target:${installFolder}/../../deployment/server/jaggeryapps/portal/js/ds-ajax-api_bckp.js,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../deployment/server/jaggeryapps/portal/extensions/themes/basic/js/dashboard-extensions.js,target:${installFolder}/../../deployment/server/jaggeryapps/portal/extensions/themes/basic/js/dashboard-extensions_bckp.js,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2telco.analytics.report.generator_${feature.version}/ds-ajax-api.js,target:${installFolder}/../../deployment/server/jaggeryapps/portal/js/ds-ajax-api.js,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2telco.analytics.report.generator_${feature.version}/dashboard-extensions.js,target:${installFolder}/../../deployment/server/jaggeryapps/portal/extensions/themes/basic/js/dashboard-extensions.js,overwrite:true);\
+
 
