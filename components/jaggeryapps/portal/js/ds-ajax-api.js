@@ -130,7 +130,7 @@
     var username;
     var hostname;
     var port;
-    var encodeHash = false;
+    var encodeHash = true;
 
     /**
      * Serialize the page into formatted hash.
