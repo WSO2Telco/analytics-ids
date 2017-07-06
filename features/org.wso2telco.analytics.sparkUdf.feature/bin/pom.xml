@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<parent>
-		<groupId>org.wso2telco.analytics</groupId>
+		<groupId>org.wso2telco.product.analytics</groupId>
 		<artifactId>org.wso2telco.analytics.ids</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
@@ -77,7 +77,7 @@
 								</properties>
 							</adviceFile>
 							<bundles>
-								<bundleDef>org.wso2telco.analytics:org.wso2telco.analytics.sparkUdf:${pom.version}</bundleDef>
+								<bundleDef>org.wso2telco.product.analytics:org.wso2telco.analytics.sparkUdf:${project.version}</bundleDef>
 							</bundles>
 						</configuration>
 					</execution>

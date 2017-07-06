@@ -18,14 +18,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2telco.analytics</groupId>
+        <groupId>org.wso2telco.product.analytics</groupId>
         <artifactId>org.wso2telco.analytics.ids</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>wso2analytics-ids</artifactId>
+    <artifactId>wso2telco-analytics-ids</artifactId>
     <packaging>jar</packaging>
     <name>WSO2 Data Analytics Server - Distribution</name>
     <description>WSO2 Data Analytics Server Distribution</description>
@@ -116,14 +116,14 @@
                                 <mkdir dir="${tempdir}" />
                                 <unzip dest="${tempdir}">
                                     <fileset dir="target">
-                                        <include name="wso2analytics-ids-${project.version}.zip" />
+                                        <include name="wso2telco-analytics-ids-${project.version}.zip" />
                                     </fileset>
                                 </unzip>
                                 <copy todir="target/wso2carbon-core-${carbon.kernel.version}/repository/components" overwrite="true">
-                                    <fileset dir="${tempdir}/wso2analytics-ids-${project.version}/repository/components">
+                                    <fileset dir="${tempdir}/wso2telco-analytics-ids-${project.version}/repository/components">
                                     </fileset>
                                 </copy>
-                                <delete file="target/wso2analytics-ids-${project.version}.zip" />
+                                <delete file="target/wso2telco-analytics-ids-${project.version}.zip" />
                                 <delete dir="${tempdir}" />
                             </tasks>
                         </configuration>
@@ -273,7 +273,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>false</skip>
                 </configuration>
             </plugin>
         </plugins>
@@ -281,7 +281,7 @@
 
     <properties>
         <identity.jar.version>5.2.0</identity.jar.version>
-        <cep.samples.distribution.version>4.2.1-SNAPSHOT</cep.samples.distribution.version>
+        <cep.samples.distribution.version>4.2.0</cep.samples.distribution.version>
     </properties>
 
 </project>

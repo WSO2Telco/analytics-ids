@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>org.wso2telco.analytics.ids</artifactId>
-        <groupId>org.wso2telco.analytics</groupId>
+        <groupId>org.wso2telco.product.analytics</groupId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <packaging>pom</packaging>
     <!--<dependencies>-->
         <!--<dependency>-->
-            <!--<groupId>org.wso2telco.analytics</groupId>-->
+            <!--<groupId>org.wso2telco.product.analytics</groupId>-->
             <!--<artifactId>org.wso2telco.analytics.report.generator.extension</artifactId>-->
             <!--<version>${analytics.ids.version}</version>-->
         <!--</dependency>-->
@@ -21,19 +19,20 @@
     <artifactId>org.wso2telco.analytics.report.generator.feature</artifactId>
     <build>
         <plugins>
-            <plugin>
+            <!--plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>2.4.1</version>
-                <executions>
-                    <execution>
-                        <id>auto-clean</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+		<configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/resources</directory>
+                            <includes>
+                                <include>*.car</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin-->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.7</version>
@@ -54,6 +53,7 @@
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
+		<version>2.7</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -67,7 +67,7 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>org_wso2telco_analytics_ids_report-alert-generation-1.0.0</include>
+                                        <include>org_wso2telco_analytics_ids_report-alert-generation-1.0.0.car</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
                                     </includes>
@@ -97,11 +97,11 @@
                                     <propertyDef>org.eclipse.equinox.p2.type.group:true</propertyDef>
                                 </properties>
                             </adviceFile>
-                            <!--<bundles>-->
+                            <bundles>
                                 <!--<bundleDef>-->
-                                    <!--org.wso2telco.analytics:org.wso2telco.analytics.report.generator.extension:${analytics.ids.version}-->
+                                    <!--org.wso2telco.product.analytics:org.wso2telco.analytics.report.generator.extension:${analytics.ids.version}-->
                                 <!--</bundleDef>-->
-                            <!--</bundles>-->
+                            </bundles>
                         </configuration>
                     </execution>
                 </executions>
@@ -109,10 +109,10 @@
         </plugins>
 
 
-        <pluginManagement>
-        	<plugins>
+        <!--pluginManagement>
+        	<plugins-->
         		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-        		<plugin>
+        		<!--plugin>
         			<groupId>org.eclipse.m2e</groupId>
         			<artifactId>lifecycle-mapping</artifactId>
         			<version>1.0.0</version>
@@ -143,7 +143,7 @@
         			</configuration>
         		</plugin>
         	</plugins>
-        </pluginManagement>
+        </pluginManagement-->
     </build>
 
 

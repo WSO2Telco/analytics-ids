@@ -8,11 +8,10 @@
 	OR CONDITIONS OF ANY KIND, either express or implied. ~ See the License for 
 	the specific language governing permissions and ~ limitations under the License. -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
-		<groupId>org.wso2telco.analytics</groupId>
+		<groupId>org.wso2telco.product.analytics</groupId>
 		<artifactId>org.wso2telco.analytics.ids</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
@@ -390,17 +389,18 @@
 
 
 								<!-- IDS features -->
-								<feaureArtifactDef>
-									org.wso2telco.analytics:org.wso2telco.analytics.ids.authentication.feature:${analytics.ids.version}
-								</feaureArtifactDef>
+                                                                
+                                                                <feaureArtifactDef>
+                                                                        org.wso2telco.product.analytics:org.wso2telco.analytics.ids.authentication.feature:${project.version}
+                                                                </feaureArtifactDef>
 
-								<feaureArtifactDef>
-									org.wso2telco.analytics:org.wso2telco.analytics.report.generator.feature:${analytics.ids.version}
-								</feaureArtifactDef>
+                                                                <feaureArtifactDef>
+                                                                        org.wso2telco.product.analytics:org.wso2telco.analytics.report.generator.feature:${project.version}
+                                                                </feaureArtifactDef>
 
-								<feaureArtifactDef>
-									org.wso2telco.analytics:org.wso2telco.analytics.sparkUdf.feature:${analytics.ids.version}
-								</feaureArtifactDef>
+                                                                <feaureArtifactDef>
+                                                                        org.wso2telco.product.analytics:org.wso2telco.analytics.sparkUdf.feature:${project.version}
+                                                                </feaureArtifactDef>
 							</featureArtifacts>
 						</configuration>
 					</execution>
@@ -800,21 +800,21 @@
 
 
 								<!-- IDS features -->
-								<feature>
-									<id>org.wso2telco.analytics.ids.authentication.feature.group</id>
-									<version>${analytics.ids.version}</version>
-								</feature>
 
-								<feature>
-									<id>org.wso2telco.analytics.report.generator.feature.group</id>
-									<version>${analytics.ids.version}</version>
-								</feature>
+                                                                <feature>
+                                                                        <id>org.wso2telco.analytics.ids.authentication.feature.group</id>
+                                                                        <version>${project.version}</version>
+                                                                </feature>
 
-								<feature>
-									<id>org.wso2telco.analytics.sparkUdf.feature.group</id>
-									<version>${analytics.ids.version}</version>
-								</feature>
+                                                                <feature>
+                                                                        <id>org.wso2telco.analytics.report.generator.feature.group</id>
+                                                                        <version>${project.version}</version>
+                                                                </feature>
 
+                                                                <feature>
+                                                                        <id>org.wso2telco.analytics.sparkUdf.feature.group</id>
+                                                                        <version>${project.version}</version>
+                                                                </feature>
 							</features>
 						</configuration>
 					</execution>
@@ -828,8 +828,7 @@
 						<phase>package</phase>
 						<configuration>
 							<tasks>
-								<replace token="false" value="true"
-									dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components">
+								<replace token="false" value="true" dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components">
 									<include name="**/bundles.info" />
 								</replace>
 							</tasks>

@@ -8,12 +8,6 @@
     <property name="ARTIFACT_DIRECTORY" value="ids-report-alert-generation"/>
     <property name="ARTIFACT_NAME" value="org_wso2telco_analytics_ids_report-alert-generation-1.0.0"/>
 
-    <target name="zip" depends="clean,pre-configure">
-        <zip destfile="${resource-dir}/${ARTIFACT_NAME}.car">
-            <zipfileset dir="${ARTIFACT_DIRECTORY}"/>
-        </zip>
-    </target>
-
     <target name="clean">
         <delete dir="${target-dir}"/>
     </target>
@@ -21,5 +15,13 @@
     <target name="pre-configure">
         <mkdir dir="${resource-dir}"/>
     </target>
+
+ <target name="zip" depends="clean,pre-configure">
+        <zip destfile="${resource-dir}/${ARTIFACT_NAME}.car">
+            <zipfileset dir="${ARTIFACT_DIRECTORY}"/>
+        </zip>
+    </target>
+
+
 </project>
 

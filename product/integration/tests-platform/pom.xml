@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>wso2das-integration</artifactId>
-        <groupId>org.wso2telco.analytics</groupId>
+        <groupId>org.wso2telco.product.analytics</groupId>
         <version>3.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
