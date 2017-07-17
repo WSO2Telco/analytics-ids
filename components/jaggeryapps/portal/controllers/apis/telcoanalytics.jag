@@ -99,6 +99,7 @@
     var TYPE_WRONG_EP=26;
     var TYPE_TOTAL_FEDERATED_SUCCESS_ATTEMPTS=27;
     var TYPE_TOTAL_FEDERATED_FAILED_ATTEMPTS=28;
+	var TYPE_USER_REG=29;
     var log = new Log();
     var carbon = require('carbon');
     var configs = require('/configs/designer.json');
