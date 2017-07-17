@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>offline_registration_breakdown_analytics</Name>
+    <Script>
+        create temporary table offline_user_reg_extended using CarbonAnalytics options (tableName "COM_WSO2TELCO_OFFLINE_USER_REGISTRATION", schema "msisdn STRING,operator STRING,status STRING,_timestamp LONG -i",  incrementalParams "offline_user_reg_ext, DAY");
+
+        create temporary table sp_user_reg_extended using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_DAILY_REGISTRATIONS",schema "day STRING -i, operator STRING -i, regCount LONG, _timestamp LONG -i", incrementalParams "sp_user_reg_ext, DAY");
+
+        create temporary table summary_offline_user_reg using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_OFFLINE_REG_BREAKDOWN", schema "day STRING -i, operator STRING -i, new_reg_sp LONG, new_reg_offline LONG, offline_update_to LONG, offline_update_from LONG, _timestamp LONG -i", primaryKeys "day, operator");
+
+        insert into table summary_offline_user_reg
+        select all_tbl.day, all_tbl.operator, 
+        checkNullforLong(sp_user_reg_extended.regCount) as new_reg_sp,
+        checkNullforLong(reg_offline_tbl.reg_count) as new_reg_offline,
+        checkNullforLong(update_to_tbl.to_count) as offline_update_to,
+        checkNullforLong(update_frm_tbl.from_count) as offline_update_from,
+        all_tbl._timestamp as _timestamp
+        from
+        (
+            select day,operator,_timestamp from sp_user_reg_extended UNION 
+            select first(day) as day, operator, _timestamp from 
+                (
+                select getDateString(_timestamp) as day, operator, getDateTimestamp(_timestamp) as _timestamp from offline_user_reg_extended
+                )
+            as all_select group by _timestamp, operator
+
+        ) as all_tbl
+        LEFT JOIN
+        sp_user_reg_extended
+        on all_tbl.day=sp_user_reg_extended.day AND all_tbl.operator=sp_user_reg_extended.operator
+        LEFT JOIN
+            (
+            select first(day) as day, operator, count(*) as reg_count, _timestamp from
+                (
+                select getDateString(_timestamp) as day, operator, msisdn, getDateTimestamp(_timestamp) as _timestamp from offline_user_reg_extended
+                where status='OFFLINE_USER_REGISTRATION'
+                )
+            as reg_select group by _timestamp, operator
+            )
+        as reg_offline_tbl
+        on all_tbl.day=reg_offline_tbl.day AND all_tbl.operator=reg_offline_tbl.operator
+        LEFT JOIN
+            (
+            select first(day) as day, operator, count(*) as to_count, _timestamp from
+                (
+                select getDateString(_timestamp) as day, operator, msisdn, getDateTimestamp(_timestamp) as _timestamp from offline_user_reg_extended
+                where status='OFFLINE_OPERATOR_MOVE_IN'
+                )
+            as reg_select group by _timestamp, operator
+            )
+        as update_to_tbl
+        on all_tbl.day=update_to_tbl.day AND all_tbl.operator=update_to_tbl.operator
+        LEFT JOIN
+            (
+            select first(day) as day, operator, count(*) as from_count, _timestamp from
+                (
+                select getDateString(_timestamp) as day, operator, msisdn, getDateTimestamp(_timestamp) as _timestamp from offline_user_reg_extended
+                where status='OFFLINE_OPERATOR_MOVE_OUT'
+                )
+            as reg_select group by _timestamp, operator
+            )
+        as update_frm_tbl
+        on all_tbl.day=update_frm_tbl.day AND all_tbl.operator=update_frm_tbl.operator;
+        
+
+        create temporary table summary_operator_offline_user_reg_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_OFFLINE_USER_REGISTRATION_TOTAL", schema "operator STRING -i, total_usercount LONG, _timestamp LONG -i");
+
+        create temporary table summary_operator_user_reg_sp_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_USER_REGISTRATION_SP_TOTAL", schema "operator STRING -i, total_usercount LONG, _timestamp LONG -i");
+
+        create temporary table com_wso2telco_summary_operator_registration_cumulative_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_REGISTRATION_CUMULATIVE_TOTAL", schema "operator STRING -i, new_reg_sp_cumulative LONG -i, new_reg_offline_cumulative LONG -i", primaryKeys "operator", mergeSchema "false" );
+
+        insert into table com_wso2telco_summary_operator_registration_cumulative_total
+        select spOperator, checkNullforLong(spcount) as spcount, checkNullforLong(offlinecount) as offlinecount 
+        from(
+            select operator as spOperator, first(total_usercount) as spcount
+            from summary_operator_user_reg_sp_total
+            where operator != 'spark'
+            group by operator
+            ) as sp_select
+            LEFT JOIN
+            (
+                select operator as offlineOperator, first(total_usercount) as offlinecount
+                from summary_operator_offline_user_reg_total
+                group by operator
+            ) as offline_select on sp_select.spOperator = offline_select.offlineOperator;
+
+
+        INCREMENTAL_TABLE_COMMIT offline_user_reg_ext;
+        INCREMENTAL_TABLE_COMMIT sp_user_reg_ext;
+    
+    </Script>
+    <CronExpression>0 0 1 1/1 * ? *</CronExpression>
+</Analytics>

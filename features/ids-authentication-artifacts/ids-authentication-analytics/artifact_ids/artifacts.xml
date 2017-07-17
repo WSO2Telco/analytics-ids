@@ -74,5 +74,11 @@
 	<dependency artifact="RealtimeAuthCountTotalStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DefinitionFileDownload" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="SuccessLoginCountExecutionPlan" version="1.0.0" include="true" serverRole="ComplexEventProcessor"/>
+	<dependency artifact="OfflineUserRegistrationEventReceiver" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="OfflineUserRegistrationEventSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="OfflineUserRegistrationEventStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DownloadOfflineUserRegistration" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="OfflineUserRegistrationSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="OfflineRegistrationBreakdownSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
     </artifact>
 </artifacts>
