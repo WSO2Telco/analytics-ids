@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>offline_user_registration_analytics</Name>
+    <Script>
+		create temporary table offline_user_registration using CarbonAnalytics options (tableName "COM_WSO2TELCO_OFFLINE_USER_REGISTRATION", schema "msisdn STRING,operator STRING,status STRING,_timestamp LONG -i",  incrementalParams "offline_user_reg, DAY");
+
+		create temporary table offline_user_registration_daily using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_OFFLINE_USER_REGISTRATIONS_DAILY",schema "day STRING -i, operator STRING -i, total_usercount LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
+
+		create temporary table offline_user_registration_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_OFFLINE_USER_REGISTRATION_TOTAL",schema "operator STRING -i, total_usercount LONG -i, _timestamp LONG -i", primaryKeys "operator");
+
+		create temporary table sp_user_registration_daily using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_DAILY_REGISTRATIONS",schema "day STRING -i, operator STRING -i, regCount LONG -i, _timestamp LONG -i");
+
+		create temporary table sp_user_registration_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_USER_REGISTRATION_SP_TOTAL",schema "operator STRING -i,total_usercount LONG -i, _timestamp LONG -i", primaryKeys "operator");
+
+		INSERT INTO TABLE offline_user_registration_daily
+		select first(day),operator, count(*) as total_usercount,dateTimestamp from(
+			select getDateString(_timestamp) as day, operator,msisdn,getDateTimestamp(_timestamp) as dateTimestamp
+			from offline_user_registration
+			where status='OFFLINE_USER_REGISTRATION'
+		) as outer1 group by outer1.operator, outer1.dateTimestamp;
+
+
+		INSERT INTO TABLE offline_user_registration_total
+			select operator,sum(total_usercount),max(_timestamp)
+			from offline_user_registration_daily
+			group by operator;
+
+		INSERT INTO TABLE sp_user_registration_total
+			select operator,sum(regCount),max(_timestamp)
+			from sp_user_registration_daily
+			group by operator;
+
+        INCREMENTAL_TABLE_COMMIT offline_user_reg;
+
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>

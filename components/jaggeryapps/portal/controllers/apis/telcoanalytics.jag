@@ -92,6 +92,7 @@
 	var TYPE_MSISDNS_SUCCESS_FAILED_REPORT=24;
 	var TYPE_LOGGING_CHECK=25;
 	var TYPE_WRONG_EP=26;
+	var TYPE_USER_REG=28;
     var log = new Log();
     var carbon = require('carbon');
     var configs = require('/configs/designer.json');
@@ -1267,6 +1268,23 @@
                         case USSD_ANALYSIS_OPERATORWISE :
                         {
                              if (isOperator || (isAdmin && (operatorParam!="undefined" && operatorParam!="" && operatorParam!=null))) {
+                                 result = {
+                                      message: true,
+                                      statusCode: 200,
+                                      status: "SUCCESS"
+                                   };
+                              } else {
+                                 result = {
+                                      message: false,
+                                      statusCode: 200,
+                                      status: "FAILED"
+                                 };
+                              }
+                              break;
+                        }
+						case TYPE_USER_REG :
+                        {
+                             if ((isOperator || isAdmin) && (appParam == "undefined" || appParam == "")) {
                                  result = {
                                       message: true,
                                       statusCode: 200,

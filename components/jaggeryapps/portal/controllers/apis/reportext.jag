@@ -40,6 +40,8 @@
 	var OPERATOR_HE_BREAKDOWNS="COM_WSO2TELCO_SUMMARY_OPERATOR_HE_BREAKDOWNS";
 	var APP_HE_BREAKDOWNS="COM_WSO2TELCO_SUMMARY_APP_HE_BREAKDOWNS";
 	var TOTAL_HE_BREAKDOWNS="COM_WSO2TELCO_SUMMARY_TOTAL_HE_BREAKDOWNS";
+	var USER_REG_OFFLINE_BREAKDOWN_TABLE="COM_WSO2TELCO_SUMMARY_OPERATOR_OFFLINE_REG_BREAKDOWN";
+	var USER_REG_OFFLINE_CUMULATIVE_TABLE="COM_WSO2TELCO_SUMMARY_OPERATOR_REGISTRATION_CUMULATIVE_TOTAL";
 	var TIME_FROM_PARAM = "timeFrom";
 	var FILE_NAME_PARAM = "fileName";
 	var TIME_TO_PARAM = "timeTo";
@@ -79,6 +81,8 @@
 	var TYPE_DETAIL_REPORT =21;//
 	var TYPE_MSISDNS_SUCCESS_FAILED_REPORT =22;//
 	var USSD_ANALYSIS_OPERATORWISE=23;
+	var TYPE_USER_REG_BREAKDOWN=27;
+	var TYPE_USER_REG_CUMULATIVE_BREAKDOWN=28;
 	var log = new Log();
 	var carbon = require('carbon');
 	var utils = require('/modules/utils.js');
@@ -404,6 +408,164 @@
 								}
 								break;
 							}
+							case TYPE_USER_REG_BREAKDOWN :
+ 								{
+								if( isOperator || isAdmin){
+									var operatorquery="";
+									var operatorStr="ALL";
+									if(operatorParam != null && operatorParam !="" && operatorParam != "undefined"){
+										operatorquery+="  AND operator:\""+operatorParam+"\"";
+										operatorStr=operatorParam;
+									}
+									var userRegistration=timeFilterQuery + operatorquery;
+									searchParams = {
+										query: userRegistration,
+										start: 0,
+										count: MAX_ALLOWED_RECORDS,
+										sortBy: [{
+											"field": "_timestamp",
+											"sortType": "ASC"
+										}]
+ 									};
+ 									var resultUserRegBreakdown = connector.search(loggedInUser, USER_REG_OFFLINE_BREAKDOWN_TABLE, stringify(searchParams));
+ 
+ 									if (resultUserRegBreakdown!=null && resultUserRegBreakdown.getStatusCode()==200) {
+ 
+ 										var regDataBreakdown = JSON.parse(resultUserRegBreakdown.getMessage());
+ 
+ 										response.contentType = "application/octet-stream";
+ 										var UUID = Packages.java.util.UUID;
+ 										var uuidFile = UUID.randomUUID().toString();
+ 										var file = new File("../../tmp/"+uuidFile+".csv");
+ 										file.open("w+");
+ 
+ 										if(timeFromParam=="undefined"||timeFromParam==""){
+ 											timeFromParam="NA";
+ 										}else{
+ 											var fromDate =  new Date(parseFloat(timeFromParam));
+ 											timeFromParam=fromDate.toString();
+ 										}
+ 										if(timeToParam=="undefined"||timeToParam==""){
+ 											timeToParam="NA";
+ 										}else{
+ 											var toDate =  new Date(parseFloat(timeToParam));
+ 											timeToParam = toDate.toString();
+ 										}
+ 										response.addHeader("Content-Disposition", "attachment; filename="+operatorStr+"_report"+".csv");
+ 										file.write("Operator,"+operatorStr+"\n");
+ 										file.write("From,"+timeFromParam+",,"+"To,"+timeToParam+"\n\n");
+ 										var firstLine="Day/Operator,";
+ 										var dayMap = new Packages.java.util.TreeMap;
+ 										var countSet = new Packages.java.util.TreeSet;
+ 										var operatorSet= new Packages.java.util.TreeSet;
+ 										var operatorSpTotal=new Packages.java.util.TreeMap;
+ 										var operatorOffTotal=new Packages.java.util.TreeMap;
+ 										regDataBreakdown.forEach(function (record, i) {
+ 											var values = record.values;
+ 											var day=values["day"];
+ 											var operator=values["operator"];
+ 											var counts=[values["new_reg_sp"],values["new_reg_offline"],values["offline_update_to"],values["offline_update_from"]];
+ 											if (!dayMap.containsKey(day)) {
+ 												var operatorMapForDay = new Packages.java.util.TreeMap;
+ 												dayMap.put(day,operatorMapForDay);
+ 											}
+ 											if (!operatorSet.contains(operator)) {
+ 													operatorSet.add(operator);
+ 												}
+ 											var operatorMapForDay=dayMap.get(day);
+ 											if (!operatorMapForDay.containsKey(operator)) {
+ 												operatorMapForDay.put(operator,counts);
+ 											}
+ 										});
+ 
+ 										for(var i=0;i<operatorSet.toArray().length;i++) {
+ 											firstLine+=operatorSet.toArray()[i]+",,,,";
+ 										}
+ 										var secondLine=",";
+ 										for(var i=0;i<operatorSet.toArray().length;i++) {
+ 											secondLine+="New Registrations SP"+","+"New Registrations Offline"+","+"Offline update From Different Operator"+","+"Offline Update to Different Operator"+",";
+ 
+ 										}
+ 										if (operatorSet.toArray().length==0){
+ 											firstLine="No records available";
+ 										}
+ 										var dayMapKeys=dayMap.keySet().toArray();
+ 										var content=firstLine+"\n"+secondLine+"\n";
+ 										for(var i=0;i<dayMapKeys.length;i++) {
+ 											var operatorMap=dayMap.get(dayMapKeys[i]);
+ 											var operatorMapKeys=operatorSet.toArray();
+ 											content+=dayMapKeys[i]+",";
+ 											for(var j=0;j<operatorMapKeys.length;j++) {
+ 												var valueMap=operatorMap.get(operatorMapKeys[j]);
+ 												if(valueMap!=null){
+ 													for(var k=0;k<4;k++) {
+ 														if(valueMap[k]==null){
+ 															content+="0"+",";
+ 														}else{
+ 															content+=valueMap[k]+",";
+ 														}
+ 													}
+ 												}else{
+ 													content+="0,0,0,0,"
+ 												}
+ 											}
+ 											content+="\n";
+ 										}
+ 										file.write(content);
+ 										print(file.getStream());
+ 										file.close();
+ 										file.del();
+ 									}
+ 								}
+ 								break;
+ 							}
+
+ 							case TYPE_USER_REG_CUMULATIVE_BREAKDOWN :
+ 							{	
+
+ 							if(isOperator || isAdmin){
+									var operatorquery="";
+									var operatorStr="ALL";
+									if(operatorParam != null && operatorParam !="" && operatorParam != "undefined"){
+										operatorquery+="operator:\""+operatorParam+"\"";
+										operatorStr=operatorParam;
+									}
+									var offlinequery= operatorquery;
+									searchParams = {
+										query: offlinequery,
+										start: 0,
+										count: MAX_ALLOWED_RECORDS,
+										sortBy: [{
+											"field": "_timestamp",
+											"sortType": "ASC"
+										}]
+									};
+									var result = connector.search(loggedInUser, USER_REG_OFFLINE_CUMULATIVE_TABLE, stringify(searchParams));
+									if (result!=null && result.getStatusCode() == 200) {
+										var oflinedata = JSON.parse(result.getMessage());
+										if(downloadParam=="drXl"){
+											response.contentType = "application/octet-stream";
+											var UUID = Packages.java.util.UUID;
+											var uuidFile = UUID.randomUUID().toString();
+											var file = new File("../../tmp/"+uuidFile+".csv");
+											file.open("w+");
+
+											response.addHeader("Content-Disposition", "attachment; filename="+operatorStr+"_report"+".csv");
+											file.write("Operator,"+operatorStr+"\n\n");
+											file.write("Operator,New Registrations SP Cumulative,New Registrations Offline Cumulative"+"\n");
+											oflinedata.forEach(function (record, i) {
+												var values = record.values;
+												file.write(values["operator"]+","+values["new_reg_sp_cumulative"]+","+values["new_reg_offline_cumulative"]+"\n");
+											});
+											print(file.getStream());
+											file.close();
+											file.del();
+										}
+									}
+								}
+								break;
+							}
+							
 						default:
 							result = '{ "status": "Failed", "statusCode": "500", "message": "Unidentified operation" }';
 					}
