@@ -2,9 +2,11 @@
 <Analytics>
     <Name>logins_vs_attempts_stat_analytics</Name>
     <Script>
-        create temporary table user_status_raw_log_v_atmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,isNewUser BOOLEAN -i,_timestamp LONG -i",  incrementalParams "user_status_raw_attemptsVlogins, DAY");
+        create temporary table user_status_raw_log_v_atmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,msisdn STRING,isNewUser BOOLEAN -i,_timestamp LONG -i",  incrementalParams "user_status_raw_attemptsVlogins, DAY");
 
         create temporary table user_status_meta_raw_log_v_atmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING, isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_raw_attemptsVlogins, DAY");
+
+            create temporary table com_wso2telco_operatoripranges_he_breakdown using CarbonAnalytics options (tableName "COM_WSO2TELCO_OPERATORIPRANGES", schema "id LONG,operator STRING, isEnable BOOLEAN, minValue STRING, maxValue STRING, _timestamp LONG -i" );
 
         create temporary table token_endpoint_raw_log_v_atmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_TOKEN_ENDPOINT", schema "authenticatedUser STRING, state STRING, nonce STRING, amr STRING, authenticationCode STRING, accessToken STRING, sourceIP STRING, contentType STRING, clientID STRING, refreshToken STRING, tokenClaims STRING, returnedResult STRING, statusCode STRING, sessionID STRING,_timestamp LONG -i",  incrementalParams "token_endpoint_raw_attemptsVlogins, DAY");
 
@@ -28,23 +30,98 @@
         select sessntime.sessionID,getDateTimestamp(sessntime._timestamp) as dayTimestamp,sessnopnapp.operator,sessnopnapp.appId
         from ( select sessionID, max(_timestamp) as _timestamp from token_endpoint_raw_log_v_atmp group by sessionID ) as sessntime	inner join ( select sessionID, min(operator) as operator,min(appId) as appId
         from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID ) as sessnopnapp on sessnopnapp.sessionID=sessntime.sessionID ) as totaltoken group by totaltoken.dayTimestamp,totaltoken.operator,totaltoken.appId ) as tottoken on tottoken.dayTimestamp=totauth.dayTimestamp and tottoken.operator=totauth.operator and tottoken.appId=totauth.appId
-        left join (
-        select count(onnetauth.sessionID) as total_authCount,onnetauth.dayTimestamp, onnetauth.operator, onnetauth.appId
-        from (
-        select sessns.sessionID, getDateTimestamp(sessns._timestamp) as dayTimestamp, sessnopnapp.operator, sessnopnapp.appId
-        from (
-        select sessionID, min(_timestamp) as _timestamp from user_status_raw_log_v_atmp group by sessionID) as sessns
-        inner join ( select singlrecdmeta.sessionID,allmeta.operator, allmeta.appId, allmeta.isMSISDNHeader from ( select sessionID, max(_timestamp) as _timestamp from                user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID ) as singlrecdmeta
-        inner join ( select sessionID,first(operator) as operator, first(appId) as appId, first(isMSISDNHeader) as isMSISDNHeader,_timestamp from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID,_timestamp ) as allmeta on allmeta.sessionID=singlrecdmeta.sessionID and allmeta._timestamp=singlrecdmeta._timestamp where allmeta.isMSISDNHeader = true ) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID) as onnetauth group by onnetauth.dayTimestamp,onnetauth.operator,onnetauth.appId ) as totonnetauth on totonnetauth.dayTimestamp=totauth.dayTimestamp and totonnetauth.operator=totauth.operator and totonnetauth.appId=totauth.appId
-        left join (
-        select count(offentauth.sessionID) as total_authCount,offentauth.dayTimestamp,offentauth.operator, offentauth.appId
-        from ( select sessns.sessionID, getDateTimestamp(sessns._timestamp) as dayTimestamp, sessnopnapp.operator,sessnopnapp.appId
-        from (
-        select  sessionID, min(_timestamp) as _timestamp from user_status_raw_log_v_atmp group by sessionID) as sessns
-        inner join ( select singlrecdmeta.sessionID, allmeta.operator, allmeta.appId, allmeta.isMSISDNHeader from ( select sessionID, max(_timestamp) as _timestamp from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID ) as singlrecdmeta
-        inner join (
-        select sessionID,first(operator) as operator, first(appId) as appId, first(isMSISDNHeader) as isMSISDNHeader,_timestamp
-        from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID,_timestamp	) as allmeta on allmeta.sessionID=singlrecdmeta.sessionID and allmeta._timestamp=singlrecdmeta._timestamp where allmeta.isMSISDNHeader = false ) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID) as offentauth group by offentauth.dayTimestamp,offentauth.operator,offentauth.appId ) as totoffentauth on totoffentauth.dayTimestamp=totauth.dayTimestamp and totoffentauth.operator=totauth.operator and totoffentauth.appId=totauth.appId
+
+            left join (            
+            select count(onnetauth.sessionID) as total_authCount,onnetauth.dayTimestamp, onnetauth.operator, onnetauth.appId 
+            from ( 
+                SELECT temp.sessionID,first(temp.dayTimestamp) as dayTimestamp, first(temp.operator) as operator, first(temp.appId) as appId
+                FROM (
+                    select IF(checkIpRange(iprangesTemp.minValue , iprangesTemp.maxValue, operatorsourceTemp.sourceIP),1,0) as iprangecheck, operatorsourceTemp.sessionID, operatorsourceTemp.sourceIP,  operatorsourceTemp.dayTimestamp, operatorsourceTemp.operator,operatorsourceTemp.appId 
+                    from(
+                        select sessns.sessionID,sourceipjoin.sourceIP, getDateTimestamp(sessnopnapp._timestamp) as dayTimestamp, sessnopnapp.operator, sessnopnapp.appId 
+                        from (      
+                            select distinct sessionID
+                            from user_status_raw_log_v_atmp 
+                            where msisdn !="false" or msisdn IS NULL
+                            except 
+                            SELECT newUR.sessionID from(
+                                select distinct sessionID from user_status_raw_log_v_atmp where status="SEND_SMS" or status="SEND_SMS_FAIL" and isNewUser=true   
+                                except
+                                select distinct sessionID
+                                from user_status_meta_raw_log_v_atmp 
+                                where operator IS NOT NULL and appId IS NOT NULL group by sessionID
+                            ) as newUR
+                        ) as sessns 
+                        inner join (         
+                            select sessionID,first(operator) as operator, first(appId) as appId, min(_timestamp) as _timestamp
+                            from user_status_meta_raw_log_v_atmp 
+                            where operator IS NOT NULL and appId IS NOT NULL group by sessionID                
+                        ) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID 
+                        inner join ( 
+                            select sessionID, first(sourceIP)  as sourceIP
+                            from  user_status_raw_log_v_atmp
+                            where sourceIP is not null
+                            group by sessionID 
+                        ) as sourceipjoin on sourceipjoin.sessionID=sessns.sessionID 
+                    )as operatorsourceTemp 
+                    left JOIN (
+                        select minValue, maxValue, operator, isEnable
+                        FROM com_wso2telco_operatoripranges_he_breakdown
+                        where isEnable = true
+                    ) as iprangesTemp on iprangesTemp.operator = operatorsourceTemp.operator 
+                ) as temp where iprangecheck=1 group by sessionID       
+            ) as onnetauth group by onnetauth.dayTimestamp,onnetauth.operator,onnetauth.appId
+        ) as totonnetauth on totonnetauth.dayTimestamp=totauth.dayTimestamp and totonnetauth.operator=totauth.operator and totonnetauth.appId=totauth.appId 
+
+        left join ( 
+            select count(offnetauthcount.sessionID) as total_authCount, offnetauthcount.dayTimestamp, offnetauthcount.operator, offnetauthcount.appId 
+            from (
+                SELECT first(temp.iprangecheck), temp.sessionID,  first(temp.dayTimestamp) as dayTimestamp , first(temp.operator) as operator, first(temp.appId) as appId 
+                        from(
+                            SELECT iprangecheckz.iprangecheck, iprangecheckz.sessionID,  iprangecheckz.dayTimestamp , iprangecheckz.operator, iprangecheckz.appId
+                            from(
+                                    SELECT max(offnetauth.iprangecheck) as iprangecheck, offnetauth.sessionID, max(offnetauth.sourceIP) as sourceIP,  min(offnetauth.dayTimestamp) as dayTimestamp, max(offnetauth.operator) as operator, max(offnetauth.appId) as appId
+                                    from(
+                                        select IF(checkIpRange(iprangesTemp.minValue , iprangesTemp.maxValue, operatorsourceTemp.sourceIP),1,0) as iprangecheck, operatorsourceTemp.sessionID, operatorsourceTemp.sourceIP,  operatorsourceTemp.dayTimestamp, operatorsourceTemp.operator,operatorsourceTemp.appId 
+                                        from(
+                                            select sessns.sessionID,sourceipjoin.sourceIP, getDateTimestamp(sessnopnapp._timestamp) as dayTimestamp, sessnopnapp.operator, sessnopnapp.appId 
+                                            from (      
+                                                select distinct sessionID
+                                                from user_status_raw_log_v_atmp 
+                                                where msisdn !="false" or msisdn IS NULL
+                                                except 
+                                                SELECT newUR.sessionID from(
+                                                    select distinct sessionID from user_status_raw_log_v_atmp where status="SEND_SMS" or status="SEND_SMS_FAIL" and isNewUser=true    
+                                                    except
+                                                    select distinct sessionID
+                                                    from user_status_meta_raw_log_v_atmp 
+                                                    where operator IS NOT NULL and appId IS NOT NULL group by sessionID
+                                                ) as newUR
+                                            ) as sessns 
+                                            inner join (         
+                                                select sessionID,first(operator) as operator, first(appId) as appId, min(_timestamp) as _timestamp
+                                                from user_status_meta_raw_log_v_atmp 
+                                                where operator IS NOT NULL and appId IS NOT NULL group by sessionID                
+                                            ) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID 
+                                            inner join ( 
+                                                select sessionID, first(sourceIP)  as sourceIP
+                                                from  user_status_raw_log_v_atmp
+                                                where sourceIP is not null
+                                                group by sessionID 
+                                            ) as sourceipjoin on sourceipjoin.sessionID=sessns.sessionID
+                                        )as operatorsourceTemp 
+                                        left JOIN (
+                                            select minValue, maxValue, operator, isEnable
+                                            FROM com_wso2telco_operatoripranges_he_breakdown
+                                            where isEnable = true
+                                        ) as iprangesTemp on iprangesTemp.operator = operatorsourceTemp.operator        
+                                ) as offnetauth GROUP BY offnetauth.sessionID
+                            ) as iprangecheckz where iprangecheck=0 
+                        )as temp GROUP BY temp.sessionID
+        )as offnetauthcount group by offnetauthcount.dayTimestamp,offnetauthcount.operator,offnetauthcount.appId
+        ) as totoffentauth on totoffentauth.dayTimestamp=totauth.dayTimestamp and totoffentauth.operator=totauth.operator and totoffentauth.appId=totauth.appId
+
+
         left join (
         select count(newuserauth.sessionID) as total_authCount,newuserauth.dayTimestamp, newuserauth.operator, newuserauth.appId
         from (

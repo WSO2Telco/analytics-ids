@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>auth_attempts_scopewise</Name>
+    <Script>
+		create temporary table user_status_raw_log_v_atmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,msisdn STRING,isNewUser BOOLEAN,_timestamp LONG -i",  incrementalParams "user_status_raw_auth_attempts_scopewise, DAY");
+
+	create temporary table user_status_meta_raw_log_v_atmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_raw_auth_attempts_scopewise, DAY");
+
+	create temporary table attempts_scope_wise using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_AUTH_ATTEMPTS_SCOPE_WISE",schema "day STRING -i, operator STRING -i, appID STRING -i,total_authCount_openid LONG -i, total_authCount_mc_india_tc LONG -i, total_authCount_mc_mnv_validate_plus LONG -i, total_authCount_mc_mnv_validate LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID", incrementalParams "summary_auth_attempts_scopewise, DAY");
+
+	create temporary table attempts_operator_scope_wise using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_AUTH_ATTEMPTS_SCOPE_WISE",schema "day STRING -i, operator STRING -i,total_authCount_openid LONG -i, total_authCount_mc_india_tc LONG -i, total_authCount_mc_mnv_validate_plus LONG -i, total_authCount_mc_mnv_validate LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
+
+	create temporary table attempts_app_scope_wise using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_AUTH_ATTEMPTS_SCOPE_WISE",schema "day STRING -i, appID STRING -i,total_authCount_openid LONG -i, total_authCount_mc_india_tc LONG -i, total_authCount_mc_mnv_validate_plus LONG -i, total_authCount_mc_mnv_validate LONG -i, _timestamp LONG -i", primaryKeys "day, appID");
+
+	create temporary table attempts_total_scope_wise using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_AUTH_ATTEMPTS_SCOPE_WISE",schema "day STRING -i,total_authCount_openid LONG -i, total_authCount_mc_india_tc LONG -i, total_authCount_mc_mnv_validate_plus LONG -i, total_authCount_mc_mnv_validate LONG -i, _timestamp LONG -i", primaryKeys "day");
+
+
+	insert into table attempts_scope_wise 
+		SELECT getDateString(all_scopes_tbl.dayTimestamp),
+		   all_scopes_tbl.operator,
+		   all_scopes_tbl.appId,
+		   checkNullforLong(totauth_open.total_authCount_openid),
+		   checkNullforLong(totauth_mc_india_tc.total_authCount_mc_india_tc),
+		   checkNullforLong(totauth_mc_mnv_validate_plus.total_authCount_mc_mnv_validate_plus),
+		   checkNullforLong(totauth_mc_mnv_validate.total_authCount_mc_mnv_validate),
+		   all_scopes_tbl.dayTimestamp
+		FROM
+		  (
+			  SELECT count(totalauth.sessionID) AS total_authCount_openid,
+				  totalauth.dayTimestamp,
+				  totalauth.operator,
+				  totalauth.appId
+		   FROM (
+					 SELECT sessns.sessionID,
+						 getDateTimestamp(time._timestamp) AS dayTimestamp,
+						 sessnopnapp.operator,
+						 sessnopnapp.appId
+				  FROM
+					(
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp 
+						EXCEPT 
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp
+						 WHERE (status="SEND_SMS"
+					   OR status="SEND_SMS_FAIL") AND msisdn !="false" 
+					) AS sessns
+				  INNER JOIN
+					(
+							SELECT sessionID,
+								min(operator) AS operator,
+								min(appId) AS appId
+						 FROM user_status_meta_raw_log_v_atmp
+						 WHERE
+						   operator IS NOT NULL
+						   AND appId IS NOT NULL
+						 GROUP BY sessionID
+					) AS sessnopnapp ON sessnopnapp.sessionID=sessns.sessionID
+				  INNER JOIN
+					(
+						SELECT sessionID,
+							min(_timestamp) AS _timestamp
+						 FROM user_status_raw_log_v_atmp
+						 WHERE status !="SEND_SMS"
+						   OR status!="SEND_SMS_FAIL"
+						 GROUP BY sessionID
+					) AS time ON time.sessionID=sessns.sessionID
+			 ) AS totalauth
+		   GROUP BY totalauth.dayTimestamp,
+					totalauth.operator,totalauth.appId
+		  ) AS all_scopes_tbl
+
+		LEFT JOIN
+				  (
+			  SELECT count(totalauth.sessionID) AS total_authCount_openid,
+				  totalauth.dayTimestamp,
+				  totalauth.operator,
+				  totalauth.appId
+		   FROM (
+					 SELECT sessns.sessionID,
+						 getDateTimestamp(time._timestamp) AS dayTimestamp,
+						 sessnopnapp.operator,
+						 sessnopnapp.appId
+				  FROM
+					(
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp 
+						EXCEPT 
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp
+						 WHERE (status="SEND_SMS"
+					   OR status="SEND_SMS_FAIL") AND msisdn !="false"
+					) AS sessns
+				  INNER JOIN
+					(
+							SELECT sessionID,
+								min(operator) AS operator,
+								min(appId) AS appId
+						 FROM user_status_meta_raw_log_v_atmp
+						 WHERE
+						   operator IS NOT NULL
+						   AND appId IS NOT NULL
+						   AND scope LIKE "%openid%" AND scope NOT LIKE "%mc_india_tc%" AND scope NOT LIKE "%mc_mnv_validate%" AND scope NOT LIKE "%mc_mnv_validate_plus%"
+						 GROUP BY sessionID
+					) AS sessnopnapp ON sessnopnapp.sessionID=sessns.sessionID
+				  INNER JOIN
+					(
+						SELECT sessionID,
+							min(_timestamp) AS _timestamp
+						 FROM user_status_raw_log_v_atmp
+						 WHERE status !="SEND_SMS"
+						   OR status!="SEND_SMS_FAIL"
+						 GROUP BY sessionID
+					) AS time ON time.sessionID=sessns.sessionID
+			 ) AS totalauth
+		   GROUP BY totalauth.dayTimestamp,
+					totalauth.operator,totalauth.appId
+		  ) AS totauth_open
+
+		  on all_scopes_tbl.dayTimestamp=totauth_open.dayTimestamp and all_scopes_tbl.operator=totauth_open.operator and all_scopes_tbl.appId=totauth_open.appId
+
+		LEFT JOIN(
+			SELECT count(totalauth.sessionID) AS total_authCount_mc_india_tc,
+				  totalauth.dayTimestamp,
+				  totalauth.operator,
+				  totalauth.appId
+		   FROM
+			 (
+					 SELECT sessns.sessionID,
+						 getDateTimestamp(time._timestamp) AS dayTimestamp,
+						 sessnopnapp.operator,
+						 sessnopnapp.appId
+				  FROM
+					(
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp 
+						EXCEPT 
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp
+						 WHERE (status="SEND_SMS"
+					   OR status="SEND_SMS_FAIL") AND msisdn !="false"
+					) AS sessns
+				  INNER JOIN
+					(
+							SELECT sessionID,
+								min(operator) AS operator,
+								min(appId) AS appId
+						 FROM user_status_meta_raw_log_v_atmp
+						 WHERE
+						   operator IS NOT NULL
+						   AND appId IS NOT NULL
+						   AND scope LIKE "%mc_india_tc%"
+						 GROUP BY sessionID
+					) AS sessnopnapp ON sessnopnapp.sessionID=sessns.sessionID
+				  INNER JOIN
+					(
+						SELECT sessionID,
+							min(_timestamp) AS _timestamp
+						 FROM user_status_raw_log_v_atmp
+						 WHERE status !="SEND_SMS"
+						   OR status!="SEND_SMS_FAIL"
+						 GROUP BY sessionID
+					) AS time ON time.sessionID=sessns.sessionID
+			 ) AS totalauth
+		   GROUP BY totalauth.dayTimestamp,
+					totalauth.operator,
+					totalauth.appId
+		  ) AS totauth_mc_india_tc on all_scopes_tbl.dayTimestamp=totauth_mc_india_tc.dayTimestamp and all_scopes_tbl.operator=totauth_mc_india_tc.operator and all_scopes_tbl.appId=totauth_mc_india_tc.appId
+		LEFT JOIN(
+			SELECT count(totalauth.sessionID) AS total_authCount_mc_mnv_validate_plus,
+				  totalauth.dayTimestamp,
+				  totalauth.operator,
+				  totalauth.appId
+		   FROM
+			 (
+					 SELECT sessns.sessionID,
+						 getDateTimestamp(time._timestamp) AS dayTimestamp,
+						 sessnopnapp.operator,
+						 sessnopnapp.appId
+				  FROM
+					(
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp 
+						EXCEPT 
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp
+						 WHERE (status="SEND_SMS"
+					   OR status="SEND_SMS_FAIL") AND msisdn !="false"
+					) AS sessns
+				  INNER JOIN
+					(
+							SELECT sessionID,
+								min(operator) AS operator,
+								min(appId) AS appId
+						 FROM user_status_meta_raw_log_v_atmp
+						 WHERE
+						   operator IS NOT NULL
+						   AND appId IS NOT NULL
+						   AND scope LIKE "%mc_mnv_validate_plus%" 
+						 GROUP BY sessionID
+					) AS sessnopnapp ON sessnopnapp.sessionID=sessns.sessionID
+				  INNER JOIN
+					(
+						SELECT sessionID,
+							min(_timestamp) AS _timestamp
+						 FROM user_status_raw_log_v_atmp
+						 WHERE status !="SEND_SMS"
+						   OR status!="SEND_SMS_FAIL"
+						 GROUP BY sessionID
+					) AS time ON time.sessionID=sessns.sessionID
+			 ) AS totalauth
+		   GROUP BY totalauth.dayTimestamp,
+					totalauth.operator,totalauth.appId
+		  ) AS totauth_mc_mnv_validate_plus on all_scopes_tbl.dayTimestamp=totauth_mc_mnv_validate_plus.dayTimestamp and all_scopes_tbl.operator=totauth_mc_mnv_validate_plus.operator and all_scopes_tbl.appId=totauth_mc_mnv_validate_plus.appId
+		LEFT JOIN(
+			SELECT count(totalauth.sessionID) AS total_authCount_mc_mnv_validate,
+				  totalauth.dayTimestamp,
+				  totalauth.operator,
+				  totalauth.appId
+		   FROM
+			 (
+					 SELECT sessns.sessionID,
+						 getDateTimestamp(time._timestamp) AS dayTimestamp,
+						 sessnopnapp.operator,
+						 sessnopnapp.appId
+				  FROM
+					(
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp 
+						EXCEPT 
+						SELECT DISTINCT sessionID
+						 FROM user_status_raw_log_v_atmp
+						 WHERE (status="SEND_SMS"
+					   OR status="SEND_SMS_FAIL") AND msisdn !="false"
+					) AS sessns
+				  INNER JOIN
+					(
+							SELECT sessionID,
+								min(operator) AS operator,
+								min(appId) AS appId
+						 FROM user_status_meta_raw_log_v_atmp
+						 WHERE
+						   operator IS NOT NULL
+						   AND appId IS NOT NULL
+						   AND scope NOT LIKE "%mc_mnv_validate_plus%"
+						   AND scope LIKE "%mc_mnv_validate%" 
+						 GROUP BY sessionID
+					) AS sessnopnapp ON sessnopnapp.sessionID=sessns.sessionID
+				  INNER JOIN
+					(
+						SELECT sessionID,
+							min(_timestamp) AS _timestamp
+						 FROM user_status_raw_log_v_atmp
+						 WHERE status !="SEND_SMS"
+						   OR status!="SEND_SMS_FAIL"
+						 GROUP BY sessionID
+					) AS time ON time.sessionID=sessns.sessionID
+			 ) AS totalauth
+		   GROUP BY totalauth.dayTimestamp,
+					totalauth.operator,totalauth.appId
+		  ) AS totauth_mc_mnv_validate on all_scopes_tbl.dayTimestamp=totauth_mc_mnv_validate.dayTimestamp and all_scopes_tbl.operator=totauth_mc_mnv_validate.operator and all_scopes_tbl.appId=totauth_mc_mnv_validate.appId;
+
+
+
+	 insert into table attempts_operator_scope_wise
+	select * from(
+		select day , operator ,SUM(total_authCount_openid), SUM(total_authCount_mc_india_tc), SUM(total_authCount_mc_mnv_validate_plus) , SUM(total_authCount_mc_mnv_validate) , first(_timestamp)
+		from attempts_scope_wise
+		WHERE operator!="spark"
+		GROUP BY day , operator
+	) as outerTable;
+	
+		 insert into table attempts_app_scope_wise
+	select * from(
+		select day , appID ,SUM(total_authCount_openid), SUM(total_authCount_mc_india_tc), SUM(total_authCount_mc_mnv_validate_plus) , SUM(total_authCount_mc_mnv_validate) , first(_timestamp)
+		from attempts_scope_wise
+		WHERE operator!="spark"
+		GROUP BY day , appID
+	) as outerTable;
+	
+	insert into table attempts_total_scope_wise
+	select * from(
+		select day  ,SUM(total_authCount_openid), SUM(total_authCount_mc_india_tc), SUM(total_authCount_mc_mnv_validate_plus) , SUM(total_authCount_mc_mnv_validate) , first(_timestamp)
+		from attempts_scope_wise
+		WHERE operator!="spark"
+		GROUP BY day 
+	) as outerTable;
+
+
+        INCREMENTAL_TABLE_COMMIT user_status_raw_auth_attempts_scopewise;
+        INCREMENTAL_TABLE_COMMIT user_status_meta_raw_auth_attempts_scopewise;
+        INCREMENTAL_TABLE_COMMIT summary_auth_attempts_scopewise;
+
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>
