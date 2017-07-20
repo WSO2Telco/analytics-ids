@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>user_success_failure_analytics</Name>
+    <Script>
+        create temporary table user_status_user_success_failure using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", 
+        schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,msisdn STRING,isNewUser BOOLEAN,_timestamp LONG -i",  incrementalParams "user_status_newrepeat_success_failure, DAY");
+
+        create temporary table user_status_meta_user_success_failure using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", 
+        schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,telcoScope STRING,status STRING,_timestamp LONG -i" , incrementalParams "user_status_meta_newrepeat_success_failure, DAY");
+
+        create temporary table user_success_failure_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_USER_SUCCESS_FAILURE", 
+        schema "day STRING -i, operator STRING -i, appID STRING -i, total_attempts LONG, new_success LONG, repeat_success LONG, new_failure LONG, repeat_failure LONG, _timestamp LONG -i", 
+        primaryKeys "day, operator, appID", incrementalParams "summary_newrepeat_success_failure, DAY", mergeSchema "false");
+
+        create temporary table user_success_failure_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_USER_SUCCESS_FAILURE", 
+        schema "day STRING -i, appID STRING -i, total_attempts LONG, new_success LONG, repeat_success LONG, new_failure LONG, repeat_failure LONG, _timestamp LONG -i", 
+        primaryKeys "day, appID");
+
+        create temporary table user_success_failure_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_USER_SUCCESS_FAILURE", 
+        schema "day STRING -i, operator STRING -i , total_attempts LONG, new_success LONG, repeat_success LONG, new_failure LONG, repeat_failure LONG, _timestamp LONG -i",
+        primaryKeys "day, operator");
+
+        create temporary table user_success_failure_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_USER_SUCCESS_FAILURE", 
+        schema "day STRING -i, total_attempts LONG, new_success LONG, repeat_success LONG, new_failure LONG, repeat_failure LONG,  _timestamp LONG -i", 
+        primaryKeys "day");
+
+        insert into table user_success_failure_summary 
+        select total_tbl.day as day, total_tbl.operator as operator, total_tbl.appId as appID, 
+        (checkNullforLong(total_tbl.total_attempts) - checkNullforLong(sms_login_fail_tbl.sms_login_fail) - checkNullforLong(sms_login_success_tbl.sms_login_success) ) as total_attempts, 
+        checkNullforLong(new_success_tbl.new_success) as new_success, 
+        checkNullforLong(repeat_success_tbl.repeat_success) as repeat_success,
+        checkNullforLong(new_failure_tbl.new_failure) as new_failure, 
+        (checkNullforLong(repeat_failure_tbl.repeat_failure) - checkNullforLong(sms_login_fail_tbl.sms_login_fail) - checkNullforLong(sms_login_success_tbl.sms_login_success)) as repeat_failure, 
+        getDateTimestamp(total_tbl._timestamp) as _timestamp
+        from 
+
+            (select total_counts.day, total_counts.operator as operator, total_counts.appId as appId,  count(total_counts.sessionID) as total_attempts, min(_timestamp) as _timestamp from 
+
+                (select distinct sessionID, getDateString(_timestamp) as day, first(operator) as operator, first(appId) as appId, _timestamp from user_status_meta_user_success_failure group by sessionID,_timestamp) 
+                as total_counts 
+
+                 inner join 
+
+                (select distinct sessionID from user_status_user_success_failure where msisdn IS NOT NULL) 
+                as user_counts 
+
+                on total_counts.sessionID=user_counts.sessionID
+
+            group by total_counts.day,  total_counts.operator, total_counts.appID) 
+            as total_tbl
+
+            left join 
+
+            (select new_status.day as day, new_status.operator as operator, new_status.appId as appId, COUNT(new_status.sessionID) as new_success from 
+
+                (select sessionID, first(operator) as operator, first(appId) as appId, getDateString(first(_timestamp)) as day from user_status_meta_user_success_failure group by sessionID,_timestamp) 
+                as new_status 
+
+                inner join 
+
+                (select distinct sessionID from user_status_user_success_failure where status="LOGIN_SUCCESS" AND isNewUser=true AND msisdn IS NOT NULL) 
+                as success_status 
+
+                on new_status.sessionID=success_status.sessionID 
+
+            group by new_status.day, new_status.operator, new_status.appId) 
+
+            as new_success_tbl
+            on total_tbl.day=new_success_tbl.day AND total_tbl.operator=new_success_tbl.operator AND total_tbl.appId=new_success_tbl.appId
+
+            left join 
+
+            (select new_status.day as day, new_status.operator as operator, new_status.appId as appId, COUNT(new_status.sessionID) as repeat_success from 
+
+                (select sessionID, first(operator) as operator, first(appId) as appId, getDateString(first(_timestamp)) as day from user_status_meta_user_success_failure group by sessionID,_timestamp) 
+                as new_status 
+
+                inner join 
+
+                (select distinct sessionID from user_status_user_success_failure where status="LOGIN_SUCCESS" AND isNewUser=false AND msisdn IS NOT NULL) 
+                as success_status 
+
+                on new_status.sessionID=success_status.sessionID group by new_status.day, new_status.operator, new_status.appId) 
+
+            as repeat_success_tbl
+            on total_tbl.day=repeat_success_tbl.day AND total_tbl.operator=repeat_success_tbl.operator AND total_tbl.appId=repeat_success_tbl.appId
+
+            left join
+
+            (select new_status.day, new_status.operator, new_status.appId, COUNT(new_status.sessionID) as new_failure from 
+
+                (select sessionID, first(operator) as operator, first(appId) as appId, getDateString(first(_timestamp)) as day from user_status_meta_user_success_failure group by sessionID,_timestamp) 
+                as new_status 
+
+                inner join 
+
+                (select distinct sessionID from user_status_user_success_failure where isNewUser=true AND msisdn IS NOT NULL except 
+                select distinct sessionID from user_status_user_success_failure where status="LOGIN_SUCCESS") 
+                as failure_status 
+
+                on new_status.sessionID=failure_status.sessionID group by new_status.day, new_status.operator, new_status.appId) 
+
+            as new_failure_tbl
+            on total_tbl.day=new_failure_tbl.day AND total_tbl.operator=new_failure_tbl.operator AND total_tbl.appId=new_failure_tbl.appId
+
+            left join
+
+            (select new_status.day, new_status.operator, new_status.appId, COUNT(new_status.sessionID) as repeat_failure from 
+                (select sessionID, first(operator) as operator, first(appId) as appId, getDateString(first(_timestamp)) as day from user_status_meta_user_success_failure group by sessionID,_timestamp) 
+                as new_status 
+
+                inner join 
+
+                (select distinct sessionID from user_status_user_success_failure where isNewUser=true AND msisdn IS NOT NULL except 
+                select distinct sessionID from user_status_user_success_failure where status="LOGIN_SUCCESS") 
+                as failure_status 
+
+                on new_status.sessionID=failure_status.sessionID group by new_status.day, new_status.operator, new_status.appId) 
+
+            as repeat_failure_tbl
+            on total_tbl.day=repeat_failure_tbl.day AND total_tbl.operator=repeat_failure_tbl.operator AND total_tbl.appId=repeat_failure_tbl.appId
+
+            left join
+
+            (
+            select COUNT(distinct sms_failtime_tbl.sessionID) as sms_login_fail, meta_info.operator, meta_info.appId, getDateString(sms_failtime_tbl._timestamp) as day, sms_failtime_tbl._timestamp as _timestamp 
+            from 
+                ( 
+                select sms_fail.sessionID as sessionID, getDateTimestamp(time._timestamp) as _timestamp from 
+                    ( 
+                    select distinct sessionID from user_status_user_success_failure where status = "SEND_SMS" or status="SEND_SMS_FAIL" except select distinct sessionID from user_status_user_success_failure where status="LOGIN_SUCCESS"
+                    ) 
+                    as sms_fail inner join 
+                    (
+                    select sessionID, min(msisdn) as msisdn, min(_timestamp) as _timestamp from user_status_user_success_failure where status !="LOGIN_SUCCESS" and msisdn !="false" and isNewUser=false group by sessionID 
+                    )
+                    as time on time.sessionID=sms_fail.sessionID 
+                ) as sms_failtime_tbl 
+                inner join 
+                (
+                select sessionID,min(operator) as operator,min(appId) as appId from user_status_meta_user_success_failure where operator IS NOT NULL and appId IS NOT NULL group by sessionID 
+                ) 
+                as meta_info on meta_info.sessionID=sms_failtime_tbl.sessionID  group by meta_info.operator, meta_info.appId, _timestamp
+            ) as  sms_login_fail_tbl
+             on total_tbl.day=sms_login_fail_tbl.day AND total_tbl.operator=sms_login_fail_tbl.operator AND total_tbl.appId=sms_login_fail_tbl.appId
+
+            left join
+            (
+            select COUNT(distinct sms_successtime_tbl.sessionID) as sms_login_success, meta_info.operator, meta_info.appId, getDateString(sms_successtime_tbl._timestamp) as day, sms_successtime_tbl._timestamp as _timestamp 
+            from 
+                ( 
+                select sms_success.sessionID as sessionID, getDateTimestamp(time._timestamp) as _timestamp from 
+                    ( 
+                    select distinct sessionID from user_status_user_success_failure where status = "SEND_SMS" or status="SEND_SMS_FAIL" intersect select distinct sessionID from user_status_user_success_failure where status="LOGIN_SUCCESS"
+                    ) 
+                    as sms_success inner join 
+                    (
+                    select sessionID,min(msisdn) as msisdn, min(_timestamp) as _timestamp from user_status_user_success_failure where status="LOGIN_SUCCESS" and msisdn !="false" and isNewUser=false group by sessionID 
+                    )
+                    as time on time.sessionID=sms_success.sessionID 
+                ) as sms_successtime_tbl 
+                inner join 
+                (
+                select sessionID, min(operator) as operator,min(appId) as appId from user_status_meta_user_success_failure where operator IS NOT NULL and appId IS NOT NULL group by sessionID 
+                ) 
+                as meta_info on meta_info.sessionID=sms_successtime_tbl.sessionID  group by meta_info.operator, meta_info.appId, _timestamp
+            ) as  sms_login_success_tbl
+             on total_tbl.day=sms_login_success_tbl.day AND total_tbl.operator=sms_login_success_tbl.operator AND total_tbl.appId=sms_login_success_tbl.appId;
+
+            insert into table user_success_failure_app select day, appID, SUM(total_attempts) as total_attempts, 
+            SUM(new_success) as new_success, SUM(repeat_success) as repeat_success, SUM(new_failure) as new_failure, 
+            SUM(repeat_failure) as repeat_failure, min(_timestamp) as  _timestamp from user_success_failure_summary 
+            where operator!="spark" group by appID, day ;
+
+            insert into table user_success_failure_operator select day, operator, SUM(total_attempts) as total_attempts, 
+            SUM(new_success) as new_success, SUM(repeat_success) as repeat_success, SUM(new_failure) as new_failure, 
+            SUM(repeat_failure) as repeat_failure, min(_timestamp) as  _timestamp from user_success_failure_summary 
+            where operator!="spark" group by operator, day;
+
+            insert into table user_success_failure_total select day, SUM(total_attempts) as total_attempts, 
+            SUM(new_success) as new_success, SUM(repeat_success) as repeat_success, SUM(new_failure) as new_failure, 
+            SUM(repeat_failure) as repeat_failure, min(_timestamp) as  _timestamp from user_success_failure_summary 
+            where operator!="spark" group by day;
+
+            INCREMENTAL_TABLE_COMMIT user_status_newrepeat_success_failure;
+            INCREMENTAL_TABLE_COMMIT user_status_meta_newrepeat_success_failure;
+            INCREMENTAL_TABLE_COMMIT summary_newrepeat_success_failure;
+
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>

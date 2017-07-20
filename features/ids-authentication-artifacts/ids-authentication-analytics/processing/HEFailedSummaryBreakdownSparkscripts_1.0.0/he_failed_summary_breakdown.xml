@@ -12,175 +12,213 @@
 
     create temporary table com_wso2telco_summary_he_breakdown using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_HE_BREAKDOWNS",schema "day STRING -i, operator STRING -i, appID STRING -i, totalHECount STRING -i, totalHESuccess STRING -i, totalHEIPValidationFail STRING -i, totalMSISDNNotFound STRING -i,totalHEProxy STRING -i,loginhintMismatch STRING -i, wrongEndPoint STRING -i, _timestamp LONG -i", primaryKeys "operator,appID,day", mergeSchema "false");
 
-    insert into table com_wso2telco_summary_he_breakdown select
-                                                           getDateString(totalHEcount._timestamp) as date, totalHEcount.operator, totalHEcount.appID, checkNullforLong(totalHEcount.HEcount) as totalHE, checkNullforLong(totalHEsuccess.HEcount) as HESuccess, checkNullforLong(totalIPFailed.sessionCount) as totalIPFailedCount, checkNullforLong(msisdnNotFound.sessionCount) as msisdnNotFoundCount, checkNullforLong(xForwardProxy.sessionCount) as proxyCount, checkNullforLong(loginhint_mismatched_records.sessionCount) as loginhintMismatch, checkNullforLong(wrongep.sessionCount2) as wrongHit, totalHEcount._timestamp from
-                                                           (
-                                                             select meta.operator as operator,  meta._timestamp as _timestamp, meta.appID, count(meta.sessionID) as HEcount
-                                                             from
-                                                               (select sessionID, getDateTimestamp(min(_timestamp)) as _timestamp, first(operator) as operator, first(appId) as appID
-                                                                from com_wso2telco_userstatus_meta_summary_he_breakdown
-                                                                where sessionID IS NOT NULL and operator IS NOT NULL and appId IS NOT NULL group by sessionID) as meta group by operator, _timestamp, appID
-                                                           ) as totalHEcount
-                                                           left join (
-                                                                       SELECT  operator,appID,_timestamp, count(sessionID) as HEcount
-                                                                       FROM (
-                                                                              SELECT sessionID, min(operator) as operator, min(appID) as appID, getAuthenticator(max(authenticatorMethods)) as status, getDateTimestamp(min(_timestamp)) as _timestamp
-                                                                              FROM auth_endpoint_login_channel_summary_he_breakdown
-                                                                              WHERE isAuthenticated = true and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL and msisdn != "false"
-                                                                              group by sessionID
-                                                                            ) as temp
-                                                                       where  status = 'HeaderEnrichment' OR status = 'HeaderEnrichmentAuthenticator'
-                                                                       GROUP BY operator, appID, _timestamp
-                                                                     ) as totalHEsuccess on totalHEcount.operator=totalHEsuccess.operator and totalHEcount.appID=totalHEsuccess.appID and  totalHEcount._timestamp=totalHEsuccess._timestamp
-                                                           left join
-                                                           (
-                                                             select meta.operator as operator, _timestamp, meta.appID, count(ustatus.sessionID) as sessionCount
-                                                             from
-                                                               (
-                                                                 select distinct sessionID, getDateTimestamp(_timestamp) as _timestamp
-                                                                 from com_wso2telco_userstatus_summary_he_breakdown
-                                                                 where status = 'IP_HEADER_NOT_IN_RANGE'
-                                                               ) as ustatus
-                                                               INNER JOIN (
-                                                                            select sessionID, first(operator) as operator, first(appId) as appID
-                                                                            from com_wso2telco_userstatus_meta_summary_he_breakdown
-                                                                            where operator IS NOT NULL group by sessionID
-                                                                          ) as meta on meta.sessionID = ustatus.sessionID group by operator, _timestamp, appID
-                                                           ) as totalIPFailed on totalHEcount.operator=totalIPFailed.operator and totalHEcount.appID=totalIPFailed.appID and  totalHEcount._timestamp=totalIPFailed._timestamp
-                                                           left join
-                                                           (
-                                                             select operator, _timestamp, count(sessionID) as sessionCount, appID
-                                                             from
-                                                               (
-                                                                 select first(operator) as operator, sessionID , first(sourceIP) as sourceIP, first(appID) as appID, getDateTimestamp(min(_timestamp)) as _timestamp
-                                                                 from
-                                                                   (
-                                                                     select IF(checkIpRange(ipranges.minValue , ipranges.maxValue, operatorforward.sourceIP),1,0) as iprangecheck, operatorforward.sessionID,operatorforward.operator, operatorforward.msisdn, operatorforward.sourceIP, operatorforward.appID, _timestamp
-                                                                     FROM
-                                                                       (
-                                                                         select minValue, maxValue, operator, isEnable
-                                                                         FROM com_wso2telco_operatoripranges_he_breakdown
-                                                                         where isEnable = true
-                                                                       ) as ipranges
-                                                                       INNER JOIN
-                                                                       (
-                                                                         select
-                                                                           ustatus.sessionID, ustatus.sourceIP, meta.operator, ustatus.msisdn, meta.appID, ustatus._timestamp
-                                                                         from (
-                                                                                select sessionID, max(sourceIP) as sourceIP, min(_timestamp) as _timestamp, min(msisdn) as msisdn
-                                                                                from com_wso2telco_userstatus_summary_he_breakdown
-                                                                                where sourceIP IS NOT null
-                                                                                group by sessionID
-                                                                              ) as ustatus
-                                                                           INNER JOIN
-                                                                           (
-                                                                             select sessionID, first(operator) as operator, first(appId) as appID
-                                                                             from com_wso2telco_userstatus_meta_summary_he_breakdown
-                                                                             where operator IS NOT NULL and appId IS NOT NULL and isMSISDNHeader=false group by sessionID
-                                                                           ) as meta on meta.sessionID = ustatus.sessionID
-                                                                       ) as operatorforward on ipranges.operator = operatorforward.operator
-                                                                   ) as iprangecheck where iprangecheck=1  group by sessionID
-                                                               ) as he_msisdn_not_found_report group by operator, _timestamp, appID
-                                                           ) as msisdnNotFound on totalHEcount.operator=msisdnNotFound.operator and totalHEcount.appID=msisdnNotFound.appID and  totalHEcount._timestamp=msisdnNotFound._timestamp
-                                                           left join
-                                                           (
-                                                             select operator, _timestamp,  count(sessionID) as sessionCount, appID
-                                                             from (
-                                                                    select first(operator) as operator, sessionID ,getDateTimestamp(min(_timestamp)) as _timestamp, first(appID) as appID
-                                                                    from (
-                                                                           select
-                                                                             IF(checkIpRange(ipranges.minValue , ipranges.maxValue, operatorforward.forwardedIP),1,0) as iprangecheck,
-                                                                             operatorforward.operator,
-                                                                             operatorforward.sessionID,
-                                                                             operatorforward.appID,
-                                                                             getDateTimestamp(operatorforward._timestamp) as _timestamp
-                                                                           FROM
-                                                                             (
-                                                                               select minValue, maxValue, operator, isEnable
-                                                                               FROM com_wso2telco_operatoripranges_he_breakdown
-                                                                               where isEnable = true
-                                                                             ) as ipranges
-                                                                             INNER JOIN (
-                                                                                          select ustatus.sessionID, ustatus.forwardedIP, ustatus._timestamp, meta.operator , ustatus.msisdn, meta.appID
-                                                                                          from
-                                                                                            (
-                                                                                              select distinct sessionID, forwardedIP, _timestamp, msisdn
-                                                                                              from com_wso2telco_userstatus_summary_he_breakdown
-                                                                                              where status='IP_HEADER_NOT_FOUND' or status = 'IP_HEADER_NOT_IN_RANGE' and forwardedIP IS NOT null and msisdn IS NOT NULL
-                                                                                            ) as ustatus
-                                                                                            INNER JOIN (
-                                                                                                         select sessionID, first(operator) as operator, first(appId) as appID
-                                                                                                         from com_wso2telco_userstatus_meta_summary_he_breakdown
-                                                                                                         where operator IS NOT NULL group by sessionID
-                                                                                                       ) as meta on meta.sessionID = ustatus.sessionID
-                                                                                        ) as operatorforward on ipranges.operator = operatorforward.operator
-                                                                         ) as operatoriprangecheck where iprangecheck=1 group by sessionID
-                                                                  ) as iprangecheckreport group by operator, _timestamp, appID
+    insert into table com_wso2telco_summary_he_breakdown 
+      select getDateString(totalHEcount._timestamp) as date, totalHEcount.operator, totalHEcount.appID, checkNullforLong(totalHEcount.HEcount) as totalHE, checkNullforLong(totalHEsuccess.HEcount) as HESuccess, checkNullforLong(totalIPFailed.sessionCount) as totalIPFailedCount, checkNullforLong(msisdnNotFound.sessionCount) as msisdnNotFoundCount, checkNullforLong(xForwardProxy.sessionCount) as proxyCount, checkNullforLong(loginhint_mismatched_records.sessionCount) as loginhintMismatch, checkNullforLong(wrongep.sessionCount2) as wrongHit, totalHEcount._timestamp 
+        from
+             (
+               select meta.operator as operator,  meta._timestamp as _timestamp, meta.appID, count(meta.sessionID) as HEcount
+               from
+                 (select sessionID, getDateTimestamp(min(_timestamp)) as _timestamp, first(operator) as operator, first(appId) as appID
+                  from com_wso2telco_userstatus_meta_summary_he_breakdown
+                  where sessionID IS NOT NULL and operator IS NOT NULL and appId IS NOT NULL group by sessionID) as meta group by operator, _timestamp, appID
+             ) as totalHEcount
+             left join (
+                         SELECT  operator,appID,_timestamp, count(sessionID) as HEcount
+                         FROM (
+                                SELECT sessionID, min(operator) as operator, min(appID) as appID, getAuthenticator(max(authenticatorMethods)) as status, getDateTimestamp(min(_timestamp)) as _timestamp
+                                FROM auth_endpoint_login_channel_summary_he_breakdown
+                                WHERE isAuthenticated = true and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL and msisdn != "false"
+                                group by sessionID
+                              ) as temp
+                         where  status = 'HeaderEnrichment' OR status = 'HeaderEnrichmentAuthenticator'
+                         GROUP BY operator, appID, _timestamp
+                       ) as totalHEsuccess on totalHEcount.operator=totalHEsuccess.operator and totalHEcount.appID=totalHEsuccess.appID and  totalHEcount._timestamp=totalHEsuccess._timestamp
+             left join
+             (
+               select meta.operator as operator, _timestamp, meta.appID, count(ustatus.sessionID) as sessionCount
+               from
+                 (
+                   select distinct sessionID, getDateTimestamp(_timestamp) as _timestamp
+                   from com_wso2telco_userstatus_summary_he_breakdown
+                   where status = 'IP_HEADER_NOT_IN_RANGE'
+                 ) as ustatus
+                 INNER JOIN (
+                              select sessionID, first(operator) as operator, first(appId) as appID
+                              from com_wso2telco_userstatus_meta_summary_he_breakdown
+                              where operator IS NOT NULL group by sessionID
+                            ) as meta on meta.sessionID = ustatus.sessionID group by operator, _timestamp, appID
+             ) as totalIPFailed on totalHEcount.operator=totalIPFailed.operator and totalHEcount.appID=totalIPFailed.appID and  totalHEcount._timestamp=totalIPFailed._timestamp
+             left join
+             (
+               select operator, _timestamp, count(sessionID) as sessionCount, appID
+               from
+                 (
+                   select first(operator) as operator, sessionID , first(sourceIP) as sourceIP, first(appID) as appID, getDateTimestamp(min(_timestamp)) as _timestamp
+                   from
+                     (
+                       select IF(checkIpRange(ipranges.minValue , ipranges.maxValue, operatorforward.sourceIP),1,0) as iprangecheck, operatorforward.sessionID,operatorforward.operator, operatorforward.msisdn, operatorforward.sourceIP, operatorforward.appID, _timestamp
+                       FROM
+                         (
+                           select minValue, maxValue, operator, isEnable
+                           FROM com_wso2telco_operatoripranges_he_breakdown
+                           where isEnable = true
+                         ) as ipranges
+                         INNER JOIN
+                         (
+                           select
+                             ustatus.sessionID, ustatus.sourceIP, meta.operator, ustatus.msisdn, meta.appID, ustatus._timestamp
+                           from (
+                                  select sessionID, max(sourceIP) as sourceIP, min(_timestamp) as _timestamp, min(msisdn) as msisdn
+                                  from com_wso2telco_userstatus_summary_he_breakdown
+                                  where sourceIP IS NOT null
+                                  group by sessionID
+                                ) as ustatus
+                             INNER JOIN
+                             (
+                               select sessionID, first(operator) as operator, first(appId) as appID
+                               from com_wso2telco_userstatus_meta_summary_he_breakdown
+                               where operator IS NOT NULL and appId IS NOT NULL and isMSISDNHeader=false group by sessionID
+                             ) as meta on meta.sessionID = ustatus.sessionID
+                         ) as operatorforward on ipranges.operator = operatorforward.operator
+                     ) as iprangecheck where iprangecheck=1  group by sessionID
+                 ) as he_msisdn_not_found_report group by operator, _timestamp, appID
+             ) as msisdnNotFound on totalHEcount.operator=msisdnNotFound.operator and totalHEcount.appID=msisdnNotFound.appID and  totalHEcount._timestamp=msisdnNotFound._timestamp
 
-                                                           ) as xForwardProxy on totalHEcount.operator=xForwardProxy.operator and totalHEcount.appID=xForwardProxy.appID and  totalHEcount._timestamp=xForwardProxy._timestamp
-                                                           left join
-                                                           (
-                                                             select _timestamp, operator, count(sessionID) as sessionCount, appID
-                                                             from(
-                                                                   select first(operator) as operator, first(sessionID) as sessionID, first(appID) as appID, getDateTimestamp(MIN(_timestamp)) AS _timestamp
-                                                                   from
-                                                                     (
-                                                                       select sessionID,min(_timestamp) as _timestamp
-                                                                       from com_wso2telco_userstatus_summary_he_breakdown
-                                                                       where status = 'LOGIN_HINT_MISMATCH'
-                                                                       group by sessionID
-                                                                     ) as ustatus
-                                                                     inner join (
-                                                                                  select sessionID as metaSessionID, first(operator) as operator, first(appId) as appID
-                                                                                  from com_wso2telco_userstatus_meta_summary_he_breakdown
-                                                                                  where operator IS NOT NULL group by sessionID
-                                                                                ) as meta on meta.metaSessionID = ustatus.sessionID group by operator, _timestamp, appID
-                                                                 ) as loginhint_mismatched
-                                                             group by operator, appID, _timestamp
-                                                           ) as loginhint_mismatched_records on totalHEcount.operator=loginhint_mismatched_records.operator and totalHEcount.appID=loginhint_mismatched_records.appID and  totalHEcount._timestamp=loginhint_mismatched_records._timestamp
-                                                           left join
-                                                           (
-                                                             select first(day), operator, count(sessionID) as sessionCount2, appID,  _timestamp
-                                                             from (
+             left join (
+                          select operator, _timestamp,  count(sessionID) as sessionCount, appId
+                          from 
+                              (
+                                select sessionID,iprangecheck, first(appId) as appId,getDateTimestamp(min(_timestamp)) as _timestamp, first(operator) as operator
+                                from
+                                    (
+                                      select IF(checkIpRange(ipranges_xforward.minValue , ipranges_xforward.maxValue, forwardedIP),1,0) as iprangecheck, iprangecheck_forwardip.sessionID, iprangecheck_forwardip.operator, iprangecheck_forwardip.appId, iprangecheck_forwardip._timestamp
+                                      from
+                                          (
+                                            select iprangecheck,sessionID,operator,appId,forwardedIP,_timestamp
+                                            from 
+                                                (
+                                                  select max(iprangecheck) as iprangecheck,sessionID,first(operator) as operator,first(appId) as appId, max(forwardedIP) as forwardedIP, min(_timestamp) as _timestamp
+                                                  from
+                                                      (
+                                                        select 
+                                                              IF(checkIpRange(ipranges.minValue , ipranges.maxValue, operatorforward.sourceIP),1,0) as iprangecheck,
+                                                              operatorforward.operator,
+                                                              operatorforward.sessionID,
+                                                              operatorforward.appId,
+                                                              operatorforward.forwardedIP,
+                                                              getDateTimestamp(operatorforward._timestamp) as _timestamp
+                                                        FROM
+                                                            (
+                                                              select minValue, maxValue, operator, isEnable
+                                                              FROM com_wso2telco_operatoripranges_he_breakdown
+                                                              where isEnable = true
+                                                            ) as ipranges
+                                                        INNER JOIN (
                                                                     select
-                                                                      getFormattedTimeString(getDateTimestamp(first(operatoriprangecheckTemp._timestamp))) as day,
-                                                                      first(operatoriprangecheckTemp.appId) as appID,
-                                                                      first(operatoriprangecheckTemp.MNOEP) as operator,
-                                                                      operatoriprangecheckTemp.sessionID,
-                                                                      getDateTimestamp(first(operatoriprangecheckTemp._timestamp)) as _timestamp
-
+                                                                    ustatus.sessionID, ustatus.sourceIP, ustatus.forwardedIP, meta.operator, ustatus.msisdn, meta.appId, ustatus._timestamp
                                                                     from (
-                                                                           select
-                                                                             IF(checkIpRange(iprangesTemp.minValue , iprangesTemp.maxValue, operatorforwardTemp.sourceIP),1,0) as iprangecheck,
-                                                                             operatorforwardTemp.appId,
-                                                                             operatorforwardTemp.msisdn,
-                                                                             operatorforwardTemp.sourceIP,
-                                                                             operatorforwardTemp.operator as MNOEP,
-                                                                             iprangesTemp.operator as MNOLPEP,
-                                                                             operatorforwardTemp.sessionID,
-                                                                             operatorforwardTemp._timestamp
-                                                                           FROM (
-                                                                                  select ustatusTemp.sourceIP, ustatusTemp._timestamp, metaTemp.operator , ustatusTemp.msisdn, metaTemp.appId, ustatusTemp.sessionID
-                                                                                  from
-                                                                                    (
-                                                                                      select distinct sessionID, msisdn, sourceIP, _timestamp
-                                                                                      from com_wso2telco_userstatus_summary_he_breakdown
-                                                                                      where status='IP_HEADER_NOT_FOUND' or status = 'IP_HEADER_NOT_IN_RANGE' and sourceIP IS NOT NULL and sourceIP!="NULL"
-                                                                                    ) as ustatusTemp
-                                                                                    INNER JOIN (
-                                                                                                 select sessionID,first(operator) as operator,first(appId) as appId
-                                                                                                 from com_wso2telco_userstatus_meta_summary_he_breakdown
-                                                                                                 where operator IS NOT NULL and appId IS NOT NULL group by sessionID
-                                                                                               ) as metaTemp on metaTemp.sessionID = ustatusTemp.sessionID
-                                                                                ) as operatorforwardTemp
-                                                                             left JOIN (
-                                                                                         select minValue, maxValue, operator, isEnable
-                                                                                         FROM com_wso2telco_operatoripranges_he_breakdown
-                                                                                         where isEnable = true
-                                                                                       ) as iprangesTemp on iprangesTemp.operator &lt;&gt; operatorforwardTemp.operator
-                                                                         ) as operatoriprangecheckTemp where iprangecheck=1 group by sessionID
-                                                                  ) as iprangecheckreport2 group by operator, _timestamp, appID
-                                                           )as wrongep on totalHEcount.operator=wrongep.operator and totalHEcount.appID=wrongep.appID and  totalHEcount._timestamp=wrongep._timestamp;
+                                                                          select sessionID
+                                                                          from
+                                                                              (
+                                                                                select distinct sessionID
+                                                                                from com_wso2telco_userstatus_summary_he_breakdown
+                                                                                where (status='MSISDN_AUTH_PROCESSING') and (sourceIP IS NOT null and forwardedIP IS NOT null)
+                                                                                EXCEPT
+                                                                                select distinct sessionID
+                                                                                from com_wso2telco_userstatus_summary_he_breakdown
+                                                                                where status = 'LOGINHINT_MISMATCH' AND msisdn !='null'
+                                                                              ) as heFailed
+                                                                              EXCEPT
+                                                                              select distinct sessionID
+                                                                              from com_wso2telco_userstatus_meta_summary_he_breakdown
+                                                                              where isMSISDNHeader = true 
+                                                                          ) as hefailed_msisdnnotfound
+                                                                    INNER JOIN (
+                                                                                select sessionID, first(operator) as operator, first(appId) as appId
+                                                                                from com_wso2telco_userstatus_meta_summary_he_breakdown
+                                                                                where operator IS NOT NULL and appId IS NOT NULL group by sessionID
+                                                                                ) as meta on meta.sessionID = hefailed_msisdnnotfound.sessionID
+                                                                    INNER JOIN (
+                                                                                select sessionID, max(sourceIP) as sourceIP, max(forwardedIP) as forwardedIP,  min(msisdn) as msisdn, min(_timestamp) as _timestamp
+                                                                                from com_wso2telco_userstatus_summary_he_breakdown
+                                                                                where sourceIP IS NOT null and (msisdn != "false" OR msisdn IS null)group by sessionID
+                                                                                ) as ustatus on ustatus.sessionID = hefailed_msisdnnotfound.sessionID
+                                                                    ) as operatorforward on ipranges.operator = operatorforward.operator
+                                                        ) as iprangecheck_sourceip group by sessionID
+                                                 ) as iprangecheck_sourceip where iprangecheck = 0
+                                            ) as iprangecheck_forwardip
+                                            INNER JOIN(
+                                                      select minValue, maxValue, operator, isEnable
+                                                      FROM com_wso2telco_operatoripranges_he_breakdown
+                                                      where isEnable = true
+                                                      ) as ipranges_xforward on iprangecheck_forwardip.operator = ipranges_xforward.operator
+                          ) as proxy where iprangecheck = 1 group by sessionID, iprangecheck
+                    )as iprangecheckreport group by operator, _timestamp, appId
+              
+              ) as xForwardProxy on totalHEcount.operator=xForwardProxy.operator and totalHEcount.appId=xForwardProxy.appId and  totalHEcount._timestamp=xForwardProxy._timestamp
+             left join
+             (
+               select _timestamp, operator, count(sessionID) as sessionCount, appID
+               from(
+                     select first(operator) as operator, first(sessionID) as sessionID, first(appID) as appID, getDateTimestamp(MIN(_timestamp)) AS _timestamp
+                     from
+                       (
+                         select sessionID,min(_timestamp) as _timestamp
+                         from com_wso2telco_userstatus_summary_he_breakdown
+                         where status = 'LOGIN_HINT_MISMATCH'
+                         group by sessionID
+                       ) as ustatus
+                       inner join (
+                                    select sessionID as metaSessionID, first(operator) as operator, first(appId) as appID
+                                    from com_wso2telco_userstatus_meta_summary_he_breakdown
+                                    where operator IS NOT NULL group by sessionID
+                                  ) as meta on meta.metaSessionID = ustatus.sessionID group by operator, _timestamp, appID
+                   ) as loginhint_mismatched
+               group by operator, appID, _timestamp
+             ) as loginhint_mismatched_records on totalHEcount.operator=loginhint_mismatched_records.operator and totalHEcount.appID=loginhint_mismatched_records.appID and  totalHEcount._timestamp=loginhint_mismatched_records._timestamp
+             left join
+             (
+               select first(day), operator, count(sessionID) as sessionCount2, appID,  _timestamp
+               from (
+                      select
+                        getFormattedTimeString(getDateTimestamp(first(operatoriprangecheckTemp._timestamp))) as day,
+                        first(operatoriprangecheckTemp.appId) as appID,
+                        first(operatoriprangecheckTemp.MNOEP) as operator,
+                        operatoriprangecheckTemp.sessionID,
+                        getDateTimestamp(first(operatoriprangecheckTemp._timestamp)) as _timestamp
+
+                      from (
+                             select
+                               IF(checkIpRange(iprangesTemp.minValue , iprangesTemp.maxValue, operatorforwardTemp.sourceIP),1,0) as iprangecheck,
+                               operatorforwardTemp.appId,
+                               operatorforwardTemp.msisdn,
+                               operatorforwardTemp.sourceIP,
+                               operatorforwardTemp.operator as MNOEP,
+                               iprangesTemp.operator as MNOLPEP,
+                               operatorforwardTemp.sessionID,
+                               operatorforwardTemp._timestamp
+                             FROM (
+                                    select ustatusTemp.sourceIP, ustatusTemp._timestamp, metaTemp.operator , ustatusTemp.msisdn, metaTemp.appId, ustatusTemp.sessionID
+                                    from
+                                      (
+                                        select distinct sessionID, msisdn, sourceIP, _timestamp
+                                        from com_wso2telco_userstatus_summary_he_breakdown
+                                        where status='IP_HEADER_NOT_FOUND' or status = 'IP_HEADER_NOT_IN_RANGE' and sourceIP IS NOT NULL and sourceIP!="NULL"
+                                      ) as ustatusTemp
+                                      INNER JOIN (
+                                                   select sessionID,first(operator) as operator,first(appId) as appId
+                                                   from com_wso2telco_userstatus_meta_summary_he_breakdown
+                                                   where operator IS NOT NULL and appId IS NOT NULL group by sessionID
+                                                 ) as metaTemp on metaTemp.sessionID = ustatusTemp.sessionID
+                                  ) as operatorforwardTemp
+                               left JOIN (
+                                           select minValue, maxValue, operator, isEnable
+                                           FROM com_wso2telco_operatoripranges_he_breakdown
+                                           where isEnable = true
+                                         ) as iprangesTemp on iprangesTemp.operator &lt;&gt; operatorforwardTemp.operator
+                           ) as operatoriprangecheckTemp where iprangecheck=1 group by sessionID
+                    ) as iprangecheckreport2 group by operator, _timestamp, appID
+             )as wrongep on totalHEcount.operator=wrongep.operator and totalHEcount.appID=wrongep.appID and  totalHEcount._timestamp=wrongep._timestamp;
 
     create temporary table com_wso2telco_summary_operator_he_breakdown using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_HE_BREAKDOWNS",schema "day STRING -i, operator STRING -i, totalHECount STRING -i, totalHESuccess STRING -i, totalHEIPValidationFail STRING -i, totalMSISDNNotFound STRING -i,totalHEProxy STRING -i, _timestamp LONG -i", primaryKeys "operator,day", mergeSchema "false");
 
