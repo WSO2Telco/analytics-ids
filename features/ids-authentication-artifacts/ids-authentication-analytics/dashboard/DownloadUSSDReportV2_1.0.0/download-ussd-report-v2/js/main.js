@@ -46,7 +46,7 @@ var view = {
             urlAppend(filter);
         });
             
-       // });
+        //});
     }
 };
 
@@ -54,12 +54,60 @@ function urlAppend(filter){
     if( filter ==undefined ){
         filter = {};
     }
-    $("#downloadpdfdr").attr("href","/portal/apis/reportalldps" + "?type=21&timeFrom=" + filter["timeFrom"]
+    $("#downloadpdfdr").attr("href","/portal/apis/reportext" + "?type=23&timeFrom=" + filter["timeFrom"]
         + "&timeTo=" + filter["timeTo"] + "&operator=" + filter["operator"]
         + "&appID=" + filter["appID"]+"&download=drPdf");
-    $("#downloadcsvdr").attr("href","/portal/apis/reportalldps" + "?type=21&timeFrom=" + filter["timeFrom"]
+    $("#downloadcsvdr").attr("href","/portal/apis/reportext" + "?type=23&timeFrom=" + filter["timeFrom"]
         + "&timeTo=" + filter["timeTo"] + "&operator=" + filter["operator"]
         + "&appID=" + filter["appID"]+"&download=drXl");   
+}
+
+function checkAccess(){
+	var filter = {};
+    
+    //wso2.gadgets.state.getGlobalState('filter',function(filter) {
+       
+   // $( document ).ready(function() {
+    	checkAccessWithFilter(filter);
+   // });
+        
+   // });
+	
+}
+
+
+
+function checkAccessWithFilter(filter){
+	
+	if( filter ==undefined || filter==null){
+        	filter = {};
+    	}
+
+    var valid=false;
+    var USSD_ANALYSIS_OPERATORWISE=23;
+    var SERVER_URL = "/portal/apis/telcoanalytics";
+    var HTTP_GET = "GET";
+    var RESPONSE_ELEMENT = "responseJSON";
+	    jQuery.ajax({
+	        url: SERVER_URL + "?type=" + USSD_ANALYSIS_OPERATORWISE+"&operator=" + filter["operator"],
+	        type: HTTP_GET,
+	        success: function (data) {
+	            var isOperator = JSON.parse(data.message);
+	            if(isOperator){
+	                document.getElementById('downloadcsvdr').click();
+	            }else{
+	                $('#modalPopup').modal('hide');
+	                $('#popupCheckAccess').modal({
+	                    show: 'true'
+	                });
+	            }
+	        },
+	        error: function (msg) {
+	            error(msg[RESPONSE_ELEMENT]);
+	        }
+	    });
+	
+    return valid;
 }
 
 $(function () {
@@ -80,8 +128,7 @@ gadgets.HubSettings.onConnect = function () {
     }
 };
 
-
-function checkAccess(){
+function checkLoged(){
     var valid=false;
     var TYPE_LOGGIN_CHECK=25;
     var SERVER_URL = "/portal/apis/telcoanalytics";
@@ -112,7 +159,7 @@ function checkAccess(){
         success: function(data, textStatus, xhr) {
             var isLogged = JSON.parse(data.message);
             if(isLogged){
-                document.getElementById('downloadcsvdr').click();
+                document.getElementById('downloadcsvdrReal').click();
             }
         },
         complete: function(xhr, textStatus) {

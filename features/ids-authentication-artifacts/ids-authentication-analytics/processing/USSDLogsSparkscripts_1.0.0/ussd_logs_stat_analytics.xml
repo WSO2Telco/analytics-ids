@@ -4,7 +4,7 @@
     <Script>
          create temporary table daily_ussd_analysis_raw using CarbonAnalytics options (tableName "COM_WSO2TELCO_DAILYUSSDLOGS", schema "type STRING, sequenceNo INTEGER, isOut BOOLEAN, msisdn LONG, sessionStatus BOOLEAN, message STRING, operator STRING, ussdType STRING, timestamp LONG, ussdSession STRING,messageId STRING, _timestamp LONG -i",  incrementalParams "daily_ussd_ussdLogs, DAY");
 
-        create temporary table ussd_logs_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS", schema "day STRING -i, operator STRING -i, totalcount LONG -i,yescount LONG -i,nocount LONG -i,invalidcount LONG -i,cancelcount LONG -i,timeoutcount LONG -i,unknown LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
+        create temporary table ussd_logs_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS", schema "day STRING -i, operator STRING -i, totalcount LONG -i,yescount LONG -i,nocount LONG -i,invalidcount LONG -i,cancelcount LONG -i,timeoutcount LONG -i,unknown LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
 
         INSERT INTO table ussd_logs_summary select getDateString(_timestamp),operator,totalcount,yescount,nocount,invalidcount,cancelcount,timeoutcount,(totalcount-(yescount+nocount+invalidcount+cancelcount+timeoutcount)) as unknown,_timestamp from ( 
 	select ussdtotal.operator, ussdtotal._timestamp , checkNullforLong(totalcount) as totalcount, checkNullforLong(yescount) as yescount, checkNullforLong(nocount) as nocount, checkNullforLong(invalidcount) as invalidcount, checkNullforLong(cancelcount) as cancelcount,  checkNullforLong(timeoutcount) as timeoutcount from ( 
@@ -29,6 +29,19 @@
 
 	 create temporary table ussd_logs_summary_per_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_PER_OPERATER", schema "message STRING -i,day STRING -i,count INTEGER -i, operator STRING -i, code STRING -i,_timestamp LONG -i", primaryKeys "day, operator, message");
 
+		
+		        create temporary table ussd_logs_summary_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_USSD_ANALYSIS", schema "day STRING -i, totalcount LONG -i,yescount LONG -i,nocount LONG -i,invalidcount LONG -i,cancelcount LONG -i,timeoutcount LONG -i,unknown LONG -i, _timestamp LONG -i", primaryKeys "day");
+
+		
+			 INSERT INTO table ussd_logs_summary_total 
+		SELECT day,SUM(totalcount),SUM(yescount),SUM(nocount),SUM(invalidcount),SUM(cancelcount),SUM(timeoutcount),SUM(unknown),_timestamp from ussd_logs_summary GROUP BY day,_timestamp;
+		
+		
+		
+		
+		
+	 create temporary table ussd_logs_summary_per_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS_PER_OPERATER", schema "message STRING -i,day STRING -i,count INTEGER -i, operator STRING -i, code STRING -i,_timestamp LONG -i", primaryKeys "day, operator, message");
+	 
 		create temporary table ussd_logs_error_codes using CarbonAnalytics options (tableName "COM_WSO2TELCO_USSD_ERROR_CODES_PER_OPERATER", schema "operator STRING -i,message STRING -i,code STRING -i, isEnnable BOOLEAN -i", primaryKeys "operator, message");
 
 
