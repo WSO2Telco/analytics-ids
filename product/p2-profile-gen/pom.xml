@@ -401,6 +401,9 @@
                                                                 <feaureArtifactDef>
                                                                         org.wso2telco.product.analytics:org.wso2telco.analytics.sparkUdf.feature:${project.version}
                                                                 </feaureArtifactDef>
+																<feaureArtifactDef>
+																	org.wso2telco.product.analytics:com.wso2telco.analytics.ids.report.generator.feature:${project.version}
+																</feaureArtifactDef>
 							</featureArtifacts>
 						</configuration>
 					</execution>
@@ -813,6 +816,10 @@
 
                                                                 <feature>
                                                                         <id>org.wso2telco.analytics.sparkUdf.feature.group</id>
+                                                                        <version>${project.version}</version>
+                                                                </feature>
+																<feature>
+                                                                        <id>com.wso2telco.analytics.ids.report.generator.feature.group</id>
                                                                         <version>${project.version}</version>
                                                                 </feature>
 							</features>
