@@ -14,9 +14,11 @@
     <modules>
         <module>components/report-generator-extension</module>
         <module>components/org.wso2telco.analytics.sparkUdf</module>
+        <module>components/com.wso2telco.analytics.ids.report.generator</module>
         <module>features/ids-authentication-artifacts</module>
 	<module>features/report-generator-artifacts</module>
         <module>features/org.wso2telco.analytics.sparkUdf.feature</module>
+        <module>features/com.wso2telco.analytics.ids.report.generator.feature</module>
         <module>product/org.wso2.das.multitenancy.dashboard.ui</module>
 
         <module>product/styles</module>
@@ -385,6 +387,34 @@
                 <version>${carbon.analytics.version}</version>
             </dependency>
             <!--END - Integration Test Dependencies-->
+
+            <!--START - com.wso2telco.analytics.ids.report.generator Dependencies-->
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>${org.codehaus.groovy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${org.apache.poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.stream.core</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+            <!--END - com.wso2telco.analytics.ids.report.generator Dependencies-->
         </dependencies>
     </dependencyManagement>
 
@@ -488,6 +518,10 @@
         <org.codehaus.groovy.version>1.7.5</org.codehaus.groovy.version>
         <commons.beanutils.version>1.9.0</commons.beanutils.version>
         <commons.digester.version>2.1</commons.digester.version>
+
+        <commons-codec.version>1.9</commons-codec.version>
+        <org.apache.poi.version>3.7</org.apache.poi.version>
+        <org.json.version>20160212</org.json.version>
     </properties>
 
     <pluginRepositories>
