@@ -94,5 +94,9 @@
 	<dependency artifact="DownloadOfflineUserRegistration" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="OfflineUserRegistrationSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="OfflineRegistrationBreakdownSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="UserSuccessFailureSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="AuthAttemptsScopeSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DownloadUSSDReport" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="DownloadUSSDReportV2" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
     </artifact>
 </artifacts>
