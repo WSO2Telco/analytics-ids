@@ -46,7 +46,7 @@
 
                 on total_counts.sessionID=user_counts.sessionID
 
-            group by total_counts.day,  total_counts.operator, total_counts.appID) 
+            group by total_counts.day,  total_counts.operator, total_counts.appId) 
             as total_tbl
 
             left join 
