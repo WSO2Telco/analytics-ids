@@ -30,7 +30,7 @@
 
     <packaging>pom</packaging>
 
-    <name>WSO2Telco - Telco Analytics Common Aggregator Module</name>
+    <name>WSO2Telco - Telco Analytics Ids</name>
 
     <dependencyManagement>
         <dependencies>
