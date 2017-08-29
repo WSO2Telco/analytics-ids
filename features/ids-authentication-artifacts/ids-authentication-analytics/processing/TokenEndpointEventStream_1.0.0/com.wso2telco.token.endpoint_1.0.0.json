@@ -57,6 +57,10 @@
       "type": "STRING"
     },
     {
+      "name": "status",
+      "type": "STRING"
+    },
+    {
       "name": "_timestamp",
       "type": "LONG"
     }
