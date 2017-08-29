@@ -23,6 +23,7 @@ function TelcoAnalyticsClient() {
     var TYPE_MONTHLY_ACTIVE_USERS = 18;
     var TYPE_TOTAL_TOKENS = 19;
     var TYPE_TOTAL_AUTH_ATTEMPTS=20;
+    var TYPE_TOTAL_TOKENS_V2=27;
     var HTTP_GET = "GET";
     var HTTP_POST = "POST";
     var RESPONSE_ELEMENT = "responseJSON";
@@ -106,6 +107,10 @@ function TelcoAnalyticsClient() {
 
     this.getTotalTokens = function (filter, callback, error) {
         this.getData(filter, TYPE_TOTAL_TOKENS, callback, error);
+    };
+
+    this.getTotalTokens_v2 = function (filter, callback, error) {
+       this.getData(filter, TYPE_TOTAL_TOKENS_V2, callback, error);
     };
     
     this.getData = function (filter, type, callback, error) {

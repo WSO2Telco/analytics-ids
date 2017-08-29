@@ -84,5 +84,8 @@
 	<dependency artifact="AuthAttemptsScopeSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DownloadUSSDReport" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DownloadUSSDReportV2" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="TotalTokensBarChart_v2" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="TotalTokenCountsSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="TotalTokenFailureCountsSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>	
     </artifact>
 </artifacts>
