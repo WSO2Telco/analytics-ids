@@ -43,6 +43,11 @@
     var ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_DAILY";
  	var ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_MONTHLY";
 
+	var TOTAL_TOKENS_PER_APP_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOKEN_COUNTS";
+    var TOTAL_TOKENS_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_TOKEN_COUNTS";
+    var TOTAL_TOKENS_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_TOKEN_COUNTS";
+    var TOTAL_TOKENS_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_APP_TOKEN_COUNTS";
+
 
     var TIME_FROM_PARAM = "timeFrom";
     var TIME_TO_PARAM = "timeTo";
@@ -92,6 +97,7 @@
 	var TYPE_MSISDNS_SUCCESS_FAILED_REPORT=24;
 	var TYPE_LOGGING_CHECK=25;
 	var TYPE_WRONG_EP=26;
+	var TYPE_TOTAL_TOKENS_V2=27;
 	var TYPE_USER_REG=28;
     var log = new Log();
     var carbon = require('carbon');
@@ -112,6 +118,7 @@
     var activeUsersDailyTable = null;
  	var activeUsersMonthlyTable = null;
     var dropoutTable = null;
+	var totalTokenTable = null;
     if (configs.cacheTimeoutSeconds) {
         cacheTimeoutSeconds = parseInt(configs.cacheTimeoutSeconds);
     }
@@ -186,6 +193,7 @@
                 dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+                    totalTokenTable = TOTAL_TOKENS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
             } else if (appParam == "undefined" || appParam == "") {
                 roleFilterQuery = operatorQuery;
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
@@ -197,6 +205,7 @@
                 dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
+                    totalTokenTable = TOTAL_TOKENS_PER_OPERATOR_PER_DAY_TABLE;
             }
             isDashboardViewer = true;
             isOperator = true ;
@@ -215,6 +224,7 @@
                 dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+                    totalTokenTable = TOTAL_TOKENS_PER_OPERATOR_PER_DAY_TABLE;
             } else if (operatorParam == "undefined" || operatorParam == "") {
                 roleFilterQuery =  serviceProviderQuery;
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
@@ -225,6 +235,7 @@
                 dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+                    totalTokenTable = TOTAL_TOKENS_PER_DAY_TABLE;
 
             }
             isDashboardViewer = true;
@@ -244,6 +255,7 @@
                 dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+		totalTokenTable = TOTAL_TOKENS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
             } else if (operatorParam != "undefined" && operatorParam != "" && (appParam == "undefined" || appParam == "")) {
                 roleFilterQuery = " AND operator: \"" + operatorParam + "\"";
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
@@ -255,6 +267,7 @@
                 dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
+                    totalTokenTable = TOTAL_TOKENS_PER_OPERATOR_PER_DAY_TABLE;
             } else if ((operatorParam == "undefined" || operatorParam == "") && appParam != "undefined" && appParam != "") {
                 roleFilterQuery = " AND appID: \"" + appParam + "\"";
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
@@ -265,6 +278,7 @@
                 dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+                    totalTokenTable = TOTAL_TOKENS_PER_APP_PER_DAY_TABLE;
             } else if ((operatorParam == "undefined" || operatorParam == "") && (appParam == "undefined" || appParam == "")) {
                 roleFilterQuery = "";
                 dailyRegistrationTable = DAILY_REGISTRATION_TOTAL_PER_DAY_TABLE;
@@ -276,6 +290,7 @@
                 dropoutTable = DROPOUTS_TOTAL_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_TOTAL_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE;
+                    totalTokenTable = TOTAL_TOKENS_PER_DAY_TABLE;
             }
             isDashboardViewer = true;
             isAdmin = true;
@@ -1344,6 +1359,80 @@
 							};
                             
                             break;
+                        }
+                        case TYPE_TOTAL_TOKENS_V2 :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                    "field": "_timestamp",
+                                    "sortType": "ASC"
+                                }]
+                            };
+                            result = connector.search(loggedInUser, totalTokenTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+                                data.forEach(function (record, i) {
+                                    var values = record.values;
+                                    var totT = [values["day"].substring(5), "TOTAL", values["totalTokenCount"]];
+                                    var sucT = [values["day"].substring(5), "SUCCESS", values["tokenSuccessCount"]];
+                                    var failedT = [values["day"].substring(5), "FAILED", values["tokenFailedCount"]];
+                                    results.push(totT);
+                                    results.push(sucT);
+                                    results.push(failedT);
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+
+
+                        }
+						case TYPE_USER_REG :
+                        {
+                             if ((isOperator || isAdmin) && (appParam == "undefined" || appParam == "")) {
+                                 result = {
+                                      message: true,
+                                      statusCode: 200,
+                                      status: "SUCCESS"
+                                   };
+                              } else {
+                                 result = {
+                                      message: false,
+                                      statusCode: 200,
+                                      status: "FAILED"
+                                 };
+                              }
+                              break;
+                        }
+
+			         case TYPE_MSISDNS_SHARING_REPORT :
+                        {
+                             if (isOperator || isServiceProvider ) {
+                                 result = {
+                                      message: true,
+                                      statusCode: 200,
+                                      status: "SUCCESS"
+                                   };
+                              } else {
+                                 result = {
+                                      message: false,
+                                      statusCode: 200,
+                                      status: "FAILED"
+                                 };
+                              }
+                              break;
                         }
                         default:
                             result = '{ "status": "Failed", "statusCode": "500", "message": "Unidentified operation" }';

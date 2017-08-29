@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>total_token_counts</Name>
+    <Script>
+        create temporary table auth_endpoint_raw_tokencount using CarbonAnalytics options (tableName "COM_WSO2TELCO_AUTHORIZATION_ENDPOINT", schema "requestType STRING, appID STRING, isAuthenticated BOOLEAN, authenticatorMethods STRING, authenticatorEndTime LONG, authenticatorStartTime LONG, sessionID STRING, isNewUser BOOLEAN, operator STRING, userAgent STRING, msisdn STRING, internalCustomerReference STRING, serverHost STRING, requestURL STRING, httpMethod STRING, urlParams STRING, requestStatus STRING, returnedError STRING, transactionID STRING, consentTimestamp LONG, consentState STRING, consentType STRING, isAuthCodeIssued BOOLEAN, state STRING,nonce STRING, scope STRING, acrValue INTEGER, isMsisdnHeader BOOLEAN, ipHeader STRING, loginHint STRING, telcoScope STRING, _timestamp LONG -i", incrementalParams "auth_endpoint_raw_tokencount_incremental, DAY");
+
+		create temporary table token_endpoint_raw_tokencount using CarbonAnalytics options (tableName "COM_WSO2TELCO_TOKEN_ENDPOINT", schema "authenticatedUser STRING, state STRING, nonce STRING, amr STRING, authenticationCode STRING, accessToken STRING, sourceIP STRING, contentType STRING, clientID STRING, payload STRING, refreshToken STRING, tokenClaims STRING, requestStatus STRING, returnedResult STRING, statusCode STRING, sessionID STRING,_timestamp LONG -i", incrementalParams "token_endpoint_raw_tokencount_incremental, DAY");
+
+		create temporary table user_status_meta_raw_tokencount using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,msisdn STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i", incrementalParams "user_status_meta_raw_tokencount_incremental, DAY");
+
+		create temporary table com_wso2telco_summary_token_counts using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOKEN_COUNTS", schema "day STRING -i,operator STRING -i,appID STRING -i,totalAuth_success LONG -i,totalTokenCount LONG -i,tokenSuccessCount LONG -i,token_did_not_call LONG -i,tokenFailedCount LONG -i,_timestamp LONG -i", primaryKeys "day,operator,appID", mergeSchema "false");
+
+
+		insert into table com_wso2telco_summary_token_counts
+		select getDateString(token_tot._timestamp), token_tot.operator, token_tot.appID, checkNullforLong(tot_auth.sessionCount), checkNullforLong(token_tot.sessionCount),checkNullforLong(token_suc.sessionCount), checkNullforLong(token_did_not_call.sessionCount), checkNullforLong(token_failed.sessionCount),token_tot._timestamp
+		from(
+			select  _timestamp, operator,  appID, count(token_total.sessionID) as sessionCount
+			from(
+				select first(operator) as operator, first(token_endpoint_tot.sessionID) as sessionID, first(appID) as appID, getDateTimestamp(MIN(_timestamp)) AS _timestamp
+				from(
+					select sessionID, min(_timestamp) as _timestamp
+					from token_endpoint_raw_tokencount
+					group by sessionID	
+				) as token_endpoint_tot 
+				INNER JOIN(
+					select sessionID, min(operator) as operator, min(appId) as appID
+					from user_status_meta_raw_tokencount
+					where operator IS NOT NULL and appId IS NOT NULL 
+					group by sessionID
+				) as user_meta on user_meta.sessionID = token_endpoint_tot.sessionID group by operator, appID, _timestamp
+			) as token_total group by operator, appID, _timestamp
+		)as token_tot
+		left join
+		(
+			select  _timestamp, operator,  appID, count(token_success.sessionID) as sessionCount
+			from(
+				select first(operator) as operator, first(token_endpoint_success.sessionID) as sessionID, first(appID) as appID, getDateTimestamp(MIN(_timestamp)) AS _timestamp
+				from(
+					select sessionID, min(_timestamp) as _timestamp
+					from token_endpoint_raw_tokencount
+					where statusCode='200'
+					group by sessionID	
+				) as token_endpoint_success 
+				INNER JOIN(
+					select sessionID, first(operator) as operator, first(appID) as appID
+					from auth_endpoint_raw_tokencount
+					where isAuthenticated= True and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL
+					group by sessionID
+				) as auth_endpoint on auth_endpoint.sessionID = token_endpoint_success.sessionID group by operator, appID, _timestamp
+			) as token_success group by operator, appID, _timestamp
+		)as token_suc on token_suc._timestamp = token_tot._timestamp and token_suc.operator = token_tot.operator and  token_suc.appID = token_tot.appID
+		left join
+		(
+			select  _timestamp, operator,  appID, count(token_fail.sessionID) as sessionCount
+			from(
+				select first(operator) as operator, first(token_endpoint_success.sessionID) as sessionID, first(appID) as appID, getDateTimestamp(MIN(_timestamp)) AS _timestamp
+				from(
+					select sessionID, min(_timestamp) as _timestamp
+					from token_endpoint_raw_tokencount
+					where statusCode!='200'
+					group by sessionID	
+				) as token_endpoint_success 
+				INNER JOIN(
+					select sessionID, first(operator) as operator, first(appID) as appID
+					from auth_endpoint_raw_tokencount
+					where isAuthenticated= True and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL
+					group by sessionID
+				) as auth_endpoint on auth_endpoint.sessionID = token_endpoint_success.sessionID group by operator, appID, _timestamp
+			) as token_fail group by operator, appID, _timestamp
+		)as token_failed on token_failed._timestamp = token_tot._timestamp and token_failed.operator = token_tot.operator and  token_failed.appID = token_tot.appID
+		left join(
+			select first(operator) as operator, count(sessionID) as sessionCount, first(appID) as appID, _timestamp
+				from(
+					select sessionID, first(operator) as operator, first(appID) as appID, getDateTimestamp(MIN(_timestamp)) AS _timestamp
+					from auth_endpoint_raw_tokencount
+					where isAuthenticated= True and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL
+					group by sessionID
+					)as total_auth group by operator, appID, _timestamp
+		) as tot_auth on tot_auth._timestamp = token_tot._timestamp and tot_auth.operator = token_tot.operator and  tot_auth.appID = token_tot.appID
+		left join(
+			select count(total_auth.sessionID) as sessionCount, operator, appID,_timestamp
+					from(
+						select sessionID, first(operator) as operator, first(appID) as appID, getDateTimestamp(MIN(_timestamp)) AS _timestamp
+						from auth_endpoint_raw_tokencount
+						where isAuthenticated= True and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL
+						group by sessionID
+						)as total_auth 
+					left join(
+							select sessionID
+							from token_endpoint_raw_tokencount
+							group by sessionID	
+						)as token_join_auth on total_auth.sessionID = token_join_auth.sessionID
+					where token_join_auth.sessionID IS NULL
+					group by operator,appID,_timestamp
+		)as token_did_not_call on token_did_not_call._timestamp = token_tot._timestamp and token_did_not_call.operator = token_tot.operator and  token_did_not_call.appID = token_tot.appID;
+
+		create temporary table com_wso2telco_summary_operator_token_counts using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_TOKEN_COUNTS", schema "day STRING -i,operator STRING -i,totalAuth_success LONG -i,totalTokenCount LONG -i,tokenSuccessCount LONG -i,token_did_not_call LONG -i,tokenFailedCount LONG -i,_timestamp LONG -i", primaryKeys "operator,day", mergeSchema "false");
+
+			
+        insert into table com_wso2telco_summary_operator_token_counts select getDateString(_timestamp) as date,operator, sum(totalAuth_success), sum(totalTokenCount), sum(tokenSuccessCount), sum(token_did_not_call), sum(tokenFailedCount), _timestamp from com_wso2telco_summary_token_counts where operator !="spark" group by operator,_timestamp;
+
+		create temporary table com_wso2telco_summary_app_token_counts using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_TOKEN_COUNTS", schema "day STRING -i,appID STRING -i,totalAuth_success LONG -i,totalTokenCount LONG -i,tokenSuccessCount LONG -i,token_did_not_call LONG -i,tokenFailedCount LONG -i,_timestamp LONG -i", primaryKeys "appID,day", mergeSchema "false");
+
+        insert into table com_wso2telco_summary_app_token_counts select getDateString(_timestamp) as date,appID, sum(totalAuth_success), sum(totalTokenCount), sum(tokenSuccessCount), sum(token_did_not_call), sum(tokenFailedCount), _timestamp from com_wso2telco_summary_token_counts where operator !="spark" group by appID,_timestamp;
+
+
+		create temporary table com_wso2telco_summary_total_token_counts using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_TOKEN_COUNTS", schema "day STRING -i,totalAuth_success LONG -i,totalTokenCount LONG -i,tokenSuccessCount LONG -i,token_did_not_call LONG -i,tokenFailedCount LONG -i,_timestamp LONG -i", primaryKeys "day", mergeSchema "false");
+
+
+		insert into table com_wso2telco_summary_total_token_counts select getDateString(_timestamp) as date, sum(totalAuth_success), sum(totalTokenCount), sum(tokenSuccessCount), sum(token_did_not_call), sum(tokenFailedCount), _timestamp from com_wso2telco_summary_token_counts where operator !="spark"  group by _timestamp;
+
+		
+        INCREMENTAL_TABLE_COMMIT auth_endpoint_raw_tokencount_incremental;
+        INCREMENTAL_TABLE_COMMIT token_endpoint_raw_tokencount_incremental;
+        INCREMENTAL_TABLE_COMMIT user_status_meta_raw_tokencount_incremental;
+
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>
