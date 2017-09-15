@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2telco.product.analytics</groupId>
         <artifactId>wso2das-multitenancy-features</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.1.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
