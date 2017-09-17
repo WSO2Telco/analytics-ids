@@ -47,6 +47,14 @@
  	var ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_ACTIVE_USERS_MONTHLY";
 	var ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_DAILY";
  	var ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_MONTHLY";
+ 	var SMS_OTP="COM_WSO2TELCO_SUMMARY_SMS_OTPURL_SUCCESS_FAILURE";
+ 	var OPERATOR_SMS_OTP="COM_WSO2TELCO_SUMMARY_OPERATOR_SMS_OTPURL_SUCCESS_FAILURE";
+ 	var APP_SMS_OTP="COM_WSO2TELCO_SUMMARY_APP_SMS_OTPURL_SUCCESS_FAILURE";
+ 	var TOTAL_SMS_OTP="COM_WSO2TELCO_SUMMARY_TOTAL_SMS_OTPURL_SUCCESS_FAILURE";
+ 	var FEDERATED_AUTHENTICAOTOR="COM_WSO2TELCO_SUMMARY_FED_SUCCESS_FAILURE";
+ 	var OPERATOR_FEDERATED_AUTHENTICAOTOR="COM_WSO2TELCO_SUMMARY_OPERATOR_FED_SUCCESS_FAILURE";
+ 	var APP_FEDERATED_AUTHENTICAOTOR="COM_WSO2TELCO_SUMMARY_APP_FED_SUCCESS_FAILURE";
+ 	var TOTAL_FEDERATED_AUTHENTICAOTOR="COM_WSO2TELCO_SUMMARY_TOTAL_FED_SUCCESS_FAILURE";
 	var TIME_FROM_PARAM = "timeFrom";
 	var FILE_NAME_PARAM = "fileName";
 	var TIME_TO_PARAM = "timeTo";
@@ -108,6 +116,8 @@
 	var hefailedtable=null;
 	var activeUsersDailyTable = null;
  	var activeUsersMonthlyTable = null;
+ 	var SMSotpTable = null;
+ 	var FederatedTable = null;
 	response.contentType = CONTENT_TYPE_JSON;
 	var token = session.get(USER_TOKEN);
 	if (token != null) {
@@ -182,6 +192,9 @@
 				heBreackdownTable=HE_BREAKDOWNS;
 				activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+ 				FederatedTable=FEDERATED_AUTHENTICAOTOR;
+ 				SMSotpTable=SMS_OTP;
+ 				
 			} else if (appParam != null && appParam == "undefined" || appParam == "") {
 				roleFilterQuery = operatorQuery;
 				dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
@@ -197,6 +210,9 @@
 				heBreackdownTable=OPERATOR_HE_BREAKDOWNS;
 				activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
+ 				FederatedTable=OPERATOR_FEDERATED_AUTHENTICAOTOR;
+ 				SMSotpTable=OPERATOR_SMS_OTP;
+
 			}
 			hefailedtable=HE_MSISDN_NOT_FOUND;
 			isDashboardViewer = true;
@@ -218,6 +234,9 @@
 				heBreackdownTable=HE_BREAKDOWNS;
 				activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+ 				FederatedTable=FEDERATED_AUTHENTICAOTOR;
+ 				SMSotpTable=SMS_OTP;
+
 			} else if (operatorParam == "undefined" || operatorParam == "") {
 				roleFilterQuery =  serviceProviderQuery;
 				dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
@@ -230,6 +249,8 @@
 				heBreackdownTable=APP_HE_BREAKDOWNS;
 				activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+ 				FederatedTable=APP_FEDERATED_AUTHENTICAOTOR;
+ 				SMSotpTable=APP_SMS_OTP;
 			}
 			isDashboardViewer = true;
 			break;
@@ -249,6 +270,8 @@
 				heBreackdownTable=HE_BREAKDOWNS;
 				activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+ 				FederatedTable=FEDERATED_AUTHENTICAOTOR;
+ 				SMSotpTable=SMS_OTP;
 			} else if (operatorParam != "undefined" && operatorParam != "" && (appParam == "undefined" || appParam == "")) {
 				roleFilterQuery = " AND operator: \"" + operatorParam + "\"";
 				dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
@@ -264,6 +287,8 @@
 				heBreackdownTable=OPERATOR_HE_BREAKDOWNS;
 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
+                FederatedTable=OPERATOR_FEDERATED_AUTHENTICAOTOR;
+                SMSotpTable=OPERATOR_SMS_OTP;
 			} else if ((operatorParam == "undefined" || operatorParam == "") && appParam != "undefined" && appParam != "") {
 				roleFilterQuery = "AND appID: \"" + appParam + "\"";
 				dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
@@ -278,6 +303,8 @@
 				heBreackdownTable=APP_HE_BREAKDOWNS;
 				activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+ 				FederatedTable=APP_FEDERATED_AUTHENTICAOTOR;
+ 				SMSotpTable=APP_SMS_OTP;
 			} else if ((operatorParam == "undefined" || operatorParam == "") && (appParam == "undefined" || appParam == "")) {
 				roleFilterQuery = "";
 				dailyRegistrationTable = DAILY_REGISTRATION_TOTAL_PER_DAY_TABLE;
@@ -293,6 +320,8 @@
 				heBreackdownTable=TOTAL_HE_BREAKDOWNS;
 				activeUsersDailyTable=ACTIVE_USERS_DAILY_TOTAL_PER_DAY_TABLE;
  				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE;
+ 				FederatedTable=TOTAL_FEDERATED_AUTHENTICAOTOR;
+ 				SMSotpTable=TOTAL_SMS_OTP;
 			}
 			USSDLogsTable=COM_WSO2TELCO_SUMMARY_USSD_ANALYSIS;
 			hefailedtable=HE_MSISDN_NOT_FOUND;
@@ -984,25 +1013,32 @@
 								var resultAttemptsVsLogins = connector.search(loggedInUser, attemptsVsLoginsTable, stringify(searchParams));
 								var resultDailyReg = connector.search(loggedInUser, dailyRegistrationTable, stringify(searchParams));
 								var resultHEFailuers = connector.search(loggedInUser, heBreackdownTable, stringify(searchParams));
+								var resultSMSotp = connector.search(loggedInUser, SMSotpTable, stringify(searchParams));
+								var resultFederated = connector.search(loggedInUser, FederatedTable, stringify(searchParams));
 								if (resultDropOuts.getStatusCode() == 200 && resultLoginChannels.getStatusCode() == 200 &&
 								resultAttemptsVsLogins.getStatusCode() == 200 &&
 								resultDailyReg.getStatusCode() == 200 &&
-								resultHEFailuers.getStatusCode() == 200) {
+								resultHEFailuers.getStatusCode() == 200 &&  
+								resultFederated.getStatusCode() == 200 &&
+								resultSMSotp.getStatusCode() == 200) {
 									var data = new Array();
 									data[0] = JSON.parse(resultLoginChannels.getMessage());
 									data[1] =JSON.parse(resultDropOuts.getMessage());
 									data[2]  = JSON.parse(resultAttemptsVsLogins.getMessage());
 									data[3] = JSON.parse(resultDailyReg.getMessage());
 									data[4] = JSON.parse(resultHEFailuers.getMessage());
+									data[5] = JSON.parse(resultFederated.getMessage());
+									data[6] = JSON.parse(resultSMSotp.getMessage());
 									var dateTreeSet = new Packages.java.util.TreeSet;
 									var map = new Packages.java.util.TreeMap;
 									//var dataExport = carbon.server.osgiService('com.wso2telco.analytics.ids.report.generator.MsisdnReportGenerationService');
+									var TYPE_DETAIL_REPORT_COLUMNS = 32;
 									
 									for (var i = 0; i < data[0].length ; i++) { 
 										var day=String(data[0][i].values["day"]);
 										dateTreeSet.add(day);
 										var list = new Packages.java.util.ArrayList();
-										for (var j = 0; j < 23 ; j++) {
+										for (var j = 0; j < TYPE_DETAIL_REPORT_COLUMNS ; j++) {
 											list.add(j,"0");
 										}
 										map.put(day,list);
@@ -1020,7 +1056,7 @@
 											list= map.get(day);
 										}else{
 											list = new Packages.java.util.ArrayList();
-											for (var j = 0; j < 23 ; j++) {
+											for (var j = 0; j < TYPE_DETAIL_REPORT_COLUMNS ; j++) {
 												list.add(j,"0");
 											}
 											map.put(day,list);
@@ -1041,7 +1077,7 @@
 											list= map.get(day);
 										}else{
 											list = new Packages.java.util.ArrayList();
-											for (var j = 0; j < 23 ; j++) {
+											for (var j = 0; j < TYPE_DETAIL_REPORT_COLUMNS ; j++) {
 												list.add(j,"0");
 											}
 											map.put(day,list);
@@ -1062,7 +1098,7 @@
 											list= map.get(day);
 										}else{
 											list = new Packages.java.util.ArrayList();
-											for (var j = 0; j < 23 ; j++) {
+											for (var j = 0; j < TYPE_DETAIL_REPORT_COLUMNS ; j++) {
 												list.add(j,"0");
 											}
 											map.put(day,list);
@@ -1083,12 +1119,51 @@
 											list= map.get(day);
 										}else{
 											list = new Packages.java.util.ArrayList();
-											for (var j = 0; j < 23 ; j++) {
+											for (var j = 0; j < TYPE_DETAIL_REPORT_COLUMNS; j++) {
 												list.add(j,"0");
 											}
 											map.put(day,list);
 										}
 										list.add(22,data[3][i].values["regCount"]);
+									}
+
+									for (var i = 0; i < data[5].length ; i++) {
+										var day=String(data[5][i].values["day"]);
+										dateTreeSet.add(day);
+										var list=null;
+										if (map.containsKey(day)) {
+											list= map.get(day);
+										}else{
+											list = new Packages.java.util.ArrayList();
+											for (var j = 0; j < TYPE_DETAIL_REPORT_COLUMNS ; j++) {
+												list.add(j,"0");
+											}
+											map.put(day,list);
+										}	
+										list.add(23,data[5][i].values["total_attempts"]);
+										list.add(24,data[5][i].values["success"]);
+										list.add(25,data[5][i].values["total_failure"]);
+									}
+
+									for (var i = 0; i < data[6].length ; i++) {
+										var day=String(data[6][i].values["day"]);
+										dateTreeSet.add(day);
+										var list=null;
+										if (map.containsKey(day)) {
+											list= map.get(day);
+										}else{
+											list = new Packages.java.util.ArrayList();
+											for (var j = 0; j < TYPE_DETAIL_REPORT_COLUMNS ; j++) {
+												list.add(j,"0");
+											}
+											map.put(day,list);
+										}	
+										list.add(26,data[6][i].values["total_otp_attempts"]);
+										list.add(27,data[6][i].values["otp_success"]);
+										list.add(28,data[6][i].values["otp_failure"]);
+										list.add(29,data[6][i].values["total_url_attempts"]);
+										list.add(30,data[6][i].values["url_success"]);
+										list.add(31,data[6][i].values["url_failure"]);
 									}
 									var dateArray=dateTreeSet.toArray();
 									
@@ -1128,10 +1203,10 @@
 										file.write("Operator,"+operator+"\n");
 										file.write("APP,"+app+"\n");
 										file.write("From,"+timeFromParam+",,"+"To,"+timeToParam+"\n\n")
-										file.write("Date,Auth Code Success-HE,Auth Code Success-USSD,Auth Code Success-SMS,Auth Code Success-Total,Auth Code Fail-Onnet T&C,Auth Code Fail-Offnet T&C,Auth Code Fail-USSD,Auth Code Fail-SMS,Auth Code Fail-MSISDN,Auth Code Fail-Total,Auth Attempts-Total,Auth Attempts-Onnet,Auth Attempts-Offnet,Auth Attempts-New User,Auth Attempts-Repeat User,Total-Token API Call,Total-Registration Count,HE Failures - IP Validation(Source IP Mismatch),HE Failures - MSISDN Header missed(GGSN Configuration),HE Failures - Originating from Proxy(Data Saving Mode),HE Failures - Wrong Endpoint,Header-Loginhint Mismatch\n");
+										file.write("Date,Auth Code Success-HE,Auth Code Success-USSD,Auth Code Success-SMS,Auth Code Success-Total,Auth Code Fail-Onnet T&C,Auth Code Fail-Offnet T&C,Auth Code Fail-USSD,Auth Code Fail-SMS,Auth Code Fail-MSISDN,Auth Code Fail-Total,Auth Attempts-Total,Auth Attempts-Onnet,Auth Attempts-Offnet,Auth Attempts-New User,Auth Attempts-Repeat User,Total-Token API Call,Total-Registration Count,HE Failures - IP Validation(Source IP Mismatch),HE Failures - MSISDN Header missed(GGSN Configuration),HE Failures - Originating from Proxy(Data Saving Mode),HE Failures - Wrong Endpoint,Header-Loginhint Mismatch,Federated Auth-Total,Federated Auth-Success,Federated Auth-Failure,SMS OTP-Total,SMS OTP-Success,SMS OTP-Failure,SMS URL-Total,SMS URL-Success,SMS URL-Failure\n");
 										for (var x = 0; x < dateArray.length ; x++) {
 											var listLast = map.get(dateArray[x]);
-											file.write(dateArray[x]+","+listLast.get(0)+","+listLast.get(1)+","+listLast.get(2)+","+listLast.get(3)+","+listLast.get(4)+","+listLast.get(5)+","+listLast.get(6)+","+listLast.get(7)+","+listLast.get(8)+","+listLast.get(9)+","+listLast.get(16)+","+listLast.get(17)+","+listLast.get(18)+","+listLast.get(19)+","+listLast.get(20)+","+listLast.get(21)+","+listLast.get(22)+","+listLast.get(11)+","+listLast.get(12)+","+listLast.get(13)+","+listLast.get(14)+","+listLast.get(15)+"\n");
+											file.write(dateArray[x]+","+listLast.get(0)+","+listLast.get(1)+","+listLast.get(2)+","+listLast.get(3)+","+listLast.get(4)+","+listLast.get(5)+","+listLast.get(6)+","+listLast.get(7)+","+listLast.get(8)+","+listLast.get(9)+","+listLast.get(16)+","+listLast.get(17)+","+listLast.get(18)+","+listLast.get(19)+","+listLast.get(20)+","+listLast.get(21)+","+listLast.get(22)+","+listLast.get(11)+","+listLast.get(12)+","+listLast.get(13)+","+listLast.get(14)+","+listLast.get(15)+","+listLast.get(23)+","+listLast.get(24)+","+listLast.get(25)+","+listLast.get(26)+","+listLast.get(27)+","+listLast.get(28)+","+listLast.get(29)+","+listLast.get(30)+","+listLast.get(31)+"\n");
 										}
 										print(file.getStream());
 										file.close();
