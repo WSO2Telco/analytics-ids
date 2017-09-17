@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Analytics>
+    <Name>fed_success_failure_analytics</Name>
+    <Script>
+        
+        create temporary table user_status_fed_success_failure using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,msisdn STRING,_timestamp LONG -i", incrementalParams "user_status_fed_success_failure_inp, DAY");
+
+        create temporary table user_status_meta_fed_success_failure using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_fed_success_failure_inp, DAY");
+
+        create temporary table com_wso2telco_summary_fed_success_failure using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_FED_SUCCESS_FAILURE", schema "day STRING -i, operator STRING -i, appID STRING -i, total_attempts LONG, success LONG, total_failure LONG, processing_failure LONG, response_failure LONG, other_failure LONG, _timestamp LONG -i", primaryKeys "day, operator, appID", incrementalParams "com_wso2telco_summary_fed_success_failure_inp, DAY", mergeSchema "false");
+
+        create temporary table com_wso2telco_summary_fed_success_failure_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_FED_SUCCESS_FAILURE", schema "day STRING -i, appID STRING -i,total_attempts LONG, success LONG, total_failure LONG, processing_failure LONG, response_failure LONG, other_failure LONG, _timestamp LONG -i", primaryKeys "day, appID");
+
+        create temporary table com_wso2telco_summary_fed_success_failure_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_FED_SUCCESS_FAILURE", schema "day STRING -i, operator STRING -i , total_attempts LONG, success LONG, total_failure LONG, processing_failure LONG, response_failure LONG, other_failure LONG, _timestamp LONG -i", primaryKeys "day, operator");
+
+        create temporary table com_wso2telco_summary_fed_success_failure_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_FED_SUCCESS_FAILURE", schema "day STRING -i, total_attempts LONG, success LONG, total_failure LONG, processing_failure LONG, response_failure LONG, other_failure LONG, _timestamp LONG -i", primaryKeys "day");
+
+        insert into table com_wso2telco_summary_fed_success_failure 
+        select getDateString(fed_total._timestamp) as day, fed_total.operator as operator, fed_total.appID as appID, fed_total.Total_FEDcount, checkNullforLong(fed_success.success_count),(checkNullforLong(processing_failure.processing_failure_count) + checkNullforLong(response_failure.response_failure_count) + checkNullforLong(other_failure.other_failure_count)) as total_failure, checkNullforLong(processing_failure.processing_failure_count), checkNullforLong(response_failure.response_failure_count), checkNullforLong(other_failure.other_failure_count), fed_total._timestamp as _timestamp
+        from (
+            select meta.operator as operator,  _timestamp, meta.appID, count(ustatus.sessionID) as Total_FEDcount
+            from
+            (
+                select distinct sessionID, getDateTimestamp(_timestamp) as _timestamp
+                from user_status_fed_success_failure
+                where status = 'FED_IDP_AUTH_PROCESSING'
+            ) as ustatus
+            INNER JOIN (
+                select sessionID, first(operator) as operator, first(appId) as appID
+                from user_status_meta_fed_success_failure
+                where operator IS NOT NULL and appId IS NOT NULL group by sessionID
+            ) as meta on meta.sessionID = ustatus.sessionID group by operator, _timestamp, appID
+        ) as fed_total 
+        LEFT JOIN
+        (
+            select meta.operator as operator,  _timestamp, meta.appID, count(ustatus.sessionID) as success_count
+                from
+                (
+                    select temp.sessionID, temp._timestamp 
+                    from(
+                        select distinct sessionID, getDateTimestamp(_timestamp) as _timestamp
+                            from user_status_fed_success_failure
+                            where status = 'FED_IDP_AUTH_PROCESSING'
+                     ) as temp
+                     INNER JOIN (
+                        select distinct sessionID, getDateTimestamp(_timestamp) as _timestamp
+                            from user_status_fed_success_failure
+                            where status = 'LOGIN_SUCCESS'
+                     ) as temp2 on temp.sessionID = temp2.sessionID
+                ) as ustatus
+                INNER JOIN (
+                    select sessionID, first(operator) as operator, first(appId) as appID
+                    from user_status_meta_fed_success_failure
+                    where operator IS NOT NULL and appId IS NOT NULL group by sessionID
+                ) as meta on meta.sessionID = ustatus.sessionID group by operator, _timestamp, appID
+            ) as fed_success on fed_total.operator = fed_success.operator AND fed_total.appID = fed_success.appID AND fed_total._timestamp = fed_success._timestamp
+        LEFT JOIN(
+            select meta.operator as operator,  _timestamp, meta.appID, count(ustatus.sessionID) as processing_failure_count
+                from
+                (
+                    select distinct sessionID, getDateTimestamp(_timestamp) as _timestamp
+                    from user_status_fed_success_failure
+                    where status = 'FED_IDP_AUTH_PROCESSING_FAIL'
+                ) as ustatus
+                INNER JOIN (
+                    select sessionID, first(operator) as operator, first(appId) as appID
+                    from user_status_meta_fed_success_failure
+                    where operator IS NOT NULL and appId IS NOT NULL group by sessionID
+                ) as meta on meta.sessionID = ustatus.sessionID group by operator, _timestamp, appID
+            ) as processing_failure on fed_total.operator = processing_failure.operator AND fed_total.appID = processing_failure.appID AND fed_total._timestamp = processing_failure._timestamp
+        LEFT JOIN(
+            select meta.operator as operator,  _timestamp, meta.appID, count(ustatus.sessionID) as response_failure_count
+                from
+                (
+                    select distinct sessionID, getDateTimestamp(_timestamp) as _timestamp
+                    from user_status_fed_success_failure
+                    where status = 'FED_IDP_AUTH_RESPONSE_FAIL'
+                ) as ustatus
+                INNER JOIN (
+                    select sessionID, first(operator) as operator, first(appId) as appID
+                    from user_status_meta_fed_success_failure
+                    where operator IS NOT NULL and appId IS NOT NULL group by sessionID
+                ) as meta on meta.sessionID = ustatus.sessionID group by operator, _timestamp, appID
+            ) as response_failure on fed_total.operator = response_failure.operator AND fed_total.appID = response_failure.appID AND fed_total._timestamp = response_failure._timestamp
+        LEFT JOIN(
+            select meta.operator as operator,  meta._timestamp, meta.appID, count(ustatus.sessionID) as other_failure_count
+                from
+                (
+                    select distinct sessionID
+                    from user_status_fed_success_failure
+                    where status = 'FED_IDP_AUTH_PROCESSING'
+                    EXCEPT
+                    select distinct sessionID
+                    from user_status_fed_success_failure
+                    where status = 'LOGIN_SUCCESS'
+                ) as ustatus
+                INNER JOIN (
+                    select sessionID, first(operator) as operator, first(appId) as appID, first(getDateTimestamp(_timestamp)) as _timestamp
+                    from user_status_meta_fed_success_failure
+                    where operator IS NOT NULL and appId IS NOT NULL group by sessionID
+                ) as meta on meta.sessionID = ustatus.sessionID group by operator, _timestamp, appID
+            ) as other_failure on fed_total.operator = other_failure.operator AND fed_total.appID = other_failure.appID AND fed_total._timestamp = other_failure._timestamp;
+
+            insert into table com_wso2telco_summary_fed_success_failure_app select day, appID, SUM(total_attempts) as total_attempts, 
+            SUM(success) as success, SUM(total_failure) as total_failure, SUM(processing_failure) as processing_failure, 
+            SUM(response_failure) as response_failure, SUM(other_failure) as other_failure, min(_timestamp) as  _timestamp from com_wso2telco_summary_fed_success_failure 
+            where operator!="spark" group by appID, day ;
+
+            insert into table com_wso2telco_summary_fed_success_failure_operator select day, operator, SUM(total_attempts) as total_attempts, 
+            SUM(success) as success, SUM(total_failure) as total_failure, SUM(processing_failure) as processing_failure, 
+            SUM(response_failure) as response_failure, SUM(other_failure) as other_failure, min(_timestamp) as  _timestamp from com_wso2telco_summary_fed_success_failure 
+            where operator!="spark" group by operator, day;
+
+            insert into table com_wso2telco_summary_fed_success_failure_total select day, SUM(total_attempts) as total_attempts, 
+            SUM(success) as success, SUM(total_failure) as total_failure, SUM(processing_failure) as processing_failure, 
+            SUM(response_failure) as response_failure, SUM(other_failure) as other_failure, min(_timestamp) as  _timestamp from com_wso2telco_summary_fed_success_failure 
+            where operator!="spark" group by day;
+
+            INCREMENTAL_TABLE_COMMIT user_status_fed_success_failure_inp;
+            INCREMENTAL_TABLE_COMMIT user_status_meta_fed_success_failure_inp;
+            INCREMENTAL_TABLE_COMMIT com_wso2telco_summary_fed_success_failure_inp;
+    </Script>
+    <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+</Analytics>
