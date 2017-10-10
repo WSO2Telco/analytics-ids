@@ -8,13 +8,13 @@
         create temporary table user_status_meta_sms_otp_n_url_success_failure using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS_META", schema "sessionID STRING,sourceIP STRING,operator STRING,appId STRING,isMSISDNHeader BOOLEAN,userAgent STRING,consumerKey STRING,state STRING,nonce STRING,scope STRING,acrValue STRING,loginHint STRING,isNewUser BOOLEAN,telcoScope STRING,status STRING,_timestamp LONG -i",  incrementalParams "user_status_meta_sms_success_failure, DAY");
 
 
-        create temporary table sms_otp_n_url_success_failure_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_SMS_OTPURL_SUCCESS_FAILURE", schema "day STRING -i, operator STRING -i, appID STRING -i, total_sms_attempts LONG, total_otp_attempts LONG, otp_success LONG, otp_failure LONG, total_url_attempts LONG, url_success LONG,url_failure LONG, _timestamp LONG -i", primaryKeys "day, operator, appID", incrementalParams "summary_sms_otp_n_url_success_failure, DAY", mergeSchema "false");
+        create temporary table sms_otp_n_url_success_failure_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_SMS_OTPURL_SUCCESS_FAILURE", schema "day STRING -i, operator STRING -i, appID STRING -i, total_sms_attempts LONG, total_otp_attempts LONG, otp_success LONG, otp_failure LONG, total_url_attempts LONG, url_success LONG,url_failure LONG,other_failure LONG, _timestamp LONG -i", primaryKeys "day, operator, appID", incrementalParams "summary_sms_otp_n_url_success_failure, DAY", mergeSchema "false");
 
-        create temporary table sms_otp_n_url_success_failure_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_SMS_OTPURL_SUCCESS_FAILURE", schema "day STRING -i, appID STRING -i, total_sms_attempts LONG, total_otp_attempts LONG, otp_success LONG, otp_failure LONG, total_url_attempts LONG, url_success LONG,url_failure LONG, _timestamp LONG -i", primaryKeys "day, appID");
+        create temporary table sms_otp_n_url_success_failure_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_SMS_OTPURL_SUCCESS_FAILURE", schema "day STRING -i, appID STRING -i, total_sms_attempts LONG, total_otp_attempts LONG, otp_success LONG, otp_failure LONG, total_url_attempts LONG, url_success LONG,url_failure LONG,other_failure LONG, _timestamp LONG -i", primaryKeys "day, appID");
 
-        create temporary table sms_otp_n_url_success_failure_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_SMS_OTPURL_SUCCESS_FAILURE", schema "day STRING -i, operator STRING -i, total_sms_attempts LONG, total_otp_attempts LONG, otp_success LONG, otp_failure LONG, total_url_attempts LONG, url_success LONG,url_failure LONG, _timestamp LONG -i", primaryKeys "day, operator");
+        create temporary table sms_otp_n_url_success_failure_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_SMS_OTPURL_SUCCESS_FAILURE", schema "day STRING -i, operator STRING -i, total_sms_attempts LONG, total_otp_attempts LONG, otp_success LONG, otp_failure LONG, total_url_attempts LONG, url_success LONG,url_failure LONG,other_failure LONG, _timestamp LONG -i", primaryKeys "day, operator");
 
-        create temporary table sms_otp_n_url_success_failure_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_SMS_OTPURL_SUCCESS_FAILURE", schema "day STRING -i, total_sms_attempts LONG, total_otp_attempts LONG, otp_success LONG, otp_failure LONG, total_url_attempts LONG, url_success LONG,url_failure LONG, _timestamp LONG -i", primaryKeys "day");
+        create temporary table sms_otp_n_url_success_failure_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_SMS_OTPURL_SUCCESS_FAILURE", schema "day STRING -i, total_sms_attempts LONG, total_otp_attempts LONG, otp_success LONG, otp_failure LONG, total_url_attempts LONG, url_success LONG,url_failure LONG,other_failure LONG, _timestamp LONG -i", primaryKeys "day");
 
 
         insert into table sms_otp_n_url_success_failure_summary 
@@ -27,7 +27,8 @@
         checkNullforLong(otp_failure.otp_failure_count),  
         (checkNullforLong(url_success.url_success_count) + checkNullforLong(url_failure.url_failure_count)) as total_url_attempts,      
         checkNullforLong(url_success.url_success_count),
-        checkNullforLong(url_failure.url_failure_count),        
+        checkNullforLong(url_failure.url_failure_count), 
+        (checkNullforLong(sms_total.total_sms_attempts) - (checkNullforLong(otp_success.otp_success_count) + checkNullforLong(otp_failure.otp_failure_count)+checkNullforLong(url_success.url_success_count) + checkNullforLong(url_failure.url_failure_count))) as other_failure,       
         sms_total._timestamp as _timestamp
         from (
             select meta.operator as operator,  _timestamp, meta.appID, count(ustatus.sessionID) as total_sms_attempts
@@ -122,17 +123,17 @@
 
             insert into table sms_otp_n_url_success_failure_app select day, appID, SUM(total_sms_attempts) as total_sms_attempts, 
             SUM(total_otp_attempts) as total_otp_attempts,  SUM(otp_success) as otp_success, 
-            SUM(otp_failure) as otp_failure, SUM(total_url_attempts) as total_url_attempts, SUM(url_success) as url_success,SUM(url_failure) as url_failure, min(_timestamp) as  _timestamp from sms_otp_n_url_success_failure_summary 
+            SUM(otp_failure) as otp_failure, SUM(total_url_attempts) as total_url_attempts, SUM(url_success) as url_success,SUM(url_failure) as url_failure,SUM(other_failure) as other_failure, min(_timestamp) as  _timestamp from sms_otp_n_url_success_failure_summary 
             where operator!="spark" group by appID, day;
 
             insert into table sms_otp_n_url_success_failure_operator select day, operator, SUM(total_sms_attempts) as total_sms_attempts, 
             SUM(total_otp_attempts) as total_otp_attempts, SUM(otp_success) as otp_success, 
-            SUM(otp_failure) as otp_failure, SUM(total_url_attempts) as total_url_attempts, SUM(url_success) as url_success,SUM(url_failure) as url_failure, min(_timestamp) as  _timestamp from sms_otp_n_url_success_failure_summary 
+            SUM(otp_failure) as otp_failure, SUM(total_url_attempts) as total_url_attempts, SUM(url_success) as url_success,SUM(url_failure) as url_failure,SUM(other_failure) as other_failure, min(_timestamp) as  _timestamp from sms_otp_n_url_success_failure_summary 
             where operator!="spark" group by operator, day;
 
             insert into table sms_otp_n_url_success_failure_total select day, SUM(total_sms_attempts) as total_sms_attempts, 
             SUM(total_otp_attempts) as total_otp_attempts,  SUM(otp_success) as otp_success, 
-            SUM(otp_failure) as otp_failure, SUM(total_url_attempts) as total_url_attempts, SUM(url_success) as url_success,SUM(url_failure) as url_failure, min(_timestamp) as  _timestamp from sms_otp_n_url_success_failure_summary 
+            SUM(otp_failure) as otp_failure, SUM(total_url_attempts) as total_url_attempts, SUM(url_success) as url_success,SUM(url_failure) as url_failure,SUM(other_failure) as other_failure, min(_timestamp) as  _timestamp from sms_otp_n_url_success_failure_summary 
             where operator!="spark" group by day;
 
             INCREMENTAL_TABLE_COMMIT user_status_sms_success_failure;
