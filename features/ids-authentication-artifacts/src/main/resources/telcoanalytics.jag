@@ -13,7 +13,7 @@
     var DROPOUTS_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_DROPOUTS";
     var REALTIME_LOGINS_PER_OPERATOR = "COM_WSO2TELCO_SUCCESS_OPERATORWISELOGINS_STREAM";
     var ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_ACTIVE_USERS_DAILY";
- 	var ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_ACTIVE_USERS_MONTHLY";
+    var ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_OPERATOR_ACTIVE_USERS_MONTHLY";
 
     var LOGIN_CHANNELS_PER_APP_TABLE = "COM_WSO2TELCO_SUMMARY_APP_LOGIN_CHANNELS";
     var ATTEMPTS_VS_LOGINS_PER_APP_TABLE = "COM_WSO2TELCO_SUMMARY_APP_ATTEMPTS_N_LOGINS";
@@ -22,7 +22,7 @@
     var DROPOUTS_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_APP_DROPOUTS";
     var REALTIME_LOGINS_PER_APP = "COM_WSO2TELCO_SUCCESS_APPWISELOGINS_STREAM";
     var ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_APP_ACTIVE_USERS_DAILY";
- 	var ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_APP_ACTIVE_USERS_MONTHLY";
+    var ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_APP_ACTIVE_USERS_MONTHLY";
 
     var LOGIN_CHANNELS_TOTAL_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_LOGIN_CHANNELS";
     var ATTEMPTS_VS_LOGINS_TOTAL_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_ATTEMPTS_N_LOGINS";
@@ -32,7 +32,7 @@
     var DROPOUTS_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_DROPOUTS";
     var REALTIME_LOGINS_TOTAL = "COM_WSO2TELCO_SUCCESS_LOGINS_STREAM";
     var ACTIVE_USERS_DAILY_TOTAL_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_ACTIVE_USERS_DAILY";
- 	var ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_ACTIVE_USERS_MONTHLY";
+    var ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_TOTAL_ACTIVE_USERS_MONTHLY";
 
     var LOGIN_CHANNELS_PER_APP_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_LOGIN_CHANNELS";
     var ATTEMPTS_VS_LOGINS_PER_APP_PER_OPERATOR_TABLE = "COM_WSO2TELCO_SUMMARY_ATTEMPTS_N_LOGINS";
@@ -43,6 +43,9 @@
     var ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE = "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_DAILY";
     var ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE = "COM_WSO2TELCO_SUMMARY_ACTIVE_USERS_MONTHLY";
     var FEDERATION_DAILY_SUCCESS_FALIURES="COM_WSO2TELCO_SUMMARY_TOTAL_FED_SUCCESS_FAILURE"; 
+    var FEDERATION_SUMMARY_OPERATOR_SUCCESS_FAILURE="COM_WSO2TELCO_SUMMARY_OPERATOR_FED_SUCCESS_FAILURE"; 
+    var FEDERATION_SUMMARY_APP_SUCCESS_FAILURE="COM_WSO2TELCO_SUMMARY_APP_FED_SUCCESS_FAILURE"; 
+    var FEDERATION_SUMMARY_OPERATOR_APP_SUCCESS_FAILURE="COM_WSO2TELCO_SUMMARY_FED_SUCCESS_FAILURE";
 
 
     var TIME_FROM_PARAM = "timeFrom";
@@ -90,8 +93,8 @@
     var TYPE_OPERATOR_USSD_LOGS=21;
     var TYPE_OPERATOR_HE_FAILURES=22;
     var USSD_ANALYSIS_OPERATORWISE=23;
-	var TYPE_MSISDNS_SUCCESS_FAILED_REPORT=24;
-	var TYPE_LOGGING_CHECK=25;
+    var TYPE_MSISDNS_SUCCESS_FAILED_REPORT=24;
+    var TYPE_LOGGING_CHECK=25;
     var TYPE_WRONG_EP=26;
     var TYPE_TOTAL_FEDERATED_SUCCESS_ATTEMPTS=27;
     var TYPE_TOTAL_FEDERATED_FAILED_ATTEMPTS=28;
@@ -112,8 +115,9 @@
     var subscriberGrowthTable = null;
     var onnetOffnetRegistrationTable = null;
     var activeUsersDailyTable = null;
- 	var activeUsersMonthlyTable = null;
+    var activeUsersMonthlyTable = null;
     var dropoutTable = null;
+    var federatedTable = null;
     if (configs.cacheTimeoutSeconds) {
         cacheTimeoutSeconds = parseInt(configs.cacheTimeoutSeconds);
     }
@@ -187,7 +191,8 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
- 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+ 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+		federatedTable = FEDERATION_SUMMARY_OPERATOR_APP_SUCCESS_FAILURE;
             } else if (appParam == "undefined" || appParam == "") {
                 roleFilterQuery = operatorQuery;
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
@@ -198,7 +203,8 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR;
                 dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
- 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
+ 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
+                federatedTable = FEDERATION_SUMMARY_OPERATOR_SUCCESS_FAILURE;
             }
             isDashboardViewer = true;
             isOperator = true ;
@@ -216,7 +222,8 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
- 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+ 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+                federatedTable = FEDERATION_SUMMARY_OPERATOR_APP_SUCCESS_FAILURE;
             } else if (operatorParam == "undefined" || operatorParam == "") {
                 roleFilterQuery =  serviceProviderQuery;
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
@@ -226,7 +233,8 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
- 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+ 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+                federatedTable = FEDERATION_SUMMARY_APP_SUCCESS_FAILURE;
 
             }
             isDashboardViewer = true;
@@ -245,7 +253,8 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
- 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+ 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+                federatedTable = FEDERATION_SUMMARY_OPERATOR_APP_SUCCESS_FAILURE;
             } else if (operatorParam != "undefined" && operatorParam != "" && (appParam == "undefined" || appParam == "")) {
                 roleFilterQuery = " AND operator: \"" + operatorParam + "\"";
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
@@ -255,8 +264,9 @@
                 onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_OPERATOR_PER_DAY_TABLE;
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR;
                 dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
- 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
+ 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
+                federatedTable = FEDERATION_SUMMARY_OPERATOR_SUCCESS_FAILURE;
             } else if ((operatorParam == "undefined" || operatorParam == "") && appParam != "undefined" && appParam != "") {
                 roleFilterQuery = " AND appID: \"" + appParam + "\"";
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
@@ -266,7 +276,8 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
- 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+ 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+                federatedTable = FEDERATION_SUMMARY_APP_SUCCESS_FAILURE;
             } else if ((operatorParam == "undefined" || operatorParam == "") && (appParam == "undefined" || appParam == "")) {
                 roleFilterQuery = "";
                 dailyRegistrationTable = DAILY_REGISTRATION_TOTAL_PER_DAY_TABLE;
@@ -277,7 +288,8 @@
                 realtimeLoginTable = REALTIME_LOGINS_TOTAL;
                 dropoutTable = DROPOUTS_TOTAL_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_TOTAL_PER_DAY_TABLE;
- 				activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE;
+ 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE;
+                federatedTable = FEDERATION_DAILY_SUCCESS_FALIURES;
             }
             isDashboardViewer = true;
             isAdmin = true;
@@ -1341,7 +1353,7 @@
                                              "sortType": "ASC"
                                          }]
                             };
-                            result = connector.search(loggedInUser, FEDERATION_DAILY_SUCCESS_FALIURES, stringify(searchParams));
+                            result = connector.search(loggedInUser, federatedTable, stringify(searchParams));
                             if (result.getStatusCode() == 200) {
                                 data = JSON.parse(result.getMessage());
 
@@ -1381,7 +1393,7 @@
                                              "sortType": "ASC"
                                          }]
                             };
-                            result = connector.search(loggedInUser, FEDERATION_DAILY_SUCCESS_FALIURES, stringify(searchParams));
+                            result = connector.search(loggedInUser, federatedTable, stringify(searchParams));
                             if (result.getStatusCode() == 200) {
                                 data = JSON.parse(result.getMessage());
 
