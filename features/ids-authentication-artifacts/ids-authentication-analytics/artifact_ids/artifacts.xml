@@ -76,5 +76,7 @@
 	<dependency artifact="RealtimeAuthCountTotalStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DefinitionFileDownload" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="SuccessLoginCountExecutionPlan" version="1.0.0" include="true" serverRole="ComplexEventProcessor"/>
+	<dependency artifact="FederatedSucessBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="FederatedFaliuresBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
     </artifact>
 </artifacts>
