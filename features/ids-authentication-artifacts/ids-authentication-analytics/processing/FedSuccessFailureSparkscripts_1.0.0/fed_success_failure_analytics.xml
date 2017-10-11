@@ -16,7 +16,7 @@
         create temporary table com_wso2telco_summary_fed_success_failure_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_FED_SUCCESS_FAILURE", schema "day STRING -i, total_attempts LONG, success LONG, total_failure LONG, processing_failure LONG, response_failure LONG, other_failure LONG, _timestamp LONG -i", primaryKeys "day");
 
         insert into table com_wso2telco_summary_fed_success_failure 
-        select getDateString(fed_total._timestamp) as day, fed_total.operator as operator, fed_total.appID as appID, fed_total.Total_FEDcount, checkNullforLong(fed_success.success_count),(checkNullforLong(processing_failure.processing_failure_count) + checkNullforLong(response_failure.response_failure_count) + checkNullforLong(other_failure.other_failure_count)) as total_failure, checkNullforLong(processing_failure.processing_failure_count), checkNullforLong(response_failure.response_failure_count), checkNullforLong(other_failure.other_failure_count), fed_total._timestamp as _timestamp
+        select getDateString(fed_total._timestamp) as day, fed_total.operator as operator, fed_total.appID as appID, fed_total.Total_FEDcount, checkNullforLong(fed_success.success_count),checkNullforLong(other_failure.other_failure_count) as total_failure, checkNullforLong(processing_failure.processing_failure_count), checkNullforLong(response_failure.response_failure_count), checkNullforLong(other_failure.other_failure_count), fed_total._timestamp as _timestamp
         from (
             select meta.operator as operator,  _timestamp, meta.appID, count(ustatus.sessionID) as Total_FEDcount
             from
