@@ -23,6 +23,8 @@ function TelcoAnalyticsClient() {
     var TYPE_MONTHLY_ACTIVE_USERS = 18;
     var TYPE_TOTAL_TOKENS = 19;
     var TYPE_TOTAL_AUTH_ATTEMPTS=20;
+    var TYPE_TOTAL_FEDERATED_SUCCESS_ATTEMPTS=27;
+    var TYPE_TOTAL_FEDERATED_FAILED_ATTEMPTS=28;
     var HTTP_GET = "GET";
     var HTTP_POST = "POST";
     var RESPONSE_ELEMENT = "responseJSON";
@@ -106,6 +108,14 @@ function TelcoAnalyticsClient() {
 
     this.getTotalTokens = function (filter, callback, error) {
         this.getData(filter, TYPE_TOTAL_TOKENS, callback, error);
+    };
+
+    this.getFederatedSuccessAttempts = function (filter, callback, error) {
+        this.getData(filter, TYPE_TOTAL_FEDERATED_SUCCESS_ATTEMPTS, callback, error);
+    };
+
+    this.getFederatedFailedAttempts = function (filter, callback, error) {
+        this.getData(filter, TYPE_TOTAL_FEDERATED_FAILED_ATTEMPTS, callback, error);
     };
     
     this.getData = function (filter, type, callback, error) {

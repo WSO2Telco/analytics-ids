@@ -86,5 +86,8 @@
 	<dependency artifact="AuthAttemptsScopeSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DownloadUSSDReport" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DownloadUSSDReportV2" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="ActiveUsersMonthlyBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="FederatedSucessBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="FederatedFaliuresBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
     </artifact>
 </artifacts>
