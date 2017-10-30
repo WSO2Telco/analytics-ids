@@ -10,7 +10,7 @@
 
     <groupId>org.wso2telco.product.analytics</groupId>
     <artifactId>org.wso2telco.analytics.ids</artifactId>
-    <version>1.2.0-rc2</version>
+    <version>1.2.0-SNAPSHOT</version>
     <modules>
         <module>components/report-generator-extension</module>
         <module>components/org.wso2telco.analytics.sparkUdf</module>
@@ -422,7 +422,7 @@
         <url>https://github.com/WSO2Telco/analytics-ids.git</url>
         <developerConnection>scm:git:https://github.com/WSO2Telco/analytics-ids.git</developerConnection>
         <connection>scm:git:https://github.com/WSO2Telco/analytics-ids.git</connection>
-        <tag>v1_2_0-rc2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <profiles>
