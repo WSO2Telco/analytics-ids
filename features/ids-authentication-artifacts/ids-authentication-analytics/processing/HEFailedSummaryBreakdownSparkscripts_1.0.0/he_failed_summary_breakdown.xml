@@ -182,20 +182,20 @@
                                                                   ) as iprangecheckreport2 group by operator, _timestamp, appID
                                                            )as wrongep on totalHEcount.operator=wrongep.operator and totalHEcount.appID=wrongep.appID and  totalHEcount._timestamp=wrongep._timestamp;
 
-    create temporary table com_wso2telco_summary_operator_he_breakdown using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_HE_BREAKDOWNS",schema "day STRING -i, operator STRING -i, totalHECount STRING -i, totalHESuccess STRING -i, totalHEIPValidationFail STRING -i, totalMSISDNNotFound STRING -i,totalHEProxy STRING -i, _timestamp LONG -i", primaryKeys "operator,day", mergeSchema "false");
+    create temporary table com_wso2telco_summary_operator_he_breakdown using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_HE_BREAKDOWNS",schema "day STRING -i, operator STRING -i, totalHECount STRING -i, totalHESuccess STRING -i, totalHEIPValidationFail STRING -i, totalMSISDNNotFound STRING -i,  totalHEProxy STRING -i,loginhintMismatch STRING -i, wrongEndPoint STRING -i, _timestamp LONG -i", primaryKeys "operator,day", mergeSchema "false");
 
 
-    insert into table com_wso2telco_summary_operator_he_breakdown select getDateString(_timestamp) as date,operator, sum(totalHECount), sum(totalHESuccess), sum(totalHEIPValidationFail), sum(totalMSISDNNotFound), sum(totalHEProxy), _timestamp from com_wso2telco_summary_he_breakdown group by operator,_timestamp;
+    insert into table com_wso2telco_summary_operator_he_breakdown select getDateString(_timestamp) as date,operator, sum(totalHECount), sum(totalHESuccess), sum(totalHEIPValidationFail), sum(totalMSISDNNotFound), sum(totalHEProxy),sum(loginhintMismatch),sum(wrongEndPoint), _timestamp from com_wso2telco_summary_he_breakdown group by operator,_timestamp;
 
 
-    create temporary table com_wso2telco_summary_app_he_breakdown using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_HE_BREAKDOWNS",schema "day STRING -i, appID STRING -i, totalHECount STRING -i, totalHESuccess STRING -i, totalHEIPValidationFail STRING -i, totalMSISDNNotFound STRING -i,totalHEProxy STRING -i, _timestamp LONG -i", primaryKeys "appID,day", mergeSchema "false");
+    create temporary table com_wso2telco_summary_app_he_breakdown using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_HE_BREAKDOWNS",schema "day STRING -i, appID STRING -i, totalHECount STRING -i, totalHESuccess STRING -i, totalHEIPValidationFail STRING -i, totalMSISDNNotFound STRING -i,totalHEProxy STRING -i,loginhintMismatch STRING -i, wrongEndPoint STRING -i, _timestamp LONG -i", primaryKeys "appID,day", mergeSchema "false");
 
-    insert into table com_wso2telco_summary_app_he_breakdown select getDateString(_timestamp) as date,appID, sum(totalHECount), sum(totalHESuccess), sum(totalHEIPValidationFail), sum(totalMSISDNNotFound), sum(totalHEProxy), _timestamp from com_wso2telco_summary_he_breakdown group by appID,_timestamp;
+    insert into table com_wso2telco_summary_app_he_breakdown select getDateString(_timestamp) as date,appID, sum(totalHECount), sum(totalHESuccess), sum(totalHEIPValidationFail), sum(totalMSISDNNotFound), sum(totalHEProxy),sum(loginhintMismatch),sum(wrongEndPoint), _timestamp from com_wso2telco_summary_he_breakdown group by appID,_timestamp;
 
 
-    create temporary table com_wso2telco_summary_total_he_breakdown using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_HE_BREAKDOWNS",schema "day STRING -i, totalHECount STRING -i, totalHESuccess STRING -i, totalHEIPValidationFail STRING -i, totalMSISDNNotFound STRING -i,totalHEProxy STRING -i, _timestamp LONG -i", primaryKeys "day", mergeSchema "false");
+    create temporary table com_wso2telco_summary_total_he_breakdown using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_HE_BREAKDOWNS",schema "day STRING -i, totalHECount STRING -i, totalHESuccess STRING -i, totalHEIPValidationFail STRING -i, totalMSISDNNotFound STRING -i,totalHEProxy STRING -i,loginhintMismatch STRING -i, wrongEndPoint STRING -i, _timestamp LONG -i", primaryKeys "day", mergeSchema "false");
 
-    insert into table com_wso2telco_summary_total_he_breakdown select getDateString(_timestamp) as date,sum(totalHECount), sum(totalHESuccess), sum(totalHEIPValidationFail), sum(totalMSISDNNotFound), sum(totalHEProxy), _timestamp from com_wso2telco_summary_he_breakdown group by _timestamp;
+    insert into table com_wso2telco_summary_total_he_breakdown select getDateString(_timestamp) as date,sum(totalHECount), sum(totalHESuccess), sum(totalHEIPValidationFail), sum(totalMSISDNNotFound), sum(totalHEProxy),sum(loginhintMismatch),sum(wrongEndPoint), _timestamp from com_wso2telco_summary_he_breakdown group by _timestamp;
 
     INCREMENTAL_TABLE_COMMIT userstatus_summary_he_breakdown;
     INCREMENTAL_TABLE_COMMIT userstatus_meta_summary_he_breakdown;
