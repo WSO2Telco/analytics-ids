@@ -4,6 +4,8 @@
     <Script>
         create temporary table auth_endpoint_login_channel using CarbonAnalytics options (tableName "COM_WSO2TELCO_AUTHORIZATION_ENDPOINT", schema "requestType STRING, appID STRING, isAuthenticated BOOLEAN, authenticatorMethods STRING, authenticatorEndTime LONG, authenticatorStartTime LONG, sessionID STRING, isNewUser BOOLEAN, operator STRING, userAgent STRING, msisdn STRING, internalCustomerReference STRING, serverHost STRING, requestURL STRING, httpMethod STRING, urlParams STRING, requestStatus STRING, returnedError STRING, transactionID STRING, consentTimestamp LONG, consentState STRING, consentType STRING, isAuthCodeIssued BOOLEAN, state STRING,nonce STRING, scope STRING, acrValue INTEGER, isMsisdnHeader BOOLEAN, ipHeader STRING, loginHint STRING, telcoScope STRING, _timestamp LONG -i",  incrementalParams "auth_endpoint_loginChannels, DAY");
 
+            create temporary table user_status_login_channel using CarbonAnalytics options (tableName "COM_WSO2TELCO_USERSTATUS", schema "sessionID STRING,status STRING,sourceIP STRING,forwardedIP STRING,_timestamp LONG,msisdn STRING,isNewUser BOOLEAN -i",  incrementalParams "user_status_loginChan, DAY");
+
         create temporary table loginChannels using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_LOGIN_CHANNELS", schema "day STRING -i, operator STRING -i, appID STRING -i, ussd_logins LONG -i,ussd_pin_logins LONG -i,sms_logins LONG -i, he_logins LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID", incrementalParams "login_channels, DAY");
 
         INSERT INTO TABLE loginChannels SELECT min(day), operator, appID,
@@ -12,7 +14,7 @@
         SUM(IF(status = 'SMS_URL_OK',1,0)) as sms_logins,
         SUM(IF(status = 'HE_OK',1,0)) as he_logins,
         count(*) as total_logins, _timestamp 
-		FROM (	SELECT sessionID,getDateString(max(_timestamp)) as day, min(operator) as operator, min(appID) as appID, getAuthenticator(max(authenticatorMethods)) as status, getDateTimestamp(max(_timestamp)) as _timestamp 	FROM auth_endpoint_login_channel WHERE isAuthenticated = true and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL group by sessionID ) temp GROUP BY operator, appID, _timestamp;
+		FROM ( SELECT count(distinct(auth.sessionID)),getDateString(max(_timestamp)) as day, min(auth.operator) as operator, min(auth.appID) as appID, getAuthenticator(max(authenticatorMethods)) as status, getDateTimestamp(max(_timestamp)) as _timestamp FROM (SELECT sessionID FROM auth_endpoint_login_channel WHERE isAuthenticated = true and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL  except SELECT sessionID FROM user_status_login_channel WHERE status ='FED_IDP_AUTH_PROCESSING') as raw LEFT JOIN auth_endpoint_login_channel as auth ON auth.sessionID=raw.sessionID GROUP BY getDateString(auth._timestamp),auth.operator, auth.appID;
 
         create temporary table loginChannels_per_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_LOGIN_CHANNELS", schema "day STRING -i, operator STRING -i -f, ussd_logins LONG -i,ussd_pin_logins LONG -i, sms_logins LONG -i, he_logins LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
 
@@ -33,6 +35,7 @@
         SUM(total_count) as total_count, _timestamp FROM loginChannels GROUP BY day, _timestamp;
 
         INCREMENTAL_TABLE_COMMIT auth_endpoint_loginChannels;
+        INCREMENTAL_TABLE_COMMIT user_status_loginChan;
         INCREMENTAL_TABLE_COMMIT login_channels;
     </Script>
     <CronExpression>0 0 0 1/1 * ? *</CronExpression>
