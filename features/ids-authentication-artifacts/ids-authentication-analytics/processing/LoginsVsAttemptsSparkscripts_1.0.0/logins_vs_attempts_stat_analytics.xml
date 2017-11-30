@@ -17,7 +17,7 @@
         from  (
         select sessns.sessionID, getDateTimestamp(sessns._timestamp) as dayTimestamp,sessnopnapp.operator, sessnopnapp.appId
         from (
-        select sessionID, min(_timestamp) as _timestamp from user_status_raw_log_v_atmp group by sessionID) as sessns
+        select sessionID, min(_timestamp) as _timestamp from user_status_raw_log_v_atmp where status != 'FED_IDP_AUTH_PROCESSING' group by sessionID) as sessns
         inner join (
         select sessionID, min(operator) as operator, min(appId) as appId
         from user_status_meta_raw_log_v_atmp
