@@ -11,7 +11,7 @@
         create temporary table attemptsVlogins using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_ATTEMPTS_N_LOGINS",schema "day STRING -i, operator STRING -i, appID STRING -i,total_authCount LONG -i, total_tokenCount LONG -i, total_authFailed LONG -i, total_tokenFailed LONG -i, onnet_authCount LONG -i, onnet_tokenCount LONG -i, onnet_authFailed LONG -i, onnet_tokenFailed LONG -i, offnet_authCount LONG -i, offnet_tokenCount LONG -i, offnet_authFailed LONG -i, offnet_tokenFailed LONG -i, newUser_authCount LONG -i, oldUser_authCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
 
         insert into table attemptsVlogins
-        select getDateString(totauth.dayTimestamp),totauth.operator, totauth.appId, totauth.total_authCount, tottoken.total_tokenCount, 0,0, totonnetauth.total_authCount,0, 0,0, totoffentauth.total_authCount,0, 0,0, totnewuserauth.total_authCount, totolduserauth.total_authCount, totauth.dayTimestamp
+        select getDateString(totauth.dayTimestamp),totauth.operator, totauth.appId, totauth.total_authCount, tottoken.total_tokenCount, 0,0, totonnetauth.total_authCount,0, 0,0, totoffentauth.total_authCount,0, 0,0, totnewuserauth.total_authCount, (totolduserauth.total_authCount + totfedolduserauth.total_authCount) as total_authCount, totauth.dayTimestamp
         from (
         select count(totalauth.sessionID) as total_authCount,totalauth.dayTimestamp, totalauth.operator, totalauth.appId
         from  (
@@ -47,14 +47,21 @@
         from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID,_timestamp	) as allmeta on allmeta.sessionID=singlrecdmeta.sessionID and allmeta._timestamp=singlrecdmeta._timestamp where allmeta.isMSISDNHeader = false ) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID) as offentauth group by offentauth.dayTimestamp,offentauth.operator,offentauth.appId ) as totoffentauth on totoffentauth.dayTimestamp=totauth.dayTimestamp and totoffentauth.operator=totauth.operator and totoffentauth.appId=totauth.appId
         left join (
         select count(newuserauth.sessionID) as total_authCount,newuserauth.dayTimestamp, newuserauth.operator, newuserauth.appId
+        from ( select sessns.sessionID, getDateTimestamp(time._timestamp) as dayTimestamp, sessnopnapp.operator,sessnopnapp.appId 
         from (
-        select sessns.sessionID, getDateTimestamp(sessns._timestamp) as dayTimestamp, sessnopnapp.operator,sessnopnapp.appId
-        from (
-        select new_and_old_users.sessionID as sessionID, new_and_old_users._timestamp as _timestamp from
-        (select sessionID, max(_timestamp) as _timestamp, last(isNewUser) as isNewUser from user_status_raw_log_v_atmp where isNewUser IS NOT NULL group by sessionID) as new_and_old_users where isNewUser=true) as sessns
+        select distinct sessionID
+        from user_status_raw_log_v_atmp  except
+        select distinct sessionID
+        from user_status_raw_log_v_atmp
+        where status="FED_IDP_AUTH_PROCESSING"  
+            ) as sessns
         inner join (
-        select sessionID,first(operator) as operator,first(appId) as appId
-        from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID) as newuserauth group by newuserauth.dayTimestamp,newuserauth.operator,newuserauth.appId ) as totnewuserauth on totnewuserauth.dayTimestamp=totauth.dayTimestamp and totnewuserauth.operator=totauth.operator and totnewuserauth.appId=totauth.appId
+        select singlrecdmeta.sessionID, singlrecdmeta.operator, singlrecdmeta.appId
+        from (
+        select sessionID,first(operator) as operator,first(appId) as appId from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID) as singlrecdmeta) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID 
+        inner join (  
+        select sessionID, min(_timestamp) as _timestamp , max(isNewUser) as isNewUser from  user_status_raw_log_v_atmp where isNewUser = true group by sessionID ) as time on time.sessionID=sessns.sessionID  
+           ) as newuserauth group by newuserauth.dayTimestamp,newuserauth.operator,newuserauth.appId ) as totnewuserauth on totnewuserauth.dayTimestamp=totauth.dayTimestamp and totnewuserauth.operator=totauth.operator and totnewuserauth.appId=totauth.appId
         left join (
         select count(olduserauth.sessionID) as total_authCount,olduserauth.dayTimestamp, olduserauth.operator, olduserauth.appId
         from (
@@ -65,7 +72,18 @@
         inner join (
         select sessionID,first(operator) as operator,first(appId) as appId
         from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID
-        ) as olduserauth group by olduserauth.dayTimestamp,olduserauth.operator,olduserauth.appId) as totolduserauth on totolduserauth.dayTimestamp=totauth.dayTimestamp and totolduserauth.operator=totauth.operator and totolduserauth.appId=totauth.appId;
+        ) as olduserauth group by olduserauth.dayTimestamp,olduserauth.operator,olduserauth.appId) as totolduserauth on totolduserauth.dayTimestamp=totauth.dayTimestamp and totolduserauth.operator=totauth.operator and totolduserauth.appId=totauth.appId
+        left join(
+            select count(fedauth.sessionID) as total_authCount,fedauth.dayTimestamp, fedauth.operator, fedauth.appId
+        from  (
+        select sessns.sessionID, getDateTimestamp(sessns._timestamp) as dayTimestamp,sessnopnapp.operator, sessnopnapp.appId
+        from (
+        select sessionID, min(_timestamp) as _timestamp from user_status_raw_log_v_atmp where status = 'FED_IDP_AUTH_PROCESSING' AND isNewUser = true group by sessionID) as sessns
+        inner join (
+        select sessionID, min(operator) as operator, min(appId) as appId
+        from user_status_meta_raw_log_v_atmp
+        where operator IS NOT NULL and appId IS NOT NULL group by sessionID ) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID) as fedauth group by fedauth.dayTimestamp,fedauth.operator,fedauth.appId
+            )as totfedolduserauth on totfedolduserauth.dayTimestamp=totauth.dayTimestamp and totfedolduserauth.operator=totauth.operator and totfedolduserauth.appId=totauth.appId;
 
         create temporary table attemptsVlogins_per_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_ATTEMPTS_N_LOGINS", schema "day STRING -i, operator STRING -i -f, total_authCount LONG -i, total_tokenCount LONG -i, total_authFailed LONG -i, total_tokenFailed LONG -i,
         onnet_authCount LONG -i, onnet_tokenCount LONG -i, onnet_authFailed LONG -i, onnet_tokenFailed LONG -i,
