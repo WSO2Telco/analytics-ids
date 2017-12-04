@@ -64,21 +64,27 @@
            ) as newuserauth group by newuserauth.dayTimestamp,newuserauth.operator,newuserauth.appId ) as totnewuserauth on totnewuserauth.dayTimestamp=totauth.dayTimestamp and totnewuserauth.operator=totauth.operator and totnewuserauth.appId=totauth.appId
         left join (
         select count(olduserauth.sessionID) as total_authCount,olduserauth.dayTimestamp, olduserauth.operator, olduserauth.appId
+        from ( select sessns.sessionID, getDateTimestamp(time._timestamp) as dayTimestamp, sessnopnapp.operator,sessnopnapp.appId 
         from (
-        select sessns.sessionID, getDateTimestamp(sessns._timestamp) as dayTimestamp, sessnopnapp.operator,sessnopnapp.appId
-        from (
-        select new_and_old_users.sessionID as sessionID, new_and_old_users._timestamp as _timestamp from
-        (select sessionID, max(_timestamp) as _timestamp, last(isNewUser) as isNewUser from user_status_raw_log_v_atmp where isNewUser IS NOT NULL group by sessionID) as new_and_old_users where isNewUser=false) as sessns
+        select distinct sessionID
+        from user_status_raw_log_v_atmp  except
+        select distinct sessionID
+        from user_status_raw_log_v_atmp
+        where status="FED_IDP_AUTH_PROCESSING"  
+            ) as sessns
         inner join (
-        select sessionID,first(operator) as operator,first(appId) as appId
-        from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID
-        ) as olduserauth group by olduserauth.dayTimestamp,olduserauth.operator,olduserauth.appId) as totolduserauth on totolduserauth.dayTimestamp=totauth.dayTimestamp and totolduserauth.operator=totauth.operator and totolduserauth.appId=totauth.appId
+        select singlrecdmeta.sessionID, singlrecdmeta.operator, singlrecdmeta.appId
+        from (
+        select sessionID,first(operator) as operator,first(appId) as appId from user_status_meta_raw_log_v_atmp where operator IS NOT NULL and appId IS NOT NULL group by sessionID) as singlrecdmeta) as sessnopnapp on sessnopnapp.sessionID=sessns.sessionID 
+        inner join (  
+        select sessionID, max(_timestamp) as _timestamp , max(isNewUser) as isNewUser from  user_status_raw_log_v_atmp where isNewUser=false group by sessionID ) as time on time.sessionID=sessns.sessionID  
+           ) as olduserauth group by olduserauth.dayTimestamp,olduserauth.operator,olduserauth.appId ) as totolduserauth on totolduserauth.dayTimestamp=totauth.dayTimestamp and totolduserauth.operator=totauth.operator and totolduserauth.appId=totauth.appId
         left join(
             select count(fedauth.sessionID) as total_authCount,fedauth.dayTimestamp, fedauth.operator, fedauth.appId
         from  (
         select sessns.sessionID, getDateTimestamp(sessns._timestamp) as dayTimestamp,sessnopnapp.operator, sessnopnapp.appId
         from (
-        select sessionID, min(_timestamp) as _timestamp from user_status_raw_log_v_atmp where status = 'FED_IDP_AUTH_PROCESSING' AND isNewUser = true group by sessionID) as sessns
+        select sessionID, min(_timestamp) as _timestamp from user_status_raw_log_v_atmp where status = 'FED_IDP_AUTH_PROCESSING' group by sessionID) as sessns
         inner join (
         select sessionID, min(operator) as operator, min(appId) as appId
         from user_status_meta_raw_log_v_atmp
