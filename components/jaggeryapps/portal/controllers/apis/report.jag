@@ -94,6 +94,8 @@
 	var TYPE_DETAIL_REPORT =21;//
 	var TYPE_MSISDNS_SUCCESS_FAILED_REPORT =22;//
 	var TYPE_ACTIVE_USERS_MONTHLY = 23;//
+	var TYPE_FED_SUCCESS_PER_DAY = 24;
+	var TYPE_FED_FAILURE_PER_DAY = 25;
 	var log = new Log();
 	var carbon = require('carbon');
 	var utils = require('/modules/utils.js');
@@ -997,6 +999,80 @@
                            		}
 								break;
 							}
+							case TYPE_FED_SUCCESS_PER_DAY :
+							{
+								searchParams = {
+									query: finalQuery,
+									start: 0,
+									count: MAX_ALLOWED_RECORDS,
+									sortBy: [{
+										"field": "_timestamp",
+										"sortType": "ASC"
+									}]
+								};
+								result = connector.search(loggedInUser, FederatedTable, stringify(searchParams));
+								if (result.getStatusCode() == 200) {
+									data = JSON.parse(result.getMessage());
+									var map = new Packages.java.util.TreeMap;
+
+									data.forEach(function (record, i) {
+										if(record!=null){
+											var list = new Packages.java.util.ArrayList();
+											var values = record.values;
+
+											list.add(values["success"]);
+											map.put(values["day"],list);
+										}
+									});
+									getFile(map,"Date","Count","FEDERATED_AUTH_SUCCESS_PER_DAY");
+									break;
+								} else {
+									result = {
+										message: result.getMessage(),
+										statusCode: result.getStatusCode(),
+										status: result.getStatus()
+									};
+								}
+								break;
+							}
+
+							case TYPE_FED_FAILURE_PER_DAY :
+							{
+								searchParams = {
+									query: finalQuery,
+									start: 0,
+									count: MAX_ALLOWED_RECORDS,
+									sortBy: [{
+										"field": "_timestamp",
+										"sortType": "ASC"
+									}]
+								};
+								result = connector.search(loggedInUser, FederatedTable, stringify(searchParams));
+								if (result.getStatusCode() == 200) {
+									data = JSON.parse(result.getMessage());
+									var map = new Packages.java.util.TreeMap;
+
+									data.forEach(function (record, i) {
+										if(record!=null){
+											var list = new Packages.java.util.ArrayList();
+											var values = record.values;
+
+											list.add(values["total_failure"]);
+											map.put(values["day"],list);
+										}
+									});
+									getFile(map,"Date","Count","FEDERATED_AUTH_FAILURE_PER_DAY");
+									break;
+								} else {
+									result = {
+										message: result.getMessage(),
+										statusCode: result.getStatusCode(),
+										status: result.getStatus()
+									};
+								}
+								break;
+							}
+
 						case TYPE_DETAIL_REPORT :
 							{
 								searchParams = {
