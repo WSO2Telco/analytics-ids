@@ -77,10 +77,10 @@ function urlAppend(filter){
     if(filter==undefined){
         filter={};
     }
-    $("#downloadpdf").attr("href","/portal/apis/report" + "?type=2&timeFrom=" + filter["timeFrom"]
+    $("#downloadpdf").attr("href","/portal/apis/report" + "?type=24&timeFrom=" + filter["timeFrom"]
         + "&timeTo=" + filter["timeTo"] + "&operator=" + filter["operator"]
         + "&appID=" + filter["appID"]+"&download=pdf");
-    $("#downloadxl").attr("href","/portal/apis/report" + "?type=2&timeFrom=" + filter["timeFrom"]
+    $("#downloadxl").attr("href","/portal/apis/report" + "?type=24&timeFrom=" + filter["timeFrom"]
         + "&timeTo=" + filter["timeTo"] + "&operator=" + filter["operator"]
         + "&appID=" + filter["appID"]+"&download=xl");
 }
