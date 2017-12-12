@@ -35,7 +35,7 @@
         from (
         select distinct sessionID
         from user_status_raw_droputs
-        where status = "SMS_AUTH_PROCESSING_FAIL" or status="SEND_SMS_FAIL" or status="SEND_SMS" and msisdn IS NOT NULL except
+        where status = "SMS_AUTH_PROCESSING_FAIL" or status="SMS_AUTH_PROCESSING" and msisdn IS NOT NULL except
         select distinct sessionID
         from user_status_raw_droputs
         where status = "LOGIN_SUCCESS" and msisdn IS NOT NULL
