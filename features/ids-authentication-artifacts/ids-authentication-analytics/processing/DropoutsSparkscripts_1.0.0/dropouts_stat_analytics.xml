@@ -8,13 +8,13 @@
 
         create temporary table dropout using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_DROPOUTS_WITH_TYPES", schema "dropoutCount INT, operator STRING, appId STRING, type STRING, day STRING, _timestamp LONG", primaryKeys "operator, appId, type, day, _timestamp", incrementalParams "dropouts_types, DAY", mergeSchema "false");
 
-        create temporary table dropout_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_DROPOUTS", schema "day STRING -i, operator STRING -i -f, appID STRING -i -f, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID", incrementalParams "dropouts, DAY", mergeSchema "false");
+        create temporary table dropout_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_DROPOUTS", schema "day STRING -i, operator STRING -i -f, appID STRING -i -f, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, federated_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID", incrementalParams "dropouts, DAY", mergeSchema "false");
 
-        create temporary table dropouts_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_DROPOUTS", schema "day STRING -i, appID STRING -i -f, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, appID");
+        create temporary table dropouts_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_DROPOUTS", schema "day STRING -i, appID STRING -i -f, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, federated_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, appID");
 
-        create temporary table dropouts_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_DROPOUTS", schema "day STRING -i, operator STRING -i -f, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
+        create temporary table dropouts_operator using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_OPERATOR_DROPOUTS", schema "day STRING -i, operator STRING -i -f, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, federated_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, operator");
 
-        create temporary table dropouts_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_DROPOUTS", schema "day STRING -i, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day");
+        create temporary table dropouts_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_DROPOUTS", schema "day STRING -i, ussd_droputs LONG -i, sms_dropouts LONG -i, msisdn_dropouts LONG -i, tnc_onnet_dropouts LONG -i, tnc_offnet_dropouts LONG -i, federated_dropouts LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day");
 
         insert into table dropout
         select COUNT(distinct dropouts.sessionID), meta.operator, meta.appId, "ONNET_TC", getDateString(meta._timestamp) as day, meta._timestamp as _timestamp
@@ -53,7 +53,7 @@
         where status="MSISDN_AUTH_PROCESSING" except
         select distinct sessionID
         from user_status_raw_droputs
-        where status="MSISDN_AUTH_SUCCESS"
+        where status="MSISDN_AUTH_SUCCESS" or status="REDIRECT_TO_CONSENT_PAGE"
         ) as dropouts
         inner join (
         select sessionID,min(operator) as operator,min(appId) as appId, getDateTimestamp(min(_timestamp)) as _timestamp
@@ -84,11 +84,25 @@
         where status="REDIRECT_TO_CONSENT_PAGE" except
         select distinct sessionID
         from user_status_raw_droputs
-        where status="REG_CONSENT_AGREED") as dropouts
+        where status="REG_CONSENT_AGREED" or status = "MSISDN_AUTH_SUCCESS") as dropouts
         inner join (
         select sessionID, first(operator) as operator, first(appId) as appId, getDateTimestamp(min(_timestamp)) as _timestamp
         from user_status_meta_raw_droputs
         where user_status_meta_raw_droputs.isMSISDNHeader = false and user_status_meta_raw_droputs.operator IS NOT NULL and user_status_meta_raw_droputs.appId IS NOT NULL group by sessionID ) as meta on meta.sessionID=dropouts.sessionID group by meta.operator, meta.appId, meta._timestamp;
+
+        insert into table dropout
+        select COUNT(distinct dropouts.sessionID), meta.operator, meta.appId, "FEDERATED", getDateString(meta._timestamp) as day, meta._timestamp as _timestamp
+        from (
+        select distinct sessionID
+        from user_status_raw_droputs
+        where status = 'FED_IDP_AUTH_PROCESSING' except
+        select distinct sessionID
+        from user_status_raw_droputs
+        where status = 'LOGIN_SUCCESS') as dropouts
+        INNER JOIN (
+        select sessionID, first(operator) as operator, first(appId) as appId, getDateTimestamp(min(_timestamp)) as _timestamp
+        from user_status_meta_raw_droputs
+        where user_status_meta_raw_droputs.operator IS NOT NULL and user_status_meta_raw_droputs.appId IS NOT NULL group by sessionID ) as meta on meta.sessionID=dropouts.sessionID  group by meta.operator, meta.appId, meta._timestamp;
 
 
         insert into table dropout_summary SELECT day, operator, appId,
@@ -97,14 +111,15 @@
         SUM(IF(type = "MSISDN",dropout.dropoutCount,0)) as msisdn_dropouts,
         SUM(IF(type ="ONNET_TC",dropout.dropoutCount,0)) as tnc_onnet_dropouts,
         SUM(IF(type="OFFNET_TC",dropout.dropoutCount,0)) as tnc_offnet_dropouts,
+        SUM(IF(type="FEDERATED",dropout.dropoutCount,0)) as federated_dropouts,
         SUM(dropout.dropoutCount) as total_dropouts, _timestamp from dropout group by operator, appId, day, _timestamp;
 
 
-        INSERT INTO TABLE dropouts_app SELECT day, appID, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, appID, _timestamp;
+        INSERT INTO TABLE dropouts_app SELECT day, appID, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts) , SUM(federated_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, appID, _timestamp;
 
-        INSERT INTO TABLE dropouts_operator SELECT day, operator, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, operator, _timestamp;
+        INSERT INTO TABLE dropouts_operator SELECT day, operator, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts) , SUM(federated_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, operator, _timestamp;
 
-        INSERT INTO TABLE dropouts_total SELECT day, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, _timestamp;
+        INSERT INTO TABLE dropouts_total SELECT day, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts) , SUM(federated_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, _timestamp;
 
         INCREMENTAL_TABLE_COMMIT user_status_droputs;
         INCREMENTAL_TABLE_COMMIT user_status_meta_droputs;
