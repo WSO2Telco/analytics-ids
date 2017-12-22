@@ -6,7 +6,7 @@
 
 	create temporary table operators_tmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_OPERATORS_TMP", schema "operator STRING -i, active BOOLEAN -i, _timestamp LONG -i", primaryKeys "operator");
 
-	create temporary table apps using CarbonAnalytics options (tableName "COM_WSO2TELCO_APPS", schema "appId STRING -i, active BOOLEAN -i, _timestamp LONG -i", primaryKeys "appId");
+	create temporary table apps using CarbonAnalytics options (tableName "COM_WSO2TELCO_APPS", schema "appId STRING -i, active BOOLEAN -i,appName STRING -i, _timestamp LONG -i", primaryKeys "appId");
 
 	create temporary table apps_tmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_APPS_TMP", schema "appId STRING -i, active BOOLEAN -i, _timestamp LONG -i", primaryKeys "appId");
 
