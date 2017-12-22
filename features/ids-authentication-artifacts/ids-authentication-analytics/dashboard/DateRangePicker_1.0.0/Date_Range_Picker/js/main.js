@@ -92,7 +92,7 @@ $(function() {
         if($("#dropdown-app option:selected").text() == "All apps") {
             return "";
         } else {
-            return $("#dropdown-app option:selected").text();
+            return $("#dropdown-app option:selected").val();
         }
     }
 
@@ -114,7 +114,7 @@ $(function() {
                     $('#dropdown-operator').append(new Option(data.operators[i], data.operators[i]));
                 }
                 for (var i=0; i < data.apps.length; i++) {
-                    $('#dropdown-app').append(new Option(data.apps[i], data.apps[i]));
+                    $('#dropdown-app').append(new Option(data.apps[i].value, data.apps[i].key));
                 }
             } else if (data.isOperator !=null && data.isOperator) {
                 $('#dropdown-operator').hide();
@@ -124,7 +124,7 @@ $(function() {
                 $('#dropdown-app').empty();
                 $('#dropdown-app').append(new Option("All apps", "AllApps"));
                 for (var i=0; i < data.apps.length; i++) {
-                    $('#dropdown-app').append(new Option(data.apps[i], data.apps[i]));
+                    $('#dropdown-app').append(new Option(data.apps[i].value, data.apps[i].key));
                 }
             } else if (data.isServiceProvider !=null &&  data.isServiceProvider) {
                 $('#dropdown-app').hide();
