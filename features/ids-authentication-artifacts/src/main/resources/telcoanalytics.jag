@@ -344,7 +344,9 @@
                                     var apps=[];
                                     appData.forEach(function (record, i) {
                                         var values = record.values;
-                                        apps.push(values["appId"]);
+                                        apps.push({"key":values["appId"],"value":values["appName"]});
+                                        //appsDislplay.push(values["appId"]);
+
                                     });
                                     results = {
                                         isAdmin: true,
@@ -379,7 +381,8 @@
                                     var apps=[];
                                     appData.forEach(function (record, i) {
                                         var values = record.values;
-                                        apps.push(values["appId"]);
+                                        //apps.push(values["appName"]);
+                                        apps.push({"key":values["appId"],"value":values["appName"]});
                                     });
                                     results = {
                                         isOperator: true,
