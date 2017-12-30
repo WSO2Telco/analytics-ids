@@ -1108,7 +1108,7 @@
 									var dateTreeSet = new Packages.java.util.TreeSet;
 									var map = new Packages.java.util.TreeMap;
 									//var dataExport = carbon.server.osgiService('com.wso2telco.analytics.ids.report.generator.MsisdnReportGenerationService');
-									var TYPE_DETAIL_REPORT_COLUMNS = 32;
+									var TYPE_DETAIL_REPORT_COLUMNS = 33;
 									
 									for (var i = 0; i < data[0].length ; i++) { 
 										var day=String(data[0][i].values["day"]);
@@ -1240,6 +1240,7 @@
 										list.add(29,data[6][i].values["total_url_attempts"]);
 										list.add(30,data[6][i].values["url_success"]);
 										list.add(31,data[6][i].values["url_failure"]);
+										list.add(32,data[6][i].values["other_failure"]);
 									}
 									var dateArray=dateTreeSet.toArray();
 									
@@ -1279,10 +1280,10 @@
 										file.write("Operator,"+operator+"\n");
 										file.write("APP,"+app+"\n");
 										file.write("From,"+timeFromParam+",,"+"To,"+timeToParam+"\n\n")
-										file.write("Date,Auth Code Success-HE,Auth Code Success-USSD,Auth Code Success-SMS,Auth Code Success-Total,Auth Code Fail-Onnet T&C,Auth Code Fail-Offnet T&C,Auth Code Fail-USSD,Auth Code Fail-SMS,Auth Code Fail-MSISDN,Auth Code Fail-Total,Auth Attempts-Total,Auth Attempts-Onnet,Auth Attempts-Offnet,Auth Attempts-New User,Auth Attempts-Repeat User,Total-Token API Call,Total-Registration Count,HE Failures - IP Validation(Source IP Mismatch),HE Failures - MSISDN Header missed(GGSN Configuration),HE Failures - Originating from Proxy(Data Saving Mode),HE Failures - Wrong Endpoint,Header-Loginhint Mismatch,Federated Auth-Total,Federated Auth-Success,Federated Auth-Failure,SMS OTP-Total,SMS OTP-Success,SMS OTP-Failure,SMS URL-Total,SMS URL-Success,SMS URL-Failure\n");
+										file.write("Date,Auth Code Success-HE,Auth Code Success-USSD,Auth Code Success-SMS,Auth Code Success-Total,Auth Code Fail-Onnet T&C,Auth Code Fail-Offnet T&C,Auth Code Fail-USSD,Auth Code Fail-SMS,Auth Code Fail-MSISDN,Auth Code Fail-Total,Auth Attempts-Total,Auth Attempts-Onnet,Auth Attempts-Offnet,Auth Attempts-New User,Auth Attempts-Repeat User,Total-Token API Call,Total-Registration Count,HE Failures - IP Validation(Source IP Mismatch),HE Failures - MSISDN Header missed(GGSN Configuration),HE Failures - Originating from Proxy(Data Saving Mode),HE Failures - Wrong Endpoint,Header-Loginhint Mismatch,Federated Auth-Total,Federated Auth-Success,Federated Auth-Failure,SMS OTP-Total,SMS OTP-Success,SMS OTP-Failure,SMS URL-Total,SMS URL-Success,SMS URL-Failure,SMS Other-Failure\n");
 										for (var x = 0; x < dateArray.length ; x++) {
 											var listLast = map.get(dateArray[x]);
-											file.write(dateArray[x]+","+listLast.get(0)+","+listLast.get(1)+","+listLast.get(2)+","+listLast.get(3)+","+listLast.get(4)+","+listLast.get(5)+","+listLast.get(6)+","+listLast.get(7)+","+listLast.get(8)+","+listLast.get(9)+","+listLast.get(16)+","+listLast.get(17)+","+listLast.get(18)+","+listLast.get(19)+","+listLast.get(20)+","+listLast.get(21)+","+listLast.get(22)+","+listLast.get(11)+","+listLast.get(12)+","+listLast.get(13)+","+listLast.get(14)+","+listLast.get(15)+","+listLast.get(23)+","+listLast.get(24)+","+listLast.get(25)+","+listLast.get(26)+","+listLast.get(27)+","+listLast.get(28)+","+listLast.get(29)+","+listLast.get(30)+","+listLast.get(31)+"\n");
+											file.write(dateArray[x]+","+listLast.get(0)+","+listLast.get(1)+","+listLast.get(2)+","+listLast.get(3)+","+listLast.get(4)+","+listLast.get(5)+","+listLast.get(6)+","+listLast.get(7)+","+listLast.get(8)+","+listLast.get(9)+","+listLast.get(16)+","+listLast.get(17)+","+listLast.get(18)+","+listLast.get(19)+","+listLast.get(20)+","+listLast.get(21)+","+listLast.get(22)+","+listLast.get(11)+","+listLast.get(12)+","+listLast.get(13)+","+listLast.get(14)+","+listLast.get(15)+","+listLast.get(23)+","+listLast.get(24)+","+listLast.get(25)+","+listLast.get(26)+","+listLast.get(27)+","+listLast.get(28)+","+listLast.get(29)+","+listLast.get(30)+","+listLast.get(31)+","+listLast.get(32)+"\n");
 										}
 										print(file.getStream());
 										file.close();
