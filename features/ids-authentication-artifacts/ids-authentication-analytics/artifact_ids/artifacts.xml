@@ -59,6 +59,8 @@
 	<dependency artifact="LoginChannelsSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="OnnetOffnetAuthAndRegSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="LoginsVsAttemptsSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="FedSuccessFailureSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="SMSOTPURLSuccessFailureSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DropoutsSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DailyRegSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DataPurgingFor32Days" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
@@ -84,5 +86,7 @@
 	<dependency artifact="AuthAttemptsScopeSparkscripts" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DownloadUSSDReport" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="DownloadUSSDReportV2" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="FederatedSucessBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="FederatedFaliuresBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
     </artifact>
 </artifacts>

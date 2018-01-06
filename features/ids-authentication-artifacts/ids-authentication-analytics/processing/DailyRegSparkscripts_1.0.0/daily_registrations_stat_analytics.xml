@@ -15,7 +15,7 @@
         create temporary table daily_registrations_total_summary using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_DAILY_REGISTRATIONS", schema "day STRING -i, regCount LONG -i, _timestamp LONG -i", primaryKeys "day");
 
 
-        INSERT INTO TABLE daily_registrations_summary SELECT first(getDateString(raw._timestamp)) as day,first(meta.operator) as operator,first(meta.appId) as appId, count(distinct(raw.sessionID)) as regCount, first(raw._timestamp) as _timestamp FROM user_status_raw_daily_reg as raw LEFT JOIN user_status_meta_raw_daily_reg as meta ON meta.sessionID=raw.sessionID WHERE raw.status='LOGIN_SUCCESS' and raw.isNewUser=true GROUP BY getDateString(raw._timestamp);
+        INSERT INTO TABLE daily_registrations_summary SELECT getDateString(first(meta._timestamp)) as day,first(meta.operator) as operator,first(meta.appId) as appId, count(distinct(raw.sessionID)) as regCount, first(getDateTimestamp(meta._timestamp)) as dayTimestamp FROM( SELECT sessionID FROM user_status_raw_daily_reg WHERE status='LOGIN_SUCCESS' and isNewUser=true except SELECT sessionID FROM user_status_raw_daily_reg WHERE status ='FED_IDP_AUTH_PROCESSING') as raw LEFT JOIN user_status_meta_raw_daily_reg as meta ON meta.sessionID=raw.sessionID GROUP BY getDateString(meta._timestamp);
 
         INSERT INTO TABLE daily_registrations_operator_summary SELECT day, operator, SUM(regCount), _timestamp FROM daily_registrations_summary GROUP BY day, operator, _timestamp;
 

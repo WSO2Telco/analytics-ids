@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.wso2telco.product.analytics</groupId>
 		<artifactId>org.wso2telco.analytics.ids</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.2.0-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 

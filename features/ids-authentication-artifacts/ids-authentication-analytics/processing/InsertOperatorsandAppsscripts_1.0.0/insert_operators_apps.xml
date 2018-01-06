@@ -6,9 +6,9 @@
 
 	create temporary table operators_tmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_OPERATORS_TMP", schema "operator STRING -i, active BOOLEAN -i, _timestamp LONG -i", primaryKeys "operator");
 
-	create temporary table apps using CarbonAnalytics options (tableName "COM_WSO2TELCO_APPS", schema "appId STRING -i, active BOOLEAN -i, _timestamp LONG -i", primaryKeys "appId");
+	create temporary table apps using CarbonAnalytics options (tableName "COM_WSO2TELCO_APPS", schema "appId STRING -i, active BOOLEAN -i,appName STRING -i, _timestamp LONG -i", primaryKeys "appId");
 
-	create temporary table apps_tmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_APPS_TMP", schema "appId STRING -i, active BOOLEAN -i, _timestamp LONG -i", primaryKeys "appId");
+	create temporary table apps_tmp using CarbonAnalytics options (tableName "COM_WSO2TELCO_APPS_TMP", schema "appId STRING -i, active BOOLEAN -i,appName STRING -i, _timestamp LONG -i", primaryKeys "appId");
 
 	create temporary table attemptsVlogins_cre_ins_oper_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_ATTEMPTS_N_LOGINS",schema "day STRING -i, operator STRING -i, appID STRING -i,total_authCount LONG -i, total_tokenCount LONG -i,   total_authFailed LONG -i, total_tokenFailed LONG -i, onnet_authCount LONG -i, onnet_tokenCount LONG -i, onnet_authFailed LONG -i, onnet_tokenFailed LONG -i, offnet_authCount LONG -i, offnet_tokenCount LONG -i, offnet_authFailed LONG -i, offnet_tokenFailed LONG -i, newUser_authCount LONG -i, oldUser_authCount LONG -i, _timestamp LONG -i", primaryKeys "day, operator, appID");
 
@@ -18,7 +18,7 @@
 
 	insert into table apps_tmp select * from apps;
 
-	insert into table apps select newaapp.appID,true,now(0) from  (	select distinct appID from attemptsVlogins_cre_ins_oper_app	except	select appId from apps_tmp ) as newaapp;
+	insert into table apps select newaapp.appID,true,newaapp.appID,now(0) from  (	select distinct appID from attemptsVlogins_cre_ins_oper_app	except	select appId from apps_tmp ) as newaapp;
 	</Script>
     <CronExpression>0 0 0 1/1 * ? *</CronExpression>
 </Analytics>

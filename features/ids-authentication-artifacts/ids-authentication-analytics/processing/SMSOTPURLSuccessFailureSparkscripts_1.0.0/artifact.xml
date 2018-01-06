@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="SMSOTPURLSuccessFailureSparkscripts" version="1.0.0" type="analytics/spark" serverRole="DataAnalyticsServer">
+    <file>smsotpurl_success_failure_analytics.xml</file>
+</artifact>
