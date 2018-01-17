@@ -47,6 +47,10 @@
     var FEDERATION_SUMMARY_APP_SUCCESS_FAILURE="COM_WSO2TELCO_SUMMARY_APP_FED_SUCCESS_FAILURE"; 
     var FEDERATION_SUMMARY_OPERATOR_APP_SUCCESS_FAILURE="COM_WSO2TELCO_SUMMARY_FED_SUCCESS_FAILURE";
 
+    var REALTIME_FEDERATED_SUCCESS_FALIURE_ATTEMPTS = "STREAM_TST_COM_WSO2TELCO_SUMMARY_TOTAL_FED_SUCCESS_FAILURE";
+    var REALTIME_FEDERATED_APP_SUCCESS_FALIURE_ATTEMPTS = "STREAM_TST_COM_WSO2TELCO_SUMMARY_APP_TOTAL_FED_SUCCESS_FAILURE";
+    var REALTIME_FEDERATED_OPERATOR_SUCCESS_FALIURE_ATTEMPTS = "STREAM_TST_COM_WSO2TELCO_SUMMARY_OPERATOR_TOTAL_FED_SUCCESS_FAILURE";
+    var REALTIME_FEDERATED_APP_OPERATOR_SUCCESS_FALIURE_ATTEMPTS = "STREAM_TST_COM_WSO2TELCO_SUMMARY_APP_OPERATOR_TOTAL_FED_SUCCESS_FAILURE";
 
     var TIME_FROM_PARAM = "timeFrom";
     var TIME_TO_PARAM = "timeTo";
@@ -98,6 +102,7 @@
     var TYPE_WRONG_EP=26;
     var TYPE_TOTAL_FEDERATED_SUCCESS_ATTEMPTS=27;
     var TYPE_TOTAL_FEDERATED_FAILED_ATTEMPTS=28;
+    var TYPE_REALTIME_TOTAL_FEDERATED_ATTEMPTS=29;
     var log = new Log();
     var carbon = require('carbon');
     var configs = require('/configs/designer.json');
@@ -118,6 +123,8 @@
     var activeUsersMonthlyTable = null;
     var dropoutTable = null;
     var federatedTable = null;
+    var realtimeFederatedTable = null;
+
     if (configs.cacheTimeoutSeconds) {
         cacheTimeoutSeconds = parseInt(configs.cacheTimeoutSeconds);
     }
@@ -191,8 +198,9 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
- 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
-		federatedTable = FEDERATION_SUMMARY_OPERATOR_APP_SUCCESS_FAILURE;
+ 		        activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+		        federatedTable = FEDERATION_SUMMARY_OPERATOR_APP_SUCCESS_FAILURE;
+                realtimeFederatedTable = STREAM_TST_COM_WSO2TELCO_SUMMARY_APP_OPERATOR_TOTAL_FED_SUCCESS_FAILURE;
             } else if (appParam == "undefined" || appParam == "") {
                 roleFilterQuery = operatorQuery;
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
@@ -203,8 +211,9 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR;
                 dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
- 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
+ 		        activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
                 federatedTable = FEDERATION_SUMMARY_OPERATOR_SUCCESS_FAILURE;
+                realtimeFederatedTable = STREAM_TST_COM_WSO2TELCO_SUMMARY_OPERATOR_TOTAL_FED_SUCCESS_FAILURE;
             }
             isDashboardViewer = true;
             isOperator = true ;
@@ -222,8 +231,9 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
- 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+ 		        activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
                 federatedTable = FEDERATION_SUMMARY_OPERATOR_APP_SUCCESS_FAILURE;
+                realtimeFederatedTable = STREAM_TST_COM_WSO2TELCO_SUMMARY_APP_OPERATOR_TOTAL_FED_SUCCESS_FAILURE;
             } else if (operatorParam == "undefined" || operatorParam == "") {
                 roleFilterQuery =  serviceProviderQuery;
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
@@ -233,8 +243,9 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
- 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+ 		        activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
                 federatedTable = FEDERATION_SUMMARY_APP_SUCCESS_FAILURE;
+                realtimeFederatedTable = REALTIME_FEDERATED_APP_SUCCESS_FALIURE_ATTEMPTS;
 
             }
             isDashboardViewer = true;
@@ -253,8 +264,9 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_OPERATOR_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_APP_PER_DAY_TABLE;
- 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
+ 		        activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_APP_PER_MONTH_TABLE;
                 federatedTable = FEDERATION_SUMMARY_OPERATOR_APP_SUCCESS_FAILURE;
+                realtimeFederatedTable = REALTIME_FEDERATED_APP_OPERATOR_SUCCESS_FALIURE_ATTEMPTS;
             } else if (operatorParam != "undefined" && operatorParam != "" && (appParam == "undefined" || appParam == "")) {
                 roleFilterQuery = " AND operator: \"" + operatorParam + "\"";
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_OPERATOR_PER_DAY_TABLE;
@@ -264,9 +276,10 @@
                 onnetOffnetRegistrationTable = ONNET_OFFNET_REGISTRATIONS_PER_OPERATOR_PER_DAY_TABLE;
                 realtimeLoginTable = REALTIME_LOGINS_PER_OPERATOR;
                 dropoutTable = DROPOUTS_PER_OPERATOR_PER_DAY_TABLE;
- 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
+ 		        activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_OPERATOR_PER_MONTH_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_OPERATOR_PER_DAY_TABLE;
                 federatedTable = FEDERATION_SUMMARY_OPERATOR_SUCCESS_FAILURE;
+                realtimeFederatedTable = REALTIME_FEDERATED_OPERATOR_SUCCESS_FALIURE_ATTEMPTS;
             } else if ((operatorParam == "undefined" || operatorParam == "") && appParam != "undefined" && appParam != "") {
                 roleFilterQuery = " AND appID: \"" + appParam + "\"";
                 dailyRegistrationTable = DAILY_REGISTRATION_PER_APP_PER_DAY_TABLE;
@@ -276,8 +289,9 @@
                 realtimeLoginTable = REALTIME_LOGINS_PER_APP;
                 dropoutTable = DROPOUTS_PER_APP_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_PER_APP_PER_DAY_TABLE;
- 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
+ 		        activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_PER_APP_PER_MONTH_TABLE;
                 federatedTable = FEDERATION_SUMMARY_APP_SUCCESS_FAILURE;
+                realtimeFederatedTable = STREAM_TST_COM_WSO2TELCO_SUMMARY_APP_TOTAL_FED_SUCCESS_FAILURE;
             } else if ((operatorParam == "undefined" || operatorParam == "") && (appParam == "undefined" || appParam == "")) {
                 roleFilterQuery = "";
                 dailyRegistrationTable = DAILY_REGISTRATION_TOTAL_PER_DAY_TABLE;
@@ -288,8 +302,9 @@
                 realtimeLoginTable = REALTIME_LOGINS_TOTAL;
                 dropoutTable = DROPOUTS_TOTAL_PER_DAY_TABLE;
                 activeUsersDailyTable=ACTIVE_USERS_DAILY_TOTAL_PER_DAY_TABLE;
- 		activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE;
+ 		        activeUsersMonthlyTable=ACTIVE_USERS_MONTHLY_TOTAL_PER_MONTH_TABLE;
                 federatedTable = FEDERATION_DAILY_SUCCESS_FALIURES;
+                realtimeFederatedTable = REALTIME_FEDERATED_SUCCESS_FALIURE_ATTEMPTS;
             }
             isDashboardViewer = true;
             isAdmin = true;
@@ -1404,6 +1419,56 @@
                                     var values = record.values;
                                     var totalToken = [values["day"].substring(5), values["total_failure"]];
                                     results.push(totalToken);
+
+                                    }
+                                });
+                                result = {
+                                    message: stringify(results),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            } else {
+                                result = {
+                                    message: result.getMessage(),
+                                    statusCode: result.getStatusCode(),
+                                    status: result.getStatus()
+                                };
+                            }
+                            break;
+
+                        }
+                        case TYPE_REALTIME_TOTAL_FEDERATED_ATTEMPTS :
+                        {
+                            searchParams = {
+                                query: finalQuery,
+                                start: 0,
+                                count: MAX_ALLOWED_RECORDS,
+                                sortBy: [{
+                                             "field": "_timestamp",
+                                             "sortType": "ASC"
+                                         }]
+                            };
+                            result = connector.search(loggedInUser, realtimeFederatedTable, stringify(searchParams));
+                            if (result.getStatusCode() == 200) {
+                                data = JSON.parse(result.getMessage());
+
+
+                                data.forEach(function (record, i) {
+                                    if(record!=null){
+
+                                    var values = record.values;
+                                    var totalAttempts = [values["day"].substring(5),"Attempts", values["meta_total_attempts"]];
+                                    var totalSucess = [values["day"].substring(5),"Success", values["meta_success"]];
+                                    var totalFaliure = [values["day"].substring(5),"Total FaliuresHE", values["meta_total_failure"]];
+                                    var totalProcessingFaliure = [values["day"].substring(5),"Processing Faliures", values["meta_processing_failure"]];
+                                    var totalResponseFaliure = [values["day"].substring(5),"Response Faliures", values["meta_response_failure"]];
+                                    var totalOtherFaliures = [values["day"].substring(5),"Other Faliures", values["meta_other_failure"]];
+                                    results.push(totalAttempts);
+                                    results.push(totalSucess);
+                                    results.push(totalFaliure);
+                                    results.push(totalProcessingFaliure);
+                                    results.push(totalResponseFaliure);
+                                    results.push(totalOtherFaliures);
 
                                     }
                                 });
