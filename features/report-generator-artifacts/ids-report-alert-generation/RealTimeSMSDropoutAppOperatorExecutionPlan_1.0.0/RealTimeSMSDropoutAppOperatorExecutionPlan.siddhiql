@@ -1,0 +1,566 @@
+@Plan:name('RealTimeSMSDropoutAppOperatorExecutionPlan')
+@Plan:statistics('true')
+@Plan:trace('true')
+
+@Export('COM_REALTIME_SUMMARY_APP_OPERATOR_SMS_DROP_OUT:1.0.0')
+define stream appOperatorExportStream (meta_day string, meta_operator string, meta_appID string, meta_total_dropouts int, meta_sms_processing_fail int, meta_send_sms_fail int, meta_no_login_sucess int, meta__timestamp long);
+
+@Export('COM_REALTIME_SUMMARY_OPERATOR_SMS_DROP_OUT:1.0.0')
+define stream operatorExportStream (meta_day string, meta_operator string, meta_total_dropouts int, meta_sms_processing_fail int, meta_send_sms_fail int, meta_no_login_sucess int, meta__timestamp long);
+
+@Export('COM_REALTIME_SUMMARY_APP_SMS_DROP_OUT:1.0.0')
+define stream appExportStream (meta_day string, meta_appID string, meta_total_dropouts int, meta_sms_processing_fail int, meta_send_sms_fail int, meta_no_login_sucess int, meta__timestamp long);
+
+@PrimaryKey('day')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_APP_SMS_DROPOUTS')
+define table tst_summary_sms_app_table (
+    day string,
+    appID string,
+    total_dropouts int,
+    sms_processing_fail int ,
+    send_sms_fail int ,
+    no_login_sucess int ,
+    _timestamp long);
+
+@PrimaryKey('day')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_OPERATOR_SMS_DROPOUTS')
+define table tst_summary_sms_operator_table (
+    day string,
+    operator string,
+    total_dropouts int,
+    sms_processing_fail int ,
+    send_sms_fail int ,
+    no_login_sucess int ,
+    _timestamp long);
+   
+@PrimaryKey('day')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_OPERATOR_APP_SMS_DROPOUTS')
+define table tst_summary_sms_operator_app_table (
+    day string,
+    operator string,
+    appID string,
+    total_dropouts int,
+    sms_processing_fail int ,
+    send_sms_fail int ,
+    no_login_sucess int ,
+    _timestamp long);
+
+
+@Import('com.wso2telco.userstatus.meta:1.0.0')
+define stream UserStatusMetaStream (sessionID string, sourceIP string, operator string, appId string, isMSISDNHeader bool, userAgent string, consumerKey string, state string, nonce string, scope string, acrValue string, loginHint string, telcoScope string, status string, transactionId string, _timestamp long);
+
+@Import('com.wso2telco.userstatus:1.0.0')
+define stream UserStatusStream (sessionID string, status string, sourceIP string, forwardedIP string, transactionId string, msisdn string, isNewUser bool, _timestamp long);
+
+
+define stream SMSSummaryAouthProcessingStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+define stream SMSSummarySendStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+define stream SMSSummaryAouthProcessingFaileedStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+define stream SMSSummarySendFailedStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+define stream LoginSucessSummaryStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+define stream TempNoLoginSummarySucessStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('appID')
+define stream ProcessedSMSSummaryAppAouthFailedStream(day string,appId string, total_dropouts int, sms_processing_fail int , send_sms_fail int , no_login_sucess int,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+define stream ProcessedSendSummaryOperatorAouthFailedStream(day string,operator string, total_dropouts int, sms_processing_fail int , send_sms_fail int , no_login_sucess int,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+@PrimaryKey('appID')
+define stream ProcessedSMSSummaryOperatorAppAouthFailedStream(day string,operator string,appId string, total_dropouts int, sms_processing_fail int , send_sms_fail int , no_login_sucess int,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('appID')
+define stream ProcessedSMSSummaryAppSendSMSFailedStream(day string,appId string, total_dropouts int, sms_processing_fail int , send_sms_fail int , no_login_sucess int,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+define stream ProcessedSendSummaryOperatorSendSMSFailedStream(day string,operator string, total_dropouts int, sms_processing_fail int , send_sms_fail int , no_login_sucess int,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+@PrimaryKey('appID')
+define stream ProcessedSMSSummaryOperatorAppFailedStream(day string,operator string,appId string, total_dropouts int, sms_processing_fail int , send_sms_fail int , no_login_sucess int,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('appID')
+define stream ProcessedSMSSummaryAppTimedOutFailedStream(day string,appId string, total_dropouts int, sms_processing_fail int , send_sms_fail int , no_login_sucess int,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+define stream ProcessedSMSSummaryOperatorTimedOutFailedStream(day string,operator string, total_dropouts int, sms_processing_fail int , send_sms_fail int , no_login_sucess int,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+@PrimaryKey('appID')
+define stream ProcessedSMSSummaryOperatorAppTimedOutFailedStream(day string,operator string,appId string, total_dropouts int, sms_processing_fail int , send_sms_fail int , no_login_sucess int,_timestamp long);
+
+from UserStatusStream[status == 'SMS_AUTH_PROCESSING' ]#window.time(5 min) as T
+join UserStatusMetaStream #window.time(5 min) as R
+on T.sessionID == R.sessionID
+select T.sessionID, R.operator, R.appId, R.consumerKey, T.status , T._timestamp
+INSERT into SMSSummaryAouthProcessingStream;
+
+from UserStatusStream[status == 'SEND_SMS' ]#window.time(5 min) as T
+join UserStatusMetaStream #window.time(5 min) as R
+on T.sessionID == R.sessionID
+select T.sessionID, R.operator, R.appId, R.consumerKey, T.status , T._timestamp
+INSERT into SMSSummarySendStream;
+
+from UserStatusStream[status == 'SMS_AUTH_PROCESSING_FAIL' ]#window.time(5 min) as T
+join UserStatusMetaStream #window.time(5 min) as R
+on T.sessionID == R.sessionID
+select T.sessionID, R.operator, R.appId, R.consumerKey, T.status , T._timestamp
+INSERT into SMSSummaryAouthProcessingFaileedStream;
+
+from UserStatusStream[status == 'SEND_SMS_FAIL' ]#window.time(5 min) as T
+join UserStatusMetaStream #window.time(5 min) as R
+on T.sessionID == R.sessionID
+select T.sessionID, R.operator, R.appId, R.consumerKey, T.status , T._timestamp
+INSERT into SMSSummarySendFailedStream;
+
+from UserStatusStream[status == 'LOGIN_SUCCESS' ]#window.time(5 min) as T
+join UserStatusMetaStream #window.time(5 min) as R
+on T.sessionID == R.sessionID
+select T.sessionID, R.operator, R.appId, R.consumerKey, T.status , T._timestamp
+INSERT into LoginSucessSummaryStream;
+
+/* SMS_AUTH_PROCESSING_FAIL  */
+from SMSSummaryAouthProcessingStream[status == 'SMS_AUTH_PROCESSING']#window.time(5 min) as T
+join SMSSummaryAouthProcessingFaileedStream[status == 'SMS_AUTH_PROCESSING_FAIL']#window.time(5 min) as R
+on T.sessionID == R.sessionID
+and T.appId == R. appId
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.appId,
+1 as total_dropouts,
+1 as sms_processing_fail,
+0 as send_sms_fail,
+0 as no_login_sucess,
+T._timestamp as _timestamp
+insert events into ProcessedSMSSummaryAppAouthFailedStream;
+
+from SMSSummaryAouthProcessingStream[status == 'SMS_AUTH_PROCESSING']#window.time(5 min) as T
+join SMSSummaryAouthProcessingFaileedStream[status == 'SMS_AUTH_PROCESSING_FAIL']#window.time(5 min) as R
+on T.sessionID == R.sessionID
+and T.operator == R. operator
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator,
+1 as total_dropouts,
+1 as sms_processing_fail,
+0 as send_sms_fail,
+0 as no_login_sucess,
+T._timestamp as _timestamp
+insert events into ProcessedSendSummaryOperatorAouthFailedStream;
+
+from SMSSummaryAouthProcessingStream[status == 'SMS_AUTH_PROCESSING']#window.time(5 min) as T
+join SMSSummaryAouthProcessingFaileedStream[status == 'SMS_AUTH_PROCESSING_FAIL']#window.time(5 min) as R
+on T.sessionID == R.sessionID
+and T.operator == R. operator
+and T.appId == R. appId
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator,
+T.appId,
+1 as total_dropouts,
+1 as sms_processing_fail,
+0 as send_sms_fail,
+0 as no_login_sucess,
+T._timestamp as _timestamp
+insert events into ProcessedSMSSummaryOperatorAppAouthFailedStream;
+
+from  tst_summary_sms_app_table   right outer join  ProcessedSMSSummaryAppAouthFailedStream
+    on ProcessedSMSSummaryAppAouthFailedStream.day == tst_summary_sms_app_table.day
+    and ProcessedSMSSummaryAppAouthFailedStream.appId == tst_summary_sms_app_table.appID
+select
+ProcessedSMSSummaryAppAouthFailedStream.day , 
+ProcessedSMSSummaryAppAouthFailedStream.appId as appID,
+max(ifThenElse(tst_summary_sms_app_table.total_dropouts is null, 0 , tst_summary_sms_app_table.total_dropouts))+1 as total_dropouts,
+max(ifThenElse(tst_summary_sms_app_table.sms_processing_fail is null, 0 , tst_summary_sms_app_table.sms_processing_fail))+1 as sms_processing_fail,
+max(ifThenElse(tst_summary_sms_app_table.send_sms_fail is null, 0 , tst_summary_sms_app_table.send_sms_fail)) as send_sms_fail,
+max(ifThenElse(tst_summary_sms_app_table.no_login_sucess is null, 0 , tst_summary_sms_app_table.no_login_sucess)) as no_login_sucess,
+ProcessedSMSSummaryAppAouthFailedStream._timestamp as _timestamp
+insert into  tst_table1;
+
+from  tst_summary_sms_operator_table   right outer join  ProcessedSendSummaryOperatorAouthFailedStream
+    on ProcessedSendSummaryOperatorAouthFailedStream.day == tst_summary_sms_operator_table.day
+    and ProcessedSendSummaryOperatorAouthFailedStream.operator == tst_summary_sms_operator_table.operator
+select
+ProcessedSendSummaryOperatorAouthFailedStream.day , 
+ProcessedSendSummaryOperatorAouthFailedStream.operator as operator,
+max(ifThenElse(tst_summary_sms_operator_table.total_dropouts is null, 0 , tst_summary_sms_operator_table.total_dropouts))+1 as total_dropouts,
+max(ifThenElse(tst_summary_sms_operator_table.sms_processing_fail is null, 0 , tst_summary_sms_operator_table.sms_processing_fail))+1 as sms_processing_fail,
+max(ifThenElse(tst_summary_sms_operator_table.send_sms_fail is null, 0 , tst_summary_sms_operator_table.send_sms_fail)) as send_sms_fail,
+max(ifThenElse(tst_summary_sms_operator_table.no_login_sucess is null, 0 , tst_summary_sms_operator_table.no_login_sucess)) as no_login_sucess,
+ProcessedSendSummaryOperatorAouthFailedStream._timestamp as _timestamp
+insert into  tst_table2;
+
+
+
+from  tst_summary_sms_operator_app_table   right outer join  ProcessedSMSSummaryOperatorAppAouthFailedStream
+    on ProcessedSMSSummaryOperatorAppAouthFailedStream.day == tst_summary_sms_operator_app_table.day
+    and ProcessedSMSSummaryOperatorAppAouthFailedStream.operator == tst_summary_sms_operator_app_table.operator
+    and ProcessedSMSSummaryOperatorAppAouthFailedStream.appId == tst_summary_sms_operator_app_table.appID
+select
+ProcessedSMSSummaryOperatorAppAouthFailedStream.day , 
+ProcessedSMSSummaryOperatorAppAouthFailedStream.operator as operator,
+ProcessedSMSSummaryOperatorAppAouthFailedStream.appId as appID,
+max(ifThenElse(tst_summary_sms_operator_app_table.total_dropouts is null, 0 , tst_summary_sms_operator_app_table.total_dropouts))+1 as total_dropouts,
+max(ifThenElse(tst_summary_sms_operator_app_table.sms_processing_fail is null, 0 , tst_summary_sms_operator_app_table.sms_processing_fail))+1 as sms_processing_fail,
+max(ifThenElse(tst_summary_sms_operator_app_table.send_sms_fail is null, 0 , tst_summary_sms_operator_app_table.send_sms_fail)) as send_sms_fail,
+max(ifThenElse(tst_summary_sms_operator_app_table.no_login_sucess is null, 0 , tst_summary_sms_operator_app_table.no_login_sucess)) as no_login_sucess,
+ProcessedSMSSummaryOperatorAppAouthFailedStream._timestamp as _timestamp
+insert into  tst_table3;
+
+from tst_table1
+insert overwrite tst_summary_sms_app_table
+    on tst_summary_sms_app_table.day == day
+    and tst_summary_sms_app_table.appID == appID;
+
+from tst_table2
+insert overwrite tst_summary_sms_operator_table
+    on tst_summary_sms_operator_table.day == day
+    and tst_summary_sms_operator_table.operator == operator;
+
+from tst_table3
+insert overwrite tst_summary_sms_operator_app_table
+    on tst_summary_sms_operator_app_table.day == day
+    and tst_summary_sms_operator_app_table.appID == appID
+    and tst_summary_sms_operator_app_table.operator == operator;
+
+/* SEND SMS FAIL  */
+from SMSSummarySendStream[status == 'SEND_SMS']#window.time(5 min) as T
+join SMSSummarySendFailedStream[status == 'SEND_SMS_FAIL']#window.time(5 min) as R
+on T.sessionID == R.sessionID
+and T.appId == R. appId
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.appId,
+1 as total_dropouts,
+0 as sms_processing_fail,
+1 as send_sms_fail,
+0 as no_login_sucess,
+T._timestamp as _timestamp
+insert events into ProcessedSMSSummaryAppSendSMSFailedStream;
+
+from SMSSummarySendStream[status == 'SEND_SMS']#window.time(5 min) as T
+join SMSSummarySendFailedStream[status == 'SEND_SMS_FAIL']#window.time(5 min) as R
+on T.sessionID == R.sessionID
+and T.operator == R. operator
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator,
+1 as total_dropouts,
+0 as sms_processing_fail,
+1 as send_sms_fail,
+0 as no_login_sucess,
+T._timestamp as _timestamp
+insert events into ProcessedSendSummaryOperatorSendSMSFailedStream;
+
+from SMSSummarySendStream[status == 'SEND_SMS']#window.time(5 min) as T
+join SMSSummarySendFailedStream[status == 'SEND_SMS_FAIL']#window.time(5 min) as R
+on T.sessionID == R.sessionID
+and T.operator == R. operator
+and T.appId == R. appId
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator,
+T.appId,
+1 as total_dropouts,
+0 as sms_processing_fail,
+1 as send_sms_fail,
+0 as no_login_sucess,
+T._timestamp as _timestamp
+insert events into ProcessedSMSSummaryOperatorAppFailedStream;
+
+from  tst_summary_sms_app_table   right outer join  ProcessedSMSSummaryAppSendSMSFailedStream
+    on ProcessedSMSSummaryAppSendSMSFailedStream.day == tst_summary_sms_app_table.day
+    and ProcessedSMSSummaryAppSendSMSFailedStream.appId == tst_summary_sms_app_table.appID
+select
+ProcessedSMSSummaryAppSendSMSFailedStream.day , 
+ProcessedSMSSummaryAppSendSMSFailedStream.appId as appID,
+max(ifThenElse(tst_summary_sms_app_table.total_dropouts is null, 0 , tst_summary_sms_app_table.total_dropouts))+1 as total_dropouts,
+max(ifThenElse(tst_summary_sms_app_table.sms_processing_fail is null, 0 , tst_summary_sms_app_table.sms_processing_fail)) as sms_processing_fail,
+max(ifThenElse(tst_summary_sms_app_table.send_sms_fail is null, 0 , tst_summary_sms_app_table.send_sms_fail)) +1 as send_sms_fail,
+max(ifThenElse(tst_summary_sms_app_table.no_login_sucess is null, 0 , tst_summary_sms_app_table.no_login_sucess)) as no_login_sucess,
+ProcessedSMSSummaryAppSendSMSFailedStream._timestamp as _timestamp
+insert into  tst_table4;
+
+
+from  tst_summary_sms_operator_table   right outer join  ProcessedSendSummaryOperatorSendSMSFailedStream
+    on ProcessedSendSummaryOperatorSendSMSFailedStream.day == tst_summary_sms_operator_table.day
+    and ProcessedSendSummaryOperatorSendSMSFailedStream.operator == tst_summary_sms_operator_table.operator
+select
+ProcessedSendSummaryOperatorSendSMSFailedStream.day , 
+ProcessedSendSummaryOperatorSendSMSFailedStream.operator as operator,
+max(ifThenElse(tst_summary_sms_operator_table.total_dropouts is null, 0 , tst_summary_sms_operator_table.total_dropouts))+1 as total_dropouts,
+max(ifThenElse(tst_summary_sms_operator_table.sms_processing_fail is null, 0 , tst_summary_sms_operator_table.sms_processing_fail)) as sms_processing_fail,
+max(ifThenElse(tst_summary_sms_operator_table.send_sms_fail is null, 0 , tst_summary_sms_operator_table.send_sms_fail)) +1 as send_sms_fail,
+max(ifThenElse(tst_summary_sms_operator_table.no_login_sucess is null, 0 , tst_summary_sms_operator_table.no_login_sucess)) as no_login_sucess,
+ProcessedSendSummaryOperatorSendSMSFailedStream._timestamp as _timestamp
+insert into  tst_table5;
+
+from  tst_summary_sms_operator_app_table   right outer join  ProcessedSMSSummaryOperatorAppFailedStream
+    on ProcessedSMSSummaryOperatorAppFailedStream.day == tst_summary_sms_operator_app_table.day
+    and ProcessedSMSSummaryOperatorAppFailedStream.operator == tst_summary_sms_operator_app_table.operator
+    and ProcessedSMSSummaryOperatorAppFailedStream.appId == tst_summary_sms_operator_app_table.appID
+select
+ProcessedSMSSummaryOperatorAppFailedStream.day , 
+ProcessedSMSSummaryOperatorAppFailedStream.operator as operator,
+ProcessedSMSSummaryOperatorAppFailedStream.appId as appID,
+max(ifThenElse(tst_summary_sms_operator_app_table.total_dropouts is null, 0 , tst_summary_sms_operator_app_table.total_dropouts))+1  as total_dropouts,
+max(ifThenElse(tst_summary_sms_operator_app_table.sms_processing_fail is null, 0 , tst_summary_sms_operator_app_table.sms_processing_fail)) as sms_processing_fail,
+max(ifThenElse(tst_summary_sms_operator_app_table.send_sms_fail is null, 0 , tst_summary_sms_operator_app_table.send_sms_fail)) +1 as send_sms_fail,
+max(ifThenElse(tst_summary_sms_operator_app_table.no_login_sucess is null, 0 , tst_summary_sms_operator_app_table.no_login_sucess)) as no_login_sucess,
+ProcessedSMSSummaryOperatorAppFailedStream._timestamp as _timestamp
+insert into  tst_table6;
+
+from tst_table4
+insert overwrite tst_summary_sms_app_table
+    on tst_summary_sms_app_table.day == day
+    and tst_summary_sms_app_table.appID == appID;
+
+from tst_table5
+insert overwrite tst_summary_sms_operator_table
+    on tst_summary_sms_operator_table.day == day
+    and tst_summary_sms_operator_table.operator == operator;
+
+from tst_table6
+insert overwrite tst_summary_sms_operator_app_table
+    on tst_summary_sms_operator_app_table.day == day
+    and tst_summary_sms_operator_app_table.appID == appID
+    and tst_summary_sms_operator_app_table.operator == operator;
+
+
+/* No login Sucess  */
+from SMSSummarySendStream#window.time(5 min) as T
+left outer join SMSSummarySendFailedStream#window.time(5 min) as R
+on T.sessionID == R.sessionID
+select  T.sessionID, T.operator, T.appId, T.consumerKey,T.status as TS, R.status as RS , T._timestamp
+INSERT expired events into TempNoLoginSummarySucessStream1;
+
+from TempNoLoginSummarySucessStream1[RS is null]
+select sessionID , operator , appId , consumerKey , TS as status, _timestamp
+insert into TempNoLoginSummarySucessStream;
+
+
+from TempNoLoginSummarySucessStream #window.time(5 min) as T
+left outer join LoginSucessSummaryStream#window.time(5 min) as S
+on T.sessionID == S.sessionID
+And T.appId == S.appId
+And S.sessionID is null
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.appId,
+1 as total_dropouts,
+0 as sms_processing_fail,
+0 as send_sms_fail,
+1 as no_login_sucess,
+T._timestamp as _timestamp
+insert into ProcessedSMSSummaryAppTimedOutFailedStream;
+
+
+from TempNoLoginSummarySucessStream #window.time(5 min) as T
+left outer join LoginSucessSummaryStream#window.time(5 min) as S
+on T.sessionID == S.sessionID
+And T.operator == S.operator
+And S.sessionID is null
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator,
+1 as total_dropouts,
+0 as sms_processing_fail,
+0 as send_sms_fail,
+1 as no_login_sucess,
+T._timestamp as _timestamp
+insert into ProcessedSMSSummaryOperatorTimedOutFailedStream;
+
+
+from TempNoLoginSummarySucessStream #window.time(5 min) as T
+left outer join LoginSucessSummaryStream#window.time(5 min) as S
+on T.sessionID == S.sessionID
+And T.appId == S.appId
+And T.operator == S.operator
+And S.sessionID is null
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator,
+T.appId,
+1 as total_dropouts,
+0 as sms_processing_fail,
+0 as send_sms_fail,
+1 as no_login_sucess,
+T._timestamp as _timestamp
+insert into ProcessedSMSSummaryOperatorAppTimedOutFailedStream;
+
+from  tst_summary_sms_app_table   right outer join  ProcessedSMSSummaryAppTimedOutFailedStream
+    on ProcessedSMSSummaryAppTimedOutFailedStream.day == tst_summary_sms_app_table.day
+    and ProcessedSMSSummaryAppTimedOutFailedStream.appId == tst_summary_sms_app_table.appID
+select
+ProcessedSMSSummaryAppTimedOutFailedStream.day , 
+ProcessedSMSSummaryAppTimedOutFailedStream.appId as appID,
+max(ifThenElse(tst_summary_sms_app_table.total_dropouts is null, 0 , tst_summary_sms_app_table.total_dropouts))+1 as total_dropouts,
+max(ifThenElse(tst_summary_sms_app_table.sms_processing_fail is null, 0 , tst_summary_sms_app_table.sms_processing_fail)) as sms_processing_fail,
+max(ifThenElse(tst_summary_sms_app_table.send_sms_fail is null, 0 , tst_summary_sms_app_table.send_sms_fail)) as send_sms_fail,
+max(ifThenElse(tst_summary_sms_app_table.no_login_sucess is null, 0 , tst_summary_sms_app_table.no_login_sucess))+1 as no_login_sucess,
+ProcessedSMSSummaryAppTimedOutFailedStream._timestamp as _timestamp
+insert into  tst_table7;
+
+from  tst_summary_sms_operator_table   right outer join  ProcessedSMSSummaryOperatorTimedOutFailedStream
+    on ProcessedSMSSummaryOperatorTimedOutFailedStream.day == tst_summary_sms_operator_table.day
+    and ProcessedSMSSummaryOperatorTimedOutFailedStream.operator == tst_summary_sms_operator_table.operator
+select
+ProcessedSMSSummaryOperatorTimedOutFailedStream.day , 
+ProcessedSMSSummaryOperatorTimedOutFailedStream.operator as operator,
+max(ifThenElse(tst_summary_sms_operator_table.total_dropouts is null, 0 , tst_summary_sms_operator_table.total_dropouts))+1 as total_dropouts,
+max(ifThenElse(tst_summary_sms_operator_table.sms_processing_fail is null, 0 , tst_summary_sms_operator_table.sms_processing_fail)) as sms_processing_fail,
+max(ifThenElse(tst_summary_sms_operator_table.send_sms_fail is null, 0 , tst_summary_sms_operator_table.send_sms_fail)) as send_sms_fail,
+max(ifThenElse(tst_summary_sms_operator_table.no_login_sucess is null, 0 , tst_summary_sms_operator_table.no_login_sucess))+1 as no_login_sucess,
+ProcessedSMSSummaryOperatorTimedOutFailedStream._timestamp as _timestamp
+insert into  tst_table8;
+
+
+
+from  tst_summary_sms_operator_app_table   right outer join  ProcessedSMSSummaryOperatorAppTimedOutFailedStream
+    on ProcessedSMSSummaryOperatorAppTimedOutFailedStream.day == tst_summary_sms_operator_app_table.day
+    and ProcessedSMSSummaryOperatorAppTimedOutFailedStream.operator == tst_summary_sms_operator_app_table.operator
+    and ProcessedSMSSummaryOperatorAppTimedOutFailedStream.appId == tst_summary_sms_operator_app_table.appID
+select
+ProcessedSMSSummaryOperatorAppTimedOutFailedStream.day , 
+ProcessedSMSSummaryOperatorAppTimedOutFailedStream.operator as operator,
+ProcessedSMSSummaryOperatorAppTimedOutFailedStream.appId as appID,
+max(ifThenElse(tst_summary_sms_operator_app_table.total_dropouts is null, 0 , tst_summary_sms_operator_app_table.total_dropouts))+1 as total_dropouts,
+max(ifThenElse(tst_summary_sms_operator_app_table.sms_processing_fail is null, 0 , tst_summary_sms_operator_app_table.sms_processing_fail)) as sms_processing_fail,
+max(ifThenElse(tst_summary_sms_operator_app_table.send_sms_fail is null, 0 , tst_summary_sms_operator_app_table.send_sms_fail)) as send_sms_fail,
+max(ifThenElse(tst_summary_sms_operator_app_table.no_login_sucess is null, 0 , tst_summary_sms_operator_app_table.no_login_sucess))+1 as no_login_sucess,
+ProcessedSMSSummaryOperatorAppTimedOutFailedStream._timestamp as _timestamp
+insert into  tst_table9;
+
+from tst_table7
+insert overwrite tst_summary_sms_app_table
+    on tst_summary_sms_app_table.day == day
+    and tst_summary_sms_app_table.appID == appID;
+
+from tst_table8
+insert overwrite tst_summary_sms_operator_table
+    on tst_summary_sms_operator_table.day == day
+    and tst_summary_sms_operator_table.operator == operator;
+
+from tst_table9
+insert overwrite tst_summary_sms_operator_app_table
+    on tst_summary_sms_operator_app_table.day == day
+    and tst_summary_sms_operator_app_table.appID == appID
+    and tst_summary_sms_operator_app_table.operator == operator;
+	
+From tst_table1 #log('~ 3333333333333333333333333 ~')
+Select
+    day as meta_day,
+	appID as meta_appID,
+    total_dropouts as meta_total_dropouts,
+    sms_processing_fail as meta_sms_processing_fail,
+    send_sms_fail as  meta_send_sms_fail,
+    no_login_sucess as meta_no_login_sucess,
+    _timestamp as meta__timestamp
+	group by day , appID
+insert into appExportStream;
+
+From tst_table2 #log('~ 3333333333333333333333333 ~')
+Select
+    day as meta_day,
+	operator as meta_operator,
+    total_dropouts as meta_total_dropouts,
+    sms_processing_fail as meta_sms_processing_fail,
+    send_sms_fail as  meta_send_sms_fail,
+    no_login_sucess as meta_no_login_sucess,
+    _timestamp as meta__timestamp
+	group by day , operator
+insert into operatorExportStream;
+
+From tst_table3 #log('~ 3333333333333333333333333 ~')
+Select
+    day as meta_day,
+	operator as meta_operator,
+	appID as meta_appID,
+    total_dropouts as meta_total_dropouts,
+    sms_processing_fail as meta_sms_processing_fail,
+    send_sms_fail as  meta_send_sms_fail,
+    no_login_sucess as meta_no_login_sucess,
+    _timestamp as meta__timestamp
+	group by day , operator , appID
+insert into appOperatorExportStream;
+
+
+From tst_table4 #log('~ 3333333333333333333333333 ~')
+Select
+    day as meta_day,
+	appID as meta_appID,
+    total_dropouts as meta_total_dropouts,
+    sms_processing_fail as meta_sms_processing_fail,
+    send_sms_fail as  meta_send_sms_fail,
+    no_login_sucess as meta_no_login_sucess,
+    _timestamp as meta__timestamp
+	group by day , appID
+insert into appExportStream;
+
+From tst_table5 #log('~ 3333333333333333333333333 ~')
+Select
+    day as meta_day,
+	operator as meta_operator,
+    total_dropouts as meta_total_dropouts,
+    sms_processing_fail as meta_sms_processing_fail,
+    send_sms_fail as  meta_send_sms_fail,
+    no_login_sucess as meta_no_login_sucess,
+    _timestamp as meta__timestamp
+	group by day , operator
+insert into operatorExportStream;
+
+From tst_table6 #log('~ 3333333333333333333333333 ~')
+Select
+    day as meta_day,
+	operator as meta_operator,
+	appID as meta_appID,
+    total_dropouts as meta_total_dropouts,
+    sms_processing_fail as meta_sms_processing_fail,
+    send_sms_fail as  meta_send_sms_fail,
+    no_login_sucess as meta_no_login_sucess,
+    _timestamp as meta__timestamp
+	group by day , operator , appID
+insert into appOperatorExportStream;
+
+
+
+
+
+
+From tst_table7 #log('~ 3333333333333333333333333 ~')
+Select
+    day as meta_day,
+	appID as meta_appID,
+    total_dropouts as meta_total_dropouts,
+    sms_processing_fail as meta_sms_processing_fail,
+    send_sms_fail as  meta_send_sms_fail,
+    no_login_sucess as meta_no_login_sucess,
+    _timestamp as meta__timestamp
+	group by day , appID
+insert into appExportStream;
+
+From tst_table8 #log('~ 3333333333333333333333333 ~')
+Select
+    day as meta_day,
+	operator as meta_operator,
+    total_dropouts as meta_total_dropouts,
+    sms_processing_fail as meta_sms_processing_fail,
+    send_sms_fail as  meta_send_sms_fail,
+    no_login_sucess as meta_no_login_sucess,
+    _timestamp as meta__timestamp
+	group by day , operator
+insert into operatorExportStream;
+
+From tst_table9 #log('~ 3333333333333333333333333 ~')
+Select
+    day as meta_day,
+	operator as meta_operator,
+	appID as meta_appID,
+    total_dropouts as meta_total_dropouts,
+    sms_processing_fail as meta_sms_processing_fail,
+    send_sms_fail as  meta_send_sms_fail,
+    no_login_sucess as meta_no_login_sucess,
+    _timestamp as meta__timestamp
+	group by day , operator , appID
+insert into appOperatorExportStream;

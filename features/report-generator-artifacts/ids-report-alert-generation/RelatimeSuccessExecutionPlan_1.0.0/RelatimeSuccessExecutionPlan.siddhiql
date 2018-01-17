@@ -1,0 +1,170 @@
+@Plan:name('RelatimeSuccessExecutionPlan')
+
+@Plan:statistics('true')
+
+@Plan:trace('true')
+
+@Export('COM_REALTIME_SUMMARY_LOGINS_SUCCESS:1.0.0')
+define stream exportStream (meta_day string, meta_total_success int, meta_he_success int, meta_sms_otp_success int, meta_sms_link_success int);
+
+@PrimaryKey('day')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_SUCCESS_COUNT')
+define table tst_table (
+    day string,
+    total_success int,
+    he_success int ,
+    sms_otp_success int ,
+    sms_link_success int);
+
+
+@Import('com.wso2telco.authorization.endpoint:1.0.0')
+define stream AouthEndpointStream (
+  requestType string,
+  appID string,
+  isAuthenticated bool,
+  authenticatorMethods string,
+  authenticatorEndTime long,
+  authenticatorStartTime long,
+  sessionID string,
+  isNewUser bool,
+  operator string,
+  userAgent string,
+  msisdn string,
+  internalCustomerReference string,
+  serverHost string,
+  requestURL string,
+  httpMethod string,
+  urlParams string,
+  requestStatus string,
+  returnedError string,
+  transactionID string,
+  consentTimestamp long,
+  consentState string, consentType string,
+  isAuthCodeIssued bool,
+  state string,
+  nonce string,
+  scope string,
+  acrValue int,
+  isMsisdnHeader bool,
+  ipHeader string,
+  loginHint string,
+  telcoScope string,
+  _timestamp long);
+ 
+ define stream SucessHEStream (day string, total_success int, he_success int , sms_otp_success int , sms_link_success int);
+ define stream SucessOTPStream (day string, total_success int, he_success int , sms_otp_success int , sms_link_success int);
+ define stream SucessSMSLinkStream (day string, total_success int, he_success int , sms_otp_success int , sms_link_success int);
+ 
+  /*
+    (isAuthenticated == true and authenticatorMethods == '[SMSOTPAuthenticator]') or 
+    (isAuthenticated == true and authenticatorMethods == '[SMS_URL_OK]') or
+  */
+from AouthEndpointStream [
+isAuthenticated == true and authenticatorMethods == '[HE_OK]'
+]
+select time:currentDate() as day,
+1 as total_success,
+1 as he_success,
+0 as sms_otp_success,
+0 as sms_link_success
+insert  into SucessHEStream;
+
+from AouthEndpointStream [
+isAuthenticated == true and authenticatorMethods == '[SMSOTPAuthenticator]'
+]
+select time:currentDate() as day,
+1 as total_success,
+0 as he_success,
+1 as sms_otp_success,
+0 as sms_link_success
+insert  into SucessOTPStream;
+
+from AouthEndpointStream [
+isAuthenticated == true and authenticatorMethods == '[SMS_URL_OK]'
+]
+select time:currentDate() as day,
+1 as total_success,
+0 as he_success,
+0 as sms_otp_success,
+1 as sms_link_success
+insert  into SucessSMSLinkStream;
+
+
+from  tst_table   right outer join  SucessHEStream
+    on SucessHEStream.day == tst_table.day
+select
+SucessHEStream.day , 
+max(ifThenElse(tst_table.total_success is null, 0 , tst_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_table.he_success is null, 0 , tst_table.he_success)) +1 as he_success,
+max(ifThenElse(tst_table.sms_otp_success is null, 0 , tst_table.sms_otp_success)) as sms_otp_success,
+max(ifThenElse(tst_table.sms_link_success is null, 0 , tst_table.sms_link_success)) as sms_link_success
+insert into tst_table1;
+
+from  tst_table   right outer join  SucessOTPStream
+    on SucessOTPStream.day == tst_table.day
+select
+SucessOTPStream.day , 
+max(ifThenElse(tst_table.total_success is null, 0 , tst_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_table.he_success is null, 0 , tst_table.he_success)) as he_success,
+max(ifThenElse(tst_table.sms_otp_success is null, 0 , tst_table.sms_otp_success)) +1 as sms_otp_success,
+max(ifThenElse(tst_table.sms_link_success is null, 0 , tst_table.sms_link_success)) as sms_link_success
+insert into tst_table2;
+
+
+from  tst_table   right outer join  SucessSMSLinkStream
+    on SucessSMSLinkStream.day == tst_table.day
+select
+SucessSMSLinkStream.day , 
+max(ifThenElse(tst_table.total_success is null, 0 , tst_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_table.he_success is null, 0 , tst_table.he_success)) as he_success,
+max(ifThenElse(tst_table.sms_otp_success is null, 0 , tst_table.sms_otp_success)) as sms_otp_success,
+max(ifThenElse(tst_table.sms_link_success is null, 0 , tst_table.sms_link_success)) +1 as sms_link_success
+insert into tst_table3;
+
+
+
+from tst_table1 #log('~RelatimeSuccessExecutionPlan Table Insertion ~')
+insert overwrite tst_table
+    on tst_table.day == day;
+   
+from tst_table2 #log('~RelatimeSuccessExecutionPlan Table Insertion ~')
+insert overwrite tst_table
+    on tst_table.day == day;
+
+from tst_table3 #log('~RelatimeSuccessExecutionPlan Table Insertion ~')
+insert overwrite tst_table
+    on tst_table.day == day;
+	
+	
+From tst_table1
+Select
+    day as meta_day,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success
+	group by day 
+insert into exportStream;
+
+From tst_table2
+Select
+    day as meta_day,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success
+	group by day 
+insert into exportStream;
+
+From tst_table3
+Select
+    day as meta_day,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success
+	group by day 
+insert into exportStream;
+
+
+
