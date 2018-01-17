@@ -1,0 +1,580 @@
+@Plan:name('RealTimeFederatedAppOperatorExecutionPlan')
+
+@Plan:statistics('true')
+
+@Plan:trace('true')
+
+
+@Export('COM_REALTIME_WSO2TELCO_SUMMARY_APP_OPERATOR_TOTAL_FED_SUCCESS_FAILURE:1.0.0')
+define stream appOperatorExportStream (meta_day string, meta_operator string, meta_appID string, meta_total_attempts int, meta_success int, meta_total_failure int, 
+									   meta_processing_failure int, meta_response_failure int, meta_other_failure int, meta__timestamp long);
+
+@Export('COM_REALTIME_WSO2TELCO_SUMMARY_OPERATOR_TOTAL_FED_SUCCESS_FAILURE:1.0.0')
+define stream opertaorExportStream (meta_day string, meta_operator string, meta_total_attempts int, meta_success int, meta_total_failure int, meta_processing_failure int, meta_response_failure int, meta_other_failure int, meta__timestamp long);
+
+@Export('COM_REALTIME_WSO2TELCO_SUMMARY_APP_TOTAL_FED_SUCCESS_FAILURE:1.0.0')
+define stream appExportStream (meta_day string, meta_appID string, meta_total_attempts int, meta_success int, meta_total_failure int, meta_processing_failure int, meta_response_failure int, meta_other_failure int, meta__timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('appID')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_FED_APP_SUCCESS_FAILURE')
+define table tst_table_app_fed (
+    day string,
+    appID string,
+    total_attempts int,
+    success int ,
+    total_failure int ,
+    processing_failure int,
+    response_failure int ,
+    other_failure int ,
+    _timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_FED_OPERATOR_SUCCESS_FAILURE')
+define table tst_table_operator_fed (
+    day string,
+    operator string,
+    total_attempts int,
+    success int ,
+    total_failure int ,
+    processing_failure int,
+    response_failure int ,
+    other_failure int ,
+    _timestamp long);
+ 
+@PrimaryKey('day')
+@PrimaryKey('operator')
+@PrimaryKey('appID')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_FED_OPERATOR_APP_SUCCESS_FAILURE')
+define table tst_table_operator_app_fed (
+    day string,
+    operator string,
+    appID string,
+    total_attempts int,
+    success int ,
+    total_failure int ,
+    processing_failure int,
+    response_failure int ,
+    other_failure int ,
+    _timestamp long);
+
+@Import('com.wso2telco.userstatus.meta:1.0.0')
+define stream UserStatusMetaStream (sessionID string, sourceIP string, operator string, appId string, isMSISDNHeader bool, userAgent string, consumerKey string, state string, nonce string, scope string, acrValue string, loginHint string, telcoScope string, status string, transactionId string, _timestamp long);
+
+@Import('com.wso2telco.userstatus:1.0.0')
+define stream UserSttatusStream (sessionID string, status string, sourceIP string, forwardedIP string, transactionId string, msisdn string, isNewUser bool, _timestamp long);
+
+define stream FederatedAppWiseProcessingStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+define stream FederatedAppWiseSuccessStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+define stream FederatedAppWiseProcessingFailedStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+define stream FederatedAppWiseResponseFailedStream (sessionID string, operator string, appId string,consumerKey string, status string, _timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('appID')
+define stream ProcessedFederatedSuccessAppStream(day string,appID string, total_attempts int, success int , total_failure int , processing_failure int,response_failure int , other_failure int ,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+define stream ProcessedFederatedSuccessOperatorStream(day string,operator string, total_attempts int, success int , total_failure int , processing_failure int,response_failure int , other_failure int ,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+@PrimaryKey('appID')
+define stream ProcessedFederatedSuccessOperatorAppStream(day string,operator string,appID string, total_attempts int, success int , total_failure int , processing_failure int,response_failure int , other_failure int ,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('appID')
+define stream ProcessedFederatedProcessingFailledAppStream(day string,appID string, total_attempts int, success int , total_failure int , processing_failure int,response_failure int , other_failure int ,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+define stream ProcessedFederatedProcessingFailledOperatorStream(day string,operator string, total_attempts int, success int , total_failure int , processing_failure int,response_failure int , other_failure int ,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+@PrimaryKey('appID')
+define stream ProcessedFederatedProcessingFailledOperatorAppStream(day string,operator string,appID string, total_attempts int, success int , total_failure int , processing_failure int,response_failure int , other_failure int ,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('appID')
+define stream ProcessedFederatedResponseFailledAppStream(day string,appID string, total_attempts int, success int , total_failure int , processing_failure int,response_failure int , other_failure int ,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+define stream ProcessedFederatedResponseFailledOperatorStream(day string,operator string, total_attempts int, success int , total_failure int , processing_failure int,response_failure int , other_failure int ,_timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+@PrimaryKey('appID')
+define stream ProcessedFederatedResponseFailledOperatorAppStream(day string,operator string,appID string, total_attempts int, success int , total_failure int , processing_failure int,response_failure int , other_failure int ,_timestamp long);
+
+
+from UserSttatusStream[status == 'FED_IDP_AUTH_PROCESSING' ]#window.time(5 min) as T
+join UserStatusMetaStream #window.time(5 min) as R
+on T.sessionID == R.sessionID
+select T.sessionID, R.operator, R.appId, R.consumerKey, T.status , T._timestamp
+INSERT into FederatedAppWiseProcessingStream;
+
+from UserSttatusStream[status == 'FED_IDP_AUTH_PROCESSING_FAIL' ]#window.time(5 min) as T
+join UserStatusMetaStream #window.time(5 min) as R
+on T.sessionID == R.sessionID
+select T.sessionID, R.operator, R.appId, R.consumerKey, T.status , T._timestamp
+INSERT into FederatedAppWiseProcessingFailedStream;
+
+from UserSttatusStream[status == 'FED_IDP_AUTH_RESPONSE_FAIL' ]#window.time(5 min) as T
+join UserStatusMetaStream #window.time(5 min) as R
+on T.sessionID == R.sessionID
+select T.sessionID, R.operator, R.appId, R.consumerKey, T.status , T._timestamp
+INSERT into FederatedAppWiseResponseFailedStream;
+
+from UserSttatusStream[status == 'FED_IDP_AUTH_SUCCESS' ]#window.time(5 min) as T
+join UserStatusMetaStream #window.time(5 min) as R
+on T.sessionID == R.sessionID
+select T.sessionID, R.operator, R.appId, R.consumerKey, T.status , T._timestamp
+INSERT into FederatedAppWiseSuccessStream;
+
+/*  FEDERATED SUCCESS SCENARIO  */
+from FederatedAppWiseSuccessStream[status == 'FED_IDP_AUTH_SUCCESS']#window.time(5 min) as T
+  join FederatedAppWiseProcessingStream[status == 'FED_IDP_AUTH_PROCESSING']#window.time(5 min) as R
+  on T.sessionID == R.sessionID
+  and T.appId == R.appId
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.appId as appID,
+1 as total_attempts,
+1 as success,
+0 as total_failure,
+0 as processing_failure,
+0 as response_failure,
+0 as other_failure,
+T._timestamp as _timestamp
+insert  into ProcessedFederatedSuccessAppStream;
+
+/*
+from ProcessedFederatedSuccessAppStream #log ('@@@@@@@@')
+insert into ttttt1;
+*/
+from FederatedAppWiseSuccessStream[status == 'FED_IDP_AUTH_SUCCESS']#window.time(5 min) as T
+  join FederatedAppWiseProcessingStream[status == 'FED_IDP_AUTH_PROCESSING']#window.time(5 min) as R
+  on T.sessionID == R.sessionID
+  and T.operator == R.operator
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator as operator,
+1 as total_attempts,
+1 as success,
+0 as total_failure,
+0 as processing_failure,
+0 as response_failure,
+0 as other_failure,
+T._timestamp as _timestamp
+insert  into ProcessedFederatedSuccessOperatorStream;
+
+/*
+from ProcessedFederatedSuccessOperatorStream #log ('$$$$$$$$$')
+insert into ttttt2;
+*/
+from FederatedAppWiseSuccessStream[status == 'FED_IDP_AUTH_SUCCESS']#window.time(5 min) as T
+  join FederatedAppWiseProcessingStream[status == 'FED_IDP_AUTH_PROCESSING']#window.time(5 min) as R
+  on T.sessionID == R.sessionID
+  and T.appId == R.appId
+  and T.operator == R.operator
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator as operator,
+T.appId as appID,
+1 as total_attempts,
+1 as success,
+0 as total_failure,
+0 as processing_failure,
+0 as response_failure,
+0 as other_failure,
+T._timestamp as _timestamp
+insert  into ProcessedFederatedSuccessOperatorAppStream;
+
+/*
+from ProcessedFederatedSuccessOperatorAppStream #log ('~~~~~~~~~~~~')
+insert into ttttt3;
+*/
+
+from  tst_table_app_fed   right outer join  ProcessedFederatedSuccessAppStream
+    on ProcessedFederatedSuccessAppStream.day == tst_table_app_fed.day
+    and ProcessedFederatedSuccessAppStream.appID == tst_table_app_fed.appID
+select
+ProcessedFederatedSuccessAppStream.day , 
+ProcessedFederatedSuccessAppStream.appID as appID,
+max(ifThenElse(tst_table_app_fed.total_attempts is null, 0 , tst_table_app_fed.total_attempts)) +1 as total_attempts,
+max(ifThenElse(tst_table_app_fed.success is null, 0 , tst_table_app_fed.success)) +1 as success,
+max(ifThenElse(tst_table_app_fed.total_failure is null, 0 , tst_table_app_fed.total_failure)) as total_failure,
+max(ifThenElse(tst_table_app_fed.processing_failure is null, 0 , tst_table_app_fed.processing_failure)) as processing_failure,
+max(ifThenElse(tst_table_app_fed.response_failure is null, 0 , tst_table_app_fed.response_failure)) as response_failure,
+max(ifThenElse(tst_table_app_fed.other_failure is null, 0 , tst_table_app_fed.other_failure)) as other_failure,
+ProcessedFederatedSuccessAppStream._timestamp as _timestamp
+insert into  tst_table1;
+
+from  tst_table_operator_fed   right outer join  ProcessedFederatedSuccessOperatorStream
+    on ProcessedFederatedSuccessOperatorStream.day == tst_table_operator_fed.day
+    and ProcessedFederatedSuccessOperatorStream.operator == tst_table_operator_fed.operator
+select
+ProcessedFederatedSuccessOperatorStream.day , 
+ProcessedFederatedSuccessOperatorStream.operator as operator,
+max(ifThenElse(tst_table_operator_fed.total_attempts is null, 0 , tst_table_operator_fed.total_attempts)) +1 as total_attempts,
+max(ifThenElse(tst_table_operator_fed.success is null, 0 , tst_table_operator_fed.success)) +1 as success,
+max(ifThenElse(tst_table_operator_fed.total_failure is null, 0 , tst_table_operator_fed.total_failure)) as total_failure,
+max(ifThenElse(tst_table_operator_fed.processing_failure is null, 0 , tst_table_operator_fed.processing_failure)) as processing_failure,
+max(ifThenElse(tst_table_operator_fed.response_failure is null, 0 , tst_table_operator_fed.response_failure)) as response_failure,
+max(ifThenElse(tst_table_operator_fed.other_failure is null, 0 , tst_table_operator_fed.other_failure)) as other_failure,
+ProcessedFederatedSuccessOperatorStream._timestamp as _timestamp
+insert into  tst_table2;
+
+from  tst_table_operator_app_fed   right outer join  ProcessedFederatedSuccessOperatorAppStream
+    on ProcessedFederatedSuccessOperatorAppStream.day == tst_table_operator_app_fed.day
+    and ProcessedFederatedSuccessOperatorAppStream.operator == tst_table_operator_app_fed.operator
+    and ProcessedFederatedSuccessOperatorAppStream.appID == tst_table_operator_app_fed.appID
+select
+ProcessedFederatedSuccessOperatorAppStream.day , 
+ProcessedFederatedSuccessOperatorAppStream.operator as operator,
+ProcessedFederatedSuccessOperatorAppStream.appID as appID,
+max(ifThenElse(tst_table_operator_app_fed.total_attempts is null, 0 , tst_table_operator_app_fed.total_attempts)) +1 as total_attempts,
+max(ifThenElse(tst_table_operator_app_fed.success is null, 0 , tst_table_operator_app_fed.success)) +1 as success,
+max(ifThenElse(tst_table_operator_app_fed.total_failure is null, 0 , tst_table_operator_app_fed.total_failure)) as total_failure,
+max(ifThenElse(tst_table_operator_app_fed.processing_failure is null, 0 , tst_table_operator_app_fed.processing_failure)) as processing_failure,
+max(ifThenElse(tst_table_operator_app_fed.response_failure is null, 0 , tst_table_operator_app_fed.response_failure)) as response_failure,
+max(ifThenElse(tst_table_operator_app_fed.other_failure is null, 0 , tst_table_operator_app_fed.other_failure)) as other_failure,
+ProcessedFederatedSuccessOperatorAppStream._timestamp as _timestamp
+insert into  tst_table3;
+
+
+from tst_table1 #log('~Federated~App---')
+insert overwrite tst_table_app_fed
+    on tst_table_app_fed.day == day
+    and tst_table_app_fed.appID == appID;
+
+from tst_table2 #log('~Federated~Opertaor---')
+insert overwrite tst_table_operator_fed
+    on tst_table_operator_fed.day == day
+    and tst_table_operator_fed.operator == operator;
+
+from tst_table3 #log('~Federated~Opertaor-App--')
+insert overwrite tst_table_operator_app_fed
+    on tst_table_operator_app_fed.day == day
+    and tst_table_operator_app_fed.appID == appID
+    and tst_table_operator_app_fed.operator == operator;
+
+
+/*  FEDERATED PROCESSING FAIL SCENARIO  */
+
+from FederatedAppWiseProcessingFailedStream[status == 'FED_IDP_AUTH_PROCESSING_FAIL']#window.time(5 min) as T
+  join FederatedAppWiseProcessingStream[status == 'FED_IDP_AUTH_PROCESSING']#window.time(5 min) as R
+  on T.sessionID == R.sessionID
+  and T.appId == R.appId
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.appId as appID,
+1 as total_attempts,
+0 as success,
+1 as total_failure,
+1 as processing_failure,
+0 as response_failure,
+0 as other_failure,
+T._timestamp as _timestamp
+insert  into ProcessedFederatedProcessingFailledAppStream;
+
+from FederatedAppWiseProcessingFailedStream[status == 'FED_IDP_AUTH_PROCESSING_FAIL']#window.time(5 min) as T
+  join FederatedAppWiseProcessingStream[status == 'FED_IDP_AUTH_PROCESSING']#window.time(5 min) as R
+  on T.sessionID == R.sessionID
+  and T.operator == R.operator
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator as operator,
+1 as total_attempts,
+0 as success,
+1 as total_failure,
+1 as processing_failure,
+0 as response_failure,
+0 as other_failure,
+T._timestamp as _timestamp
+insert  into ProcessedFederatedProcessingFailledOperatorStream;
+
+from FederatedAppWiseProcessingFailedStream[status == 'FED_IDP_AUTH_PROCESSING_FAIL']#window.time(5 min) as T
+  join FederatedAppWiseProcessingStream[status == 'FED_IDP_AUTH_PROCESSING']#window.time(5 min) as R
+  on T.sessionID == R.sessionID
+  and T.appId == R.appId
+  and T.operator == R.operator
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator as operator,
+T.appId as appID,
+1 as total_attempts,
+0 as success,
+1 as total_failure,
+1 as processing_failure,
+0 as response_failure,
+0 as other_failure,
+T._timestamp as _timestamp
+insert  into ProcessedFederatedProcessingFailledOperatorAppStream;
+
+
+from  tst_table_app_fed   right outer join  ProcessedFederatedProcessingFailledAppStream
+    on ProcessedFederatedProcessingFailledAppStream.day == tst_table_app_fed.day
+    and ProcessedFederatedProcessingFailledAppStream.appID == tst_table_app_fed.appID
+select
+ProcessedFederatedProcessingFailledAppStream.day , 
+ProcessedFederatedProcessingFailledAppStream.appID as appID,
+max(ifThenElse(tst_table_app_fed.total_attempts is null, 0 , tst_table_app_fed.total_attempts)) +1 as total_attempts,
+max(ifThenElse(tst_table_app_fed.success is null, 0 , tst_table_app_fed.success))  as success,
+max(ifThenElse(tst_table_app_fed.total_failure is null, 0 , tst_table_app_fed.total_failure)) +1 as total_failure,
+max(ifThenElse(tst_table_app_fed.processing_failure is null, 0 , tst_table_app_fed.processing_failure)) +1 as processing_failure,
+max(ifThenElse(tst_table_app_fed.response_failure is null, 0 , tst_table_app_fed.response_failure)) as response_failure,
+max(ifThenElse(tst_table_app_fed.other_failure is null, 0 , tst_table_app_fed.other_failure)) as other_failure,
+ProcessedFederatedProcessingFailledAppStream._timestamp as _timestamp
+insert into  tst_table4;
+
+from  tst_table_operator_fed   right outer join  ProcessedFederatedProcessingFailledOperatorStream
+    on ProcessedFederatedProcessingFailledOperatorStream.day == tst_table_operator_fed.day
+    and ProcessedFederatedProcessingFailledOperatorStream.operator == tst_table_operator_fed.operator
+select
+ProcessedFederatedProcessingFailledOperatorStream.day , 
+ProcessedFederatedProcessingFailledOperatorStream.operator as operator,
+max(ifThenElse(tst_table_operator_fed.total_attempts is null, 0 , tst_table_operator_fed.total_attempts)) +1 as total_attempts,
+max(ifThenElse(tst_table_operator_fed.success is null, 0 , tst_table_operator_fed.success)) as success,
+max(ifThenElse(tst_table_operator_fed.total_failure is null, 0 , tst_table_operator_fed.total_failure)) +1 as total_failure,
+max(ifThenElse(tst_table_operator_fed.processing_failure is null, 0 , tst_table_operator_fed.processing_failure)) +1 as processing_failure,
+max(ifThenElse(tst_table_operator_fed.response_failure is null, 0 , tst_table_operator_fed.response_failure)) as response_failure,
+max(ifThenElse(tst_table_operator_fed.other_failure is null, 0 , tst_table_operator_fed.other_failure)) as other_failure,
+ProcessedFederatedProcessingFailledOperatorStream._timestamp as _timestamp
+insert into  tst_table5;
+
+from  tst_table_operator_app_fed   right outer join  ProcessedFederatedProcessingFailledOperatorAppStream
+    on ProcessedFederatedProcessingFailledOperatorAppStream.day == tst_table_operator_app_fed.day
+    and ProcessedFederatedProcessingFailledOperatorAppStream.operator == tst_table_operator_app_fed.operator
+    and ProcessedFederatedProcessingFailledOperatorAppStream.appID == tst_table_operator_app_fed.appID
+select
+ProcessedFederatedProcessingFailledOperatorAppStream.day , 
+ProcessedFederatedProcessingFailledOperatorAppStream.operator as operator,
+ProcessedFederatedProcessingFailledOperatorAppStream.appID as appID,
+max(ifThenElse(tst_table_operator_app_fed.total_attempts is null, 0 , tst_table_operator_app_fed.total_attempts)) +1 as total_attempts,
+max(ifThenElse(tst_table_operator_app_fed.success is null, 0 , tst_table_operator_app_fed.success))  as success,
+max(ifThenElse(tst_table_operator_app_fed.total_failure is null, 0 , tst_table_operator_app_fed.total_failure)) +1 as total_failure,
+max(ifThenElse(tst_table_operator_app_fed.processing_failure is null, 0 , tst_table_operator_app_fed.processing_failure)) +1 as processing_failure,
+max(ifThenElse(tst_table_operator_app_fed.response_failure is null, 0 , tst_table_operator_app_fed.response_failure)) as response_failure,
+max(ifThenElse(tst_table_operator_app_fed.other_failure is null, 0 , tst_table_operator_app_fed.other_failure)) as other_failure,
+ProcessedFederatedProcessingFailledOperatorAppStream._timestamp as _timestamp
+insert into  tst_table6;
+
+from tst_table4 #log('~Federated~App---')
+insert overwrite tst_table_app_fed
+    on tst_table_app_fed.day == day
+    and tst_table_app_fed.appID == appID;
+
+from tst_table5 #log('~Federated~Opertaor---')
+insert overwrite tst_table_operator_fed
+    on tst_table_operator_fed.day == day
+    and tst_table_operator_fed.operator == operator;
+
+from tst_table6 #log('~Federated~Opertaor-App--')
+insert overwrite tst_table_operator_app_fed
+    on tst_table_operator_app_fed.day == day
+    and tst_table_operator_app_fed.appID == appID
+    and tst_table_operator_app_fed.operator == operator;
+
+
+
+
+/*  FEDERATED RESPONSE FAIL SCENARIO  */
+
+from FederatedAppWiseResponseFailedStream[status == 'FED_IDP_AUTH_RESPONSE_FAIL']#window.time(5 min) as T
+  join FederatedAppWiseProcessingStream[status == 'FED_IDP_AUTH_PROCESSING']#window.time(5 min) as R
+  on T.sessionID == R.sessionID
+  and T.appId == R.appId
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.appId as appID,
+1 as total_attempts,
+0 as success,
+1 as total_failure,
+1 as processing_failure,
+0 as response_failure,
+0 as other_failure,
+T._timestamp as _timestamp
+insert  into ProcessedFederatedResponseFailledAppStream;
+
+from FederatedAppWiseResponseFailedStream[status == 'FED_IDP_AUTH_RESPONSE_FAIL']#window.time(5 min) as T
+  join FederatedAppWiseProcessingStream[status == 'FED_IDP_AUTH_PROCESSING']#window.time(5 min) as R
+  on T.sessionID == R.sessionID
+  and T.operator == R.operator
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator as operator,
+1 as total_attempts,
+0 as success,
+1 as total_failure,
+1 as processing_failure,
+0 as response_failure,
+0 as other_failure,
+T._timestamp as _timestamp
+insert  into ProcessedFederatedResponseFailledOperatorStream;
+
+from FederatedAppWiseResponseFailedStream[status == 'FED_IDP_AUTH_RESPONSE_FAIL']#window.time(5 min) as T
+  join FederatedAppWiseProcessingStream[status == 'FED_IDP_AUTH_PROCESSING']#window.time(5 min) as R
+  on T.sessionID == R.sessionID
+  and T.appId == R.appId
+  and T.operator == R.operator
+Select time:dateFormat(T._timestamp , 'yyyy-MM-dd') as day,
+T.operator as operator,
+T.appId as appID,
+1 as total_attempts,
+0 as success,
+1 as total_failure,
+1 as processing_failure,
+0 as response_failure,
+0 as other_failure,
+T._timestamp as _timestamp
+insert  into ProcessedFederatedResponseFailledOperatorAppStream;
+
+
+from  tst_table_app_fed   right outer join  ProcessedFederatedResponseFailledAppStream
+    on ProcessedFederatedResponseFailledAppStream.day == tst_table_app_fed.day
+    and ProcessedFederatedResponseFailledAppStream.appID == tst_table_app_fed.appID
+select
+ProcessedFederatedResponseFailledAppStream.day , 
+ProcessedFederatedResponseFailledAppStream.appID as appID,
+max(ifThenElse(tst_table_app_fed.total_attempts is null, 0 , tst_table_app_fed.total_attempts)) +1 as total_attempts,
+max(ifThenElse(tst_table_app_fed.success is null, 0 , tst_table_app_fed.success))  as success,
+max(ifThenElse(tst_table_app_fed.total_failure is null, 0 , tst_table_app_fed.total_failure)) +1 as total_failure,
+max(ifThenElse(tst_table_app_fed.processing_failure is null, 0 , tst_table_app_fed.processing_failure))  as processing_failure,
+max(ifThenElse(tst_table_app_fed.response_failure is null, 0 , tst_table_app_fed.response_failure)) +1 as response_failure,
+max(ifThenElse(tst_table_app_fed.other_failure is null, 0 , tst_table_app_fed.other_failure)) as other_failure,
+ProcessedFederatedResponseFailledAppStream._timestamp as _timestamp
+insert into  tst_table7;
+
+from  tst_table_operator_fed   right outer join  ProcessedFederatedResponseFailledOperatorStream
+    on ProcessedFederatedResponseFailledOperatorStream.day == tst_table_operator_fed.day
+    and ProcessedFederatedResponseFailledOperatorStream.operator == tst_table_operator_fed.operator
+select
+ProcessedFederatedResponseFailledOperatorStream.day , 
+ProcessedFederatedResponseFailledOperatorStream.operator as operator,
+max(ifThenElse(tst_table_operator_fed.total_attempts is null, 0 , tst_table_operator_fed.total_attempts)) +1 as total_attempts,
+max(ifThenElse(tst_table_operator_fed.success is null, 0 , tst_table_operator_fed.success)) as success,
+max(ifThenElse(tst_table_operator_fed.total_failure is null, 0 , tst_table_operator_fed.total_failure)) +1 as total_failure,
+max(ifThenElse(tst_table_operator_fed.processing_failure is null, 0 , tst_table_operator_fed.processing_failure))  as processing_failure,
+max(ifThenElse(tst_table_operator_fed.response_failure is null, 0 , tst_table_operator_fed.response_failure)) +1 as response_failure,
+max(ifThenElse(tst_table_operator_fed.other_failure is null, 0 , tst_table_operator_fed.other_failure)) as other_failure,
+ProcessedFederatedResponseFailledOperatorStream._timestamp as _timestamp
+insert into  tst_table8;
+
+from  tst_table_operator_app_fed   right outer join  ProcessedFederatedResponseFailledOperatorAppStream
+    on ProcessedFederatedResponseFailledOperatorAppStream.day == tst_table_operator_app_fed.day
+    and ProcessedFederatedResponseFailledOperatorAppStream.operator == tst_table_operator_app_fed.operator
+    and ProcessedFederatedResponseFailledOperatorAppStream.appID == tst_table_operator_app_fed.appID
+select
+ProcessedFederatedResponseFailledOperatorAppStream.day , 
+ProcessedFederatedResponseFailledOperatorAppStream.operator as operator,
+ProcessedFederatedResponseFailledOperatorAppStream.appID as appID,
+max(ifThenElse(tst_table_operator_app_fed.total_attempts is null, 0 , tst_table_operator_app_fed.total_attempts)) +1 as total_attempts,
+max(ifThenElse(tst_table_operator_app_fed.success is null, 0 , tst_table_operator_app_fed.success))  as success,
+max(ifThenElse(tst_table_operator_app_fed.total_failure is null, 0 , tst_table_operator_app_fed.total_failure)) +1 as total_failure,
+max(ifThenElse(tst_table_operator_app_fed.processing_failure is null, 0 , tst_table_operator_app_fed.processing_failure)) as processing_failure,
+max(ifThenElse(tst_table_operator_app_fed.response_failure is null, 0 , tst_table_operator_app_fed.response_failure)) +1  as response_failure,
+max(ifThenElse(tst_table_operator_app_fed.other_failure is null, 0 , tst_table_operator_app_fed.other_failure)) as other_failure,
+ProcessedFederatedResponseFailledOperatorAppStream._timestamp as _timestamp
+insert into  tst_table9;
+
+from tst_table7#log('~Federated~App---')
+insert overwrite tst_table_app_fed
+    on tst_table_app_fed.day == day
+    and tst_table_app_fed.appID == appID;
+
+from tst_table8 #log('~Federated~Opertaor---')
+insert overwrite tst_table_operator_fed
+    on tst_table_operator_fed.day == day
+    and tst_table_operator_fed.operator == operator;
+
+from tst_table9 #log('~Federated~Opertaor-App--')
+insert overwrite tst_table_operator_app_fed
+    on tst_table_operator_app_fed.day == day
+    and tst_table_operator_app_fed.appID == appID
+    and tst_table_operator_app_fed.operator == operator;
+
+
+From tst_table7
+Select
+    day as meta_day,
+    appID as meta_appID,
+    total_attempts as meta_total_attempts,
+    success as meta_success,
+    total_failure as  meta_total_failure,
+    processing_failure as meta_processing_failure,
+    response_failure as  meta_response_failure,
+    other_failure as meta_other_failure,
+    _timestamp as meta__timestamp
+	group by day , appID
+insert into appExportStream;
+
+From tst_table8
+Select
+    day as meta_day,
+    operator as meta_operator,
+    total_attempts as meta_total_attempts,
+    success as meta_success,
+    total_failure as  meta_total_failure,
+    processing_failure as meta_processing_failure,
+    response_failure as  meta_response_failure,
+    other_failure as meta_other_failure,
+    _timestamp as meta__timestamp
+	group by day , operator
+insert into opertaorExportStream;
+
+From tst_table9
+Select
+    day as meta_day,
+	operator as meta_operator,
+    appID as meta_appID,
+    total_attempts as meta_total_attempts,
+    success as meta_success,
+    total_failure as  meta_total_failure,
+    processing_failure as meta_processing_failure,
+    response_failure as  meta_response_failure,
+    other_failure as meta_other_failure,
+    _timestamp as meta__timestamp
+	group by day ,operator, appID
+insert into appOperatorExportStream;
+
+
+
+/*
+From tst_table1
+Select
+    day as meta_day,
+    appID as meta_appID,
+    total_attempts as meta_total_attempts,
+    success as meta_success,
+    total_failure as  meta_total_failure,
+    processing_failure as meta_processing_failure,
+    response_failure as  meta_response_failure,
+    other_failure as meta_other_failure,
+    _timestamp as meta_time
+group by day , appID
+insert into exportFederatedSucessSummarryAppStream ;
+
+From tst_table4
+Select
+    day as meta_day,
+    appID as meta_appID,
+    total_attempts as meta_total_attempts,
+    success as meta_success,
+    total_failure as  meta_total_failure,
+    processing_failure as meta_processing_failure,
+    response_failure as  meta_response_failure,
+    other_failure as meta_other_failure,
+    _timestamp as meta_time
+group by day , appID
+insert into exportFederatedSucessSummarryAppStream ;
+
+
+From tst_table7
+Select
+    day as meta_day,
+    appID as meta_appID,
+    total_attempts as meta_total_attempts,
+    success as meta_success,
+    total_failure as  meta_total_failure,
+    processing_failure as meta_processing_failure,
+    response_failure as  meta_response_failure,
+    other_failure as meta_other_failure,
+    _timestamp as meta_time
+group by day , appID
+insert into exportFederatedSucessSummarryAppStream ;

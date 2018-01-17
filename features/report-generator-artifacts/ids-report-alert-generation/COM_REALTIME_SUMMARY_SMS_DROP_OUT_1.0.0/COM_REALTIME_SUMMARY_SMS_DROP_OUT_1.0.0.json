@@ -1,0 +1,32 @@
+{
+  "name": "COM_REALTIME_SUMMARY_SMS_DROP_OUT",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "metaData": [
+    {
+      "name": "day",
+      "type": "STRING"
+    },
+    {
+      "name": "total_dropouts",
+      "type": "INT"
+    },
+    {
+      "name": "sms_processing_fail",
+      "type": "INT"
+    },
+    {
+      "name": "send_sms_fail",
+      "type": "INT"
+    },
+    {
+      "name": "no_login_sucess",
+      "type": "INT"
+    },
+    {
+      "name": "_timestamp",
+      "type": "LONG"
+    }
+  ]
+}

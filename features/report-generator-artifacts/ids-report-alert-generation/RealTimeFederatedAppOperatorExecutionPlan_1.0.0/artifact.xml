@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="RealTimeFederatedAppOperatorExecutionPlan" version="1.0.0" type="event/execution-plan" serverRole="ComplexEventProcessor">
+    <file>RealTimeFederatedAppOperatorExecutionPlan.siddhiql</file>
+</artifact>
