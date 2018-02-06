@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="COM_REALTIME_WSO2TELCO_SUMMARY_OPERATOR_TOTAL_FED_SUCCESS_FAILURE" version="1.0.0" type="event/stream" serverRole="DataAnalyticsServer">
+    <file>COM_REALTIME_WSO2TELCO_SUMMARY_OPERATOR_TOTAL_FED_SUCCESS_FAILURE_1.0.0.json</file>
+</artifact>

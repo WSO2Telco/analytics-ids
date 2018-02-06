@@ -1,0 +1,421 @@
+@Plan:name('RelatimeSuccessAppOperatorExecutionPlan')
+
+@Plan:statistics('true')
+
+@Plan:trace('true')
+
+@Export('COM_REALTIME_SUMMARY_APP_OPERATOR_LOGINS_SUCCESS:1.0.0')
+define stream appOperatorExportStream (meta_day string, meta_appID string, meta_operator string, meta_total_success int, meta_he_success int, meta_sms_otp_success int, meta_sms_link_success int, meta__timestamp long);
+
+@Export('COM_REALTIME_SUMMARY_OPERATOR_LOGINS_SUCCESS:1.0.0')
+define stream operatorExportStream (meta_day string, meta_operator string, meta_total_success int, meta_he_success int, meta_sms_otp_success int, meta_sms_link_success int, meta__timestamp long);
+
+@Export('COM_REALTIME_SUMMARY_APP_LOGINS_SUCCESS:1.0.0')
+define stream appExportStream (meta_day string, meta_appID string, meta_total_success int, meta_he_success int, meta_sms_otp_success int, meta_sms_link_success int, meta__timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('appID')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_SMS_APP_SUCCESS_COUNT')
+define table tst_sms_total_summary_app_table (
+    day string,
+    appID string,
+    total_success int,
+    he_success int ,
+    sms_otp_success int ,
+    sms_link_success int ,
+    _timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('operator')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_SMS_OPERATOR_SUCCESS_COUNT')
+define table tst_sms_total_summary_operator_table (
+    day string,
+    operator string,
+    total_success int,
+    he_success int ,
+    sms_otp_success int ,
+    sms_link_success int ,
+    _timestamp long);
+
+@PrimaryKey('day')
+@PrimaryKey('appID')
+@PrimaryKey('operator')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_SMS_APP_OPERATOR_SUCCESS_COUNT')
+define table tst_sms_total_summary_app_operator_table (
+    day string,
+    appID string,
+    operator string,
+    total_success int,
+    he_success int ,
+    sms_otp_success int ,
+    sms_link_success int ,
+    _timestamp long);
+
+
+@Import('com.wso2telco.authorization.endpoint:1.0.0')
+define stream AouthEndpointStream (
+  requestType string,
+  appID string,
+  isAuthenticated bool,
+  authenticatorMethods string,
+  authenticatorEndTime long,
+  authenticatorStartTime long,
+  sessionID string,
+  isNewUser bool,
+  operator string,
+  userAgent string,
+  msisdn string,
+  internalCustomerReference string,
+  serverHost string,
+  requestURL string,
+  httpMethod string,
+  urlParams string,
+  requestStatus string,
+  returnedError string,
+  transactionID string,
+  consentTimestamp long,
+  consentState string, consentType string,
+  isAuthCodeIssued bool,
+  state string,
+  nonce string,
+  scope string,
+  acrValue int,
+  isMsisdnHeader bool,
+  ipHeader string,
+  loginHint string,
+  telcoScope string,
+  _timestamp long);
+ 
+ define stream SucessSMSLinkOperatorAppStream (day string, appID string ,operator string , total_success int, he_success int , sms_otp_success int , sms_link_success int , _timestamp long);
+ 
+ define stream SucessHEOperatorAppStream (day string, appID string ,operator string , total_success int, he_success int , sms_otp_success int , sms_link_success int , _timestamp long) ;
+ 
+ define stream SucessOTPOperatorAppStream (day string, appID string ,operator string , total_success int, he_success int , sms_otp_success int , sms_link_success int , _timestamp long) ;
+ 
+ 
+  /*
+    (isAuthenticated == true and authenticatorMethods == '[SMSOTPAuthenticator]') or 
+    (isAuthenticated == true and authenticatorMethods == '[SMS_URL_OK]') or
+  */
+from AouthEndpointStream [
+isAuthenticated == true and authenticatorMethods == '[HE_OK]'
+]
+select time:currentDate() as day,
+appID as appID,
+operator as operator,
+1 as total_success,
+1 as he_success,
+0 as sms_otp_success,
+0 as sms_link_success ,
+_timestamp as _timestamp
+insert  into SucessHEOperatorAppStream;
+
+from  tst_sms_total_summary_app_table   right outer join  SucessHEOperatorAppStream
+    on SucessHEOperatorAppStream.day == tst_sms_total_summary_app_table.day
+    and SucessHEOperatorAppStream.appID == tst_sms_total_summary_app_table.appID
+select
+SucessHEOperatorAppStream.day , 
+SucessHEOperatorAppStream.appID as appID,
+max(ifThenElse(tst_sms_total_summary_app_table.total_success is null, 0 , tst_sms_total_summary_app_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_sms_total_summary_app_table.he_success is null, 0 , tst_sms_total_summary_app_table.he_success)) +1 as he_success,
+max(ifThenElse(tst_sms_total_summary_app_table.sms_otp_success is null, 0 , tst_sms_total_summary_app_table.sms_otp_success)) as sms_otp_success,
+max(ifThenElse(tst_sms_total_summary_app_table.sms_link_success is null, 0 , tst_sms_total_summary_app_table.sms_link_success)) as sms_link_success,
+SucessHEOperatorAppStream._timestamp as _timestamp
+insert into  tst_table1;
+
+from  tst_sms_total_summary_operator_table   right outer join  SucessHEOperatorAppStream
+    on SucessHEOperatorAppStream.day == tst_sms_total_summary_operator_table.day
+    and SucessHEOperatorAppStream.operator == tst_sms_total_summary_operator_table.operator
+select
+SucessHEOperatorAppStream.day , 
+SucessHEOperatorAppStream.operator as operator,
+max(ifThenElse(tst_sms_total_summary_operator_table.total_success is null, 0 , tst_sms_total_summary_operator_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_sms_total_summary_operator_table.he_success is null, 0 , tst_sms_total_summary_operator_table.he_success)) +1 as he_success,
+max(ifThenElse(tst_sms_total_summary_operator_table.sms_otp_success is null, 0 , tst_sms_total_summary_operator_table.sms_otp_success)) as sms_otp_success,
+max(ifThenElse(tst_sms_total_summary_operator_table.sms_link_success is null, 0 , tst_sms_total_summary_operator_table.sms_link_success)) as sms_link_success,
+SucessHEOperatorAppStream._timestamp as _timestamp
+insert into  tst_table2;
+
+from  tst_sms_total_summary_app_operator_table   right outer join  SucessHEOperatorAppStream
+    on SucessHEOperatorAppStream.day == tst_sms_total_summary_app_operator_table.day
+    and SucessHEOperatorAppStream.appID == tst_sms_total_summary_app_operator_table.appID
+    and SucessHEOperatorAppStream.operator == tst_sms_total_summary_app_operator_table.operator
+select
+SucessHEOperatorAppStream.day , 
+SucessHEOperatorAppStream.appID as appID,
+SucessHEOperatorAppStream.operator as operator,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.total_success is null, 0 , tst_sms_total_summary_app_operator_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.he_success is null, 0 , tst_sms_total_summary_app_operator_table.he_success)) +1 as he_success,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.sms_otp_success is null, 0 , tst_sms_total_summary_app_operator_table.sms_otp_success)) as sms_otp_success,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.sms_link_success is null, 0 , tst_sms_total_summary_app_operator_table.sms_link_success)) as sms_link_success,
+SucessHEOperatorAppStream._timestamp as _timestamp
+insert into  tst_table3;
+
+
+from AouthEndpointStream [
+isAuthenticated == true and authenticatorMethods == '[SMSOTPAuthenticator]'
+]
+select time:currentDate() as day,
+appID as appID,
+operator as operator,
+1 as total_success,
+0 as he_success,
+1 as sms_otp_success,
+0 as sms_link_success ,
+_timestamp as _timestamp
+insert  into SucessOTPOperatorAppStream;
+
+from  tst_sms_total_summary_app_table   right outer join  SucessOTPOperatorAppStream
+    on SucessOTPOperatorAppStream.day == tst_sms_total_summary_app_table.day
+    and SucessOTPOperatorAppStream.appID == tst_sms_total_summary_app_table.appID
+select
+SucessOTPOperatorAppStream.day , 
+SucessOTPOperatorAppStream.appID as appID,
+max(ifThenElse(tst_sms_total_summary_app_table.total_success is null, 0 , tst_sms_total_summary_app_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_sms_total_summary_app_table.he_success is null, 0 , tst_sms_total_summary_app_table.he_success))  as he_success,
+max(ifThenElse(tst_sms_total_summary_app_table.sms_otp_success is null, 0 , tst_sms_total_summary_app_table.sms_otp_success)) +1 as sms_otp_success,
+max(ifThenElse(tst_sms_total_summary_app_table.sms_link_success is null, 0 , tst_sms_total_summary_app_table.sms_link_success)) as sms_link_success,
+SucessOTPOperatorAppStream._timestamp as _timestamp
+insert into  tst_table4;
+
+from  tst_sms_total_summary_operator_table   right outer join  SucessOTPOperatorAppStream
+    on SucessOTPOperatorAppStream.day == tst_sms_total_summary_operator_table.day
+    and SucessOTPOperatorAppStream.operator == tst_sms_total_summary_operator_table.operator
+select
+SucessOTPOperatorAppStream.day , 
+SucessOTPOperatorAppStream.operator as operator,
+max(ifThenElse(tst_sms_total_summary_operator_table.total_success is null, 0 , tst_sms_total_summary_operator_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_sms_total_summary_operator_table.he_success is null, 0 , tst_sms_total_summary_operator_table.he_success)) as he_success,
+max(ifThenElse(tst_sms_total_summary_operator_table.sms_otp_success is null, 0 , tst_sms_total_summary_operator_table.sms_otp_success)) +1 as sms_otp_success,
+max(ifThenElse(tst_sms_total_summary_operator_table.sms_link_success is null, 0 , tst_sms_total_summary_operator_table.sms_link_success)) as sms_link_success,
+SucessOTPOperatorAppStream._timestamp as _timestamp
+insert into  tst_table5;
+
+from  tst_sms_total_summary_app_operator_table   right outer join  SucessOTPOperatorAppStream
+    on SucessOTPOperatorAppStream.day == tst_sms_total_summary_app_operator_table.day
+    and SucessOTPOperatorAppStream.appID == tst_sms_total_summary_app_operator_table.appID
+    and SucessOTPOperatorAppStream.operator == tst_sms_total_summary_app_operator_table.operator
+select
+SucessOTPOperatorAppStream.day , 
+SucessOTPOperatorAppStream.appID as appID,
+SucessOTPOperatorAppStream.operator as operator,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.total_success is null, 0 , tst_sms_total_summary_app_operator_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.he_success is null, 0 , tst_sms_total_summary_app_operator_table.he_success)) as he_success,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.sms_otp_success is null, 0 , tst_sms_total_summary_app_operator_table.sms_otp_success)) +1 as sms_otp_success,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.sms_link_success is null, 0 , tst_sms_total_summary_app_operator_table.sms_link_success)) as sms_link_success,
+SucessOTPOperatorAppStream._timestamp as _timestamp
+insert into  tst_table6;
+
+from AouthEndpointStream [
+isAuthenticated == true and authenticatorMethods == '[SMS_URL_OK]'
+]
+select time:currentDate() as day,
+appID as appID,
+operator as operator,
+1 as total_success,
+0 as he_success,
+0 as sms_otp_success,
+1 as sms_link_success ,
+_timestamp as _timestamp
+insert  into SucessSMSLinkOperatorAppStream;
+
+from  tst_sms_total_summary_app_table   right outer join  SucessSMSLinkOperatorAppStream
+    on SucessSMSLinkOperatorAppStream.day == tst_sms_total_summary_app_table.day
+    and SucessSMSLinkOperatorAppStream.appID == tst_sms_total_summary_app_table.appID
+select
+SucessSMSLinkOperatorAppStream.day , 
+SucessSMSLinkOperatorAppStream.appID as appID,
+max(ifThenElse(tst_sms_total_summary_app_table.total_success is null, 0 , tst_sms_total_summary_app_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_sms_total_summary_app_table.he_success is null, 0 , tst_sms_total_summary_app_table.he_success))  as he_success,
+max(ifThenElse(tst_sms_total_summary_app_table.sms_otp_success is null, 0 , tst_sms_total_summary_app_table.sms_otp_success)) as sms_otp_success,
+max(ifThenElse(tst_sms_total_summary_app_table.sms_link_success is null, 0 , tst_sms_total_summary_app_table.sms_link_success)) +1 as sms_link_success,
+SucessSMSLinkOperatorAppStream._timestamp as _timestamp
+insert into  tst_table7;
+
+from  tst_sms_total_summary_operator_table   right outer join  SucessSMSLinkOperatorAppStream
+    on SucessSMSLinkOperatorAppStream.day == tst_sms_total_summary_operator_table.day
+    and SucessSMSLinkOperatorAppStream.operator == tst_sms_total_summary_operator_table.operator
+select
+SucessSMSLinkOperatorAppStream.day , 
+SucessSMSLinkOperatorAppStream.operator as operator,
+max(ifThenElse(tst_sms_total_summary_operator_table.total_success is null, 0 , tst_sms_total_summary_operator_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_sms_total_summary_operator_table.he_success is null, 0 , tst_sms_total_summary_operator_table.he_success)) as he_success,
+max(ifThenElse(tst_sms_total_summary_operator_table.sms_otp_success is null, 0 , tst_sms_total_summary_operator_table.sms_otp_success)) as sms_otp_success,
+max(ifThenElse(tst_sms_total_summary_operator_table.sms_link_success is null, 0 , tst_sms_total_summary_operator_table.sms_link_success)) +1 as sms_link_success,
+SucessSMSLinkOperatorAppStream._timestamp as _timestamp
+insert into  tst_table8;
+
+from  tst_sms_total_summary_app_operator_table   right outer join  SucessSMSLinkOperatorAppStream
+    on SucessSMSLinkOperatorAppStream.day == tst_sms_total_summary_app_operator_table.day
+    and SucessSMSLinkOperatorAppStream.appID == tst_sms_total_summary_app_operator_table.appID
+    and SucessSMSLinkOperatorAppStream.operator == tst_sms_total_summary_app_operator_table.operator
+select
+SucessSMSLinkOperatorAppStream.day , 
+SucessSMSLinkOperatorAppStream.appID as appID,
+SucessSMSLinkOperatorAppStream.operator as operator,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.total_success is null, 0 , tst_sms_total_summary_app_operator_table.total_success)) +1 as total_success,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.he_success is null, 0 , tst_sms_total_summary_app_operator_table.he_success)) as he_success,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.sms_otp_success is null, 0 , tst_sms_total_summary_app_operator_table.sms_otp_success))  as sms_otp_success,
+max(ifThenElse(tst_sms_total_summary_app_operator_table.sms_link_success is null, 0 , tst_sms_total_summary_app_operator_table.sms_link_success)) +1 as sms_link_success,
+SucessSMSLinkOperatorAppStream._timestamp as _timestamp
+insert into  tst_table9;
+
+from tst_table1 #log('~~~~~~ summary App ----------------')
+insert overwrite tst_sms_total_summary_app_table
+    on tst_sms_total_summary_app_table.day == day
+    and tst_sms_total_summary_app_table.appID == appID;
+   
+from tst_table2 #log('~~~~~~ summary Operator ----------------')
+insert overwrite tst_sms_total_summary_operator_table
+    on tst_sms_total_summary_operator_table.day == day
+    and tst_sms_total_summary_operator_table.operator == operator;
+
+from tst_table3 #log('~~~~~~ summary Operator App ----------------')
+insert overwrite tst_sms_total_summary_app_operator_table
+    on tst_sms_total_summary_app_operator_table.day == day
+    and tst_sms_total_summary_app_operator_table.appID == appID
+    and tst_sms_total_summary_app_operator_table.operator == operator;
+
+from tst_table4 #log('~~~~~~ summary App ----------------')
+insert overwrite tst_sms_total_summary_app_table
+    on tst_sms_total_summary_app_table.day == day
+    and tst_sms_total_summary_app_table.appID == appID;
+   
+from tst_table5 #log('~~~~~~ summary Operator ----------------')
+insert overwrite tst_sms_total_summary_operator_table
+    on tst_sms_total_summary_operator_table.day == day
+    and tst_sms_total_summary_operator_table.operator == operator;
+
+from tst_table6 #log('~~~~~~ summary Operator App ----------------')
+insert overwrite tst_sms_total_summary_app_operator_table
+    on tst_sms_total_summary_app_operator_table.day == day
+    and tst_sms_total_summary_app_operator_table.appID == appID
+    and tst_sms_total_summary_app_operator_table.operator == operator;
+
+from tst_table7 #log('~~~~~~ summary App ----------------')
+insert overwrite tst_sms_total_summary_app_table
+    on tst_sms_total_summary_app_table.day == day
+    and tst_sms_total_summary_app_table.appID == appID;
+   
+from tst_table8 #log('~~~~~~ summary Operator ----------------')
+insert overwrite tst_sms_total_summary_operator_table
+    on tst_sms_total_summary_operator_table.day == day
+    and tst_sms_total_summary_operator_table.operator == operator;
+
+from tst_table9 #log('~~~~~~ summary Operator App ----------------')
+insert overwrite tst_sms_total_summary_app_operator_table
+    on tst_sms_total_summary_app_operator_table.day == day
+    and tst_sms_total_summary_app_operator_table.appID == appID
+    and tst_sms_total_summary_app_operator_table.operator == operator;
+	
+	
+From tst_table1
+Select
+    day as meta_day,
+	appID as meta_appID,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success,
+	_timestamp as meta__timestamp
+	group by day , appID
+insert into exportStream;
+
+From tst_table2
+Select
+    day as meta_day,
+	operator as meta_operator,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success,
+	_timestamp as meta__timestamp
+	group by day , operator
+insert into operatorExportStream;
+
+From tst_table3
+Select
+    day as meta_day,
+	appID as meta_appID,
+	operator as meta_operator,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success,
+	_timestamp as meta__timestamp
+	group by day ,appID , operator
+insert into appOperatorExportStream;
+
+From tst_table4
+Select
+    day as meta_day,
+	appID as meta_appID,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success,
+	_timestamp as meta__timestamp
+	group by day , appID
+insert into exportStream;
+
+From tst_table5
+Select
+    day as meta_day,
+	operator as meta_operator,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success,
+	_timestamp as meta__timestamp
+	group by day , operator
+insert into operatorExportStream;
+
+From tst_table6
+Select
+    day as meta_day,
+	appID as meta_appID,
+	operator as meta_operator,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success,
+	_timestamp as meta__timestamp
+	group by day ,appID , operator
+insert into appOperatorExportStream;
+
+From tst_table7
+Select
+    day as meta_day,
+	appID as meta_appID,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success,
+	_timestamp as meta__timestamp
+	group by day , appID
+insert into exportStream;
+
+From tst_table8
+Select
+    day as meta_day,
+	operator as meta_operator,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success,
+	_timestamp as meta__timestamp
+	group by day , operator
+insert into operatorExportStream;
+
+From tst_table9
+Select
+    day as meta_day,
+	appID as meta_appID,
+	operator as meta_operator,
+    total_success as meta_total_success,
+    he_success as meta_he_success,
+    sms_otp_success as  meta_sms_otp_success,
+    sms_link_success as meta_sms_link_success,
+	_timestamp as meta__timestamp
+	group by day ,appID , operator
+insert into appOperatorExportStream;

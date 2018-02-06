@@ -78,5 +78,6 @@
 	<dependency artifact="SuccessLoginCountExecutionPlan" version="1.0.0" include="true" serverRole="ComplexEventProcessor"/>
 	<dependency artifact="FederatedSucessBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
 	<dependency artifact="FederatedFaliuresBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+	<dependency artifact="RealtimeFederatedAttemptsBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
     </artifact>
 </artifacts>

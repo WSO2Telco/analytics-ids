@@ -1,0 +1,47 @@
+{
+  "streamId": "COM_REALTIME_WSO2TELCO_SUMMARY_APP_TOTAL_FED_SUCCESS_FAILURE:1.0.0",
+  "name": "COM_REALTIME_WSO2TELCO_SUMMARY_APP_TOTAL_FED_SUCCESS_FAILURE",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "metaData": [
+    {
+      "name": "day",
+      "type": "STRING"
+    },
+    {
+      "name": "appID",
+      "type": "STRING"
+    },
+    {
+      "name": "total_attempts",
+      "type": "INT"
+    },
+    {
+      "name": "success",
+      "type": "INT"
+    },
+    {
+      "name": "total_failure",
+      "type": "INT"
+    },
+    {
+      "name": "processing_failure",
+      "type": "INT"
+    },
+    {
+      "name": "response_failure",
+      "type": "INT"
+    },
+    {
+      "name": "other_failure",
+      "type": "INT"
+    },
+    {
+      "name": "_timestamp",
+      "type": "LONG"
+    }
+  ],
+  "correlationData": [],
+  "payloadData": []
+}

@@ -25,6 +25,7 @@ function TelcoAnalyticsClient() {
     var TYPE_TOTAL_AUTH_ATTEMPTS=20;
     var TYPE_TOTAL_FEDERATED_SUCCESS_ATTEMPTS=27;
     var TYPE_TOTAL_FEDERATED_FAILED_ATTEMPTS=28;
+    var TYPE_TOTAL_REALTIME_SUCCESS_ATTEMPTS=29;
     var HTTP_GET = "GET";
     var HTTP_POST = "POST";
     var RESPONSE_ELEMENT = "responseJSON";
@@ -116,6 +117,10 @@ function TelcoAnalyticsClient() {
 
     this.getFederatedFailedAttempts = function (filter, callback, error) {
         this.getData(filter, TYPE_TOTAL_FEDERATED_FAILED_ATTEMPTS, callback, error);
+    };
+
+    this.getRealtimeFederatedTotalAttempts = function (filter, callback, error) {
+        this.getData(filter, TYPE_TOTAL_REALTIME_SUCCESS_ATTEMPTS, callback, error);
     };
     
     this.getData = function (filter, type, callback, error) {
