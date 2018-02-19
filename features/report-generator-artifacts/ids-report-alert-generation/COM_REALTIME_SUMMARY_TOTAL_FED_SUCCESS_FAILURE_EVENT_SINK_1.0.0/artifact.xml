@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="COM_REALTIME_SUMMARY_TOTAL_FED_SUCCESS_FAILURE_EVENT_SINK" version="1.0.0" type="analytics/eventstore" serverRole="DataAnalyticsServer">
+    <file>COM_REALTIME_SUMMARY_TOTAL_FED_SUCCESS_FAILURE.xml</file>
+</artifact>

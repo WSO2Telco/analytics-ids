@@ -6,18 +6,18 @@
 
 
 @Export('COM_REALTIME_WSO2TELCO_SUMMARY_APP_OPERATOR_TOTAL_FED_SUCCESS_FAILURE:1.0.0')
-define stream appOperatorExportStream (meta_day string, meta_operator string, meta_appID string, meta_total_attempts int, meta_success int, meta_total_failure int, 
-									   meta_processing_failure int, meta_response_failure int, meta_other_failure int, meta__timestamp long);
+define stream appOperatorExportStream (day string, operator string, appID string, total_attempts int, success int, total_failure int,
+									   processing_failure int, response_failure int, other_failure int, _timestamp long);
 
 @Export('COM_REALTIME_WSO2TELCO_SUMMARY_OPERATOR_TOTAL_FED_SUCCESS_FAILURE:1.0.0')
-define stream opertaorExportStream (meta_day string, meta_operator string, meta_total_attempts int, meta_success int, meta_total_failure int, meta_processing_failure int, meta_response_failure int, meta_other_failure int, meta__timestamp long);
+define stream opertaorExportStream (day string, operator string, total_attempts int, success int, total_failure int, processing_failure int, response_failure int, other_failure int, _timestamp long);
 
 @Export('COM_REALTIME_WSO2TELCO_SUMMARY_APP_TOTAL_FED_SUCCESS_FAILURE:1.0.0')
-define stream appExportStream (meta_day string, meta_appID string, meta_total_attempts int, meta_success int, meta_total_failure int, meta_processing_failure int, meta_response_failure int, meta_other_failure int, meta__timestamp long);
+define stream appExportStream (day string, appID string, total_attempts int, success int, total_failure int, processing_failure int, response_failure int, other_failure int, _timestamp long);
 
 @PrimaryKey('day')
 @PrimaryKey('appID')
-@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_FED_APP_SUCCESS_FAILURE')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='COM_WSO2TELCO_SUMMARY_TOTAL_FED_APP_SUCCESS_FAILURE')
 define table tst_table_app_fed (
     day string,
     appID string,
@@ -31,7 +31,7 @@ define table tst_table_app_fed (
 
 @PrimaryKey('day')
 @PrimaryKey('operator')
-@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_FED_OPERATOR_SUCCESS_FAILURE')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='COM_WSO2TELCO_SUMMARY_TOTAL_FED_OPERATOR_SUCCESS_FAILURE')
 define table tst_table_operator_fed (
     day string,
     operator string,
@@ -46,7 +46,7 @@ define table tst_table_operator_fed (
 @PrimaryKey('day')
 @PrimaryKey('operator')
 @PrimaryKey('appID')
-@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_FED_OPERATOR_APP_SUCCESS_FAILURE')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='COM_WSO2TELCO_SUMMARY_TOTAL_FED_OPERATOR_APP_SUCCESS_FAILURE')
 define table tst_table_operator_app_fed (
     day string,
     operator string,
@@ -492,44 +492,44 @@ insert overwrite tst_table_operator_app_fed
 
 From tst_table7
 Select
-    day as meta_day,
-    appID as meta_appID,
-    total_attempts as meta_total_attempts,
-    success as meta_success,
-    total_failure as  meta_total_failure,
-    processing_failure as meta_processing_failure,
-    response_failure as  meta_response_failure,
-    other_failure as meta_other_failure,
-    _timestamp as meta__timestamp
+    day as day,
+    appID as appID,
+    total_attempts as total_attempts,
+    success as success,
+    total_failure as total_failure,
+    processing_failure as processing_failure,
+    response_failure as response_failure,
+    other_failure as other_failure,
+    _timestamp as _timestamp
 	group by day , appID
 insert into appExportStream;
 
 From tst_table8
 Select
-    day as meta_day,
-    operator as meta_operator,
-    total_attempts as meta_total_attempts,
-    success as meta_success,
-    total_failure as  meta_total_failure,
-    processing_failure as meta_processing_failure,
-    response_failure as  meta_response_failure,
-    other_failure as meta_other_failure,
-    _timestamp as meta__timestamp
+    day as day,
+    operator as operator,
+    total_attempts as total_attempts,
+    success as success,
+    total_failure as total_failure,
+    processing_failure as processing_failure,
+    response_failure as response_failure,
+    other_failure as other_failure,
+    _timestamp as _timestamp
 	group by day , operator
 insert into opertaorExportStream;
 
 From tst_table9
 Select
-    day as meta_day,
-	operator as meta_operator,
-    appID as meta_appID,
-    total_attempts as meta_total_attempts,
-    success as meta_success,
-    total_failure as  meta_total_failure,
-    processing_failure as meta_processing_failure,
-    response_failure as  meta_response_failure,
-    other_failure as meta_other_failure,
-    _timestamp as meta__timestamp
+    day as day,
+	operator as operator,
+    appID as appID,
+    total_attempts as total_attempts,
+    success as success,
+    total_failure as total_failure,
+    processing_failure as processing_failure,
+    response_failure as response_failure,
+    other_failure as other_failure,
+    _timestamp as _timestamp
 	group by day ,operator, appID
 insert into appOperatorExportStream;
 

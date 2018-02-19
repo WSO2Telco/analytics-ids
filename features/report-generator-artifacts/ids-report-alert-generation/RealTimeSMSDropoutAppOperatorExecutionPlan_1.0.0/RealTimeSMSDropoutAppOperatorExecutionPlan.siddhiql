@@ -12,7 +12,7 @@ define stream operatorExportStream (meta_day string, meta_operator string, meta_
 define stream appExportStream (meta_day string, meta_appID string, meta_total_dropouts int, meta_sms_processing_fail int, meta_send_sms_fail int, meta_no_login_sucess int, meta__timestamp long);
 
 @PrimaryKey('day')
-@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_APP_SMS_DROPOUTS')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='COM_WSO2TELCO_SUMMARY_TOTAL_APP_SMS_DROPOUTS')
 define table tst_summary_sms_app_table (
     day string,
     appID string,
@@ -23,7 +23,7 @@ define table tst_summary_sms_app_table (
     _timestamp long);
 
 @PrimaryKey('day')
-@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_OPERATOR_SMS_DROPOUTS')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='COM_WSO2TELCO_SUMMARY_TOTAL_OPERATOR_SMS_DROPOUTS')
 define table tst_summary_sms_operator_table (
     day string,
     operator string,
@@ -34,7 +34,7 @@ define table tst_summary_sms_operator_table (
     _timestamp long);
    
 @PrimaryKey('day')
-@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_OPERATOR_APP_SMS_DROPOUTS')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='COM_WSO2TELCO_SUMMARY_TOTAL_OPERATOR_APP_SMS_DROPOUTS')
 define table tst_summary_sms_operator_app_table (
     day string,
     operator string,
