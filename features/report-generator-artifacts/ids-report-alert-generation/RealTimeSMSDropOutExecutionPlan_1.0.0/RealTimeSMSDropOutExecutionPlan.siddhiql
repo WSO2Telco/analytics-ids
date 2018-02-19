@@ -8,7 +8,7 @@
 define stream exportStream (meta_day string, meta_total_dropouts int, meta_sms_processing_fail int, meta_send_sms_fail int, meta_no_login_sucess int, meta__timestamp long);
 
 @PrimaryKey('day')
-@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_SMS_DROPOUTS')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='COM_WSO2TELCO_SUMMARY_TOTAL_SMS_DROPOUTS')
 define table tst_table (
     day string,
     total_dropouts int,

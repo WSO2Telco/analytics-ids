@@ -7,10 +7,10 @@
 
 
 @Export('COM_REALTIME_SUMMARY_TOTAL_FED_SUCCESS_FAILURE:1.0.0')
-define stream exportStream (meta_day string, meta_total_attempts int, meta_success int, meta_total_failure int, meta_processing_failure int, meta_response_failure int, meta_other_failure int, meta__timestamp long);
+define stream exportStream (day string, total_attempts int, success int, total_failure int, processing_failure int, response_failure int, other_failure int, _timestamp long);
 
 @PrimaryKey('day')
-@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='TST_COM_WSO2TELCO_SUMMARY_TOTAL_FED_SUCCESS_FAILURE')
+@From(eventtable='rdbms', datasource.name='WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB', table.name='COM_WSO2TELCO_SUMMARY_TOTAL_FED_SUCCESS_FAILURE')
 define table tst_table (
     day string,
     total_attempts int,
@@ -185,42 +185,42 @@ insert into exportFederatedSucessSummarryStream;
  
 From tst_table1
 Select
-    day as meta_day,
-    total_attempts as meta_total_attempts,
-    success as meta_success,
-    total_failure as  meta_total_failure,
-    processing_failure as meta_processing_failure,
-    response_failure as  meta_response_failure,
-    other_failure as meta_other_failure,
-    _timestamp as meta__timestamp
+    day as day,
+    total_attempts as total_attempts,
+    success as success,
+    total_failure as total_failure,
+    processing_failure as processing_failure,
+    response_failure as response_failure,
+    other_failure as other_failure,
+    _timestamp as _timestamp
 	group by day 
 insert into exportStream;
 
  
 From tst_table2
 Select
-    day as meta_day,
-    total_attempts as meta_total_attempts,
-    success as meta_success,
-    total_failure as  meta_total_failure,
-    processing_failure as meta_processing_failure,
-    response_failure as  meta_response_failure,
-    other_failure as meta_other_failure,
-    _timestamp as meta__timestamp
+    day as day,
+    total_attempts as total_attempts,
+    success as success,
+    total_failure as total_failure,
+    processing_failure as processing_failure,
+    response_failure as response_failure,
+    other_failure as other_failure,
+    _timestamp as _timestamp
 	group by day 
 insert into exportStream;
 
  
 From tst_table3
 Select
-    day as meta_day,
-    total_attempts as meta_total_attempts,
-    success as meta_success,
-    total_failure as  meta_total_failure,
-    processing_failure as meta_processing_failure,
-    response_failure as  meta_response_failure,
-    other_failure as meta_other_failure,
-    _timestamp as meta__timestamp
+    day as day,
+    total_attempts as total_attempts,
+    success as success,
+    total_failure as total_failure,
+    processing_failure as processing_failure,
+    response_failure as response_failure,
+    other_failure as other_failure,
+    _timestamp as _timestamp
 	group by day 
 insert into exportStream;
 /*

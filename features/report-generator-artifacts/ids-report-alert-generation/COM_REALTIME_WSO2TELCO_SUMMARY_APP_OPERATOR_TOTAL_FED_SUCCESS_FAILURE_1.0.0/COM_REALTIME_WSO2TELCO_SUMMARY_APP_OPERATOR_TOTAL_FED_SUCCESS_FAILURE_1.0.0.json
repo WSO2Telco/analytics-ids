@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "nickName": "",
   "description": "",
-  "metaData": [
+  "metaData": [],
+  "correlationData": [],
+  "payloadData": [
     {
       "name": "day",
       "type": "STRING"
@@ -45,7 +47,5 @@
       "name": "_timestamp",
       "type": "LONG"
     }
-  ],
-  "correlationData": [],
-  "payloadData": []
+  ]
 }
