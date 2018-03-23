@@ -9,7 +9,7 @@
         INSERT INTO TABLE loginChannels SELECT min(day), operator, appID,
         SUM(IF(status = 'USSD_OK',1,0)) as ussd_logins,
         SUM(IF(status = 'USSD_PIN' OR status = 'USSDPINAuthenticator',1,0)) as ussd_pin_logins,
-        SUM(IF(status = 'SMS_URL_OK',1,0)) as sms_logins,
+        SUM(IF(status = 'SMS_URL_OK' OR status = 'SMSOTPAuthenticator',1,0)) as sms_logins,
         SUM(IF(status = 'HE_OK',1,0)) as he_logins,
         count(*) as total_logins, _timestamp 
 		FROM (	SELECT sessionID,getDateString(max(_timestamp)) as day, min(operator) as operator, min(appID) as appID, getAuthenticator(max(authenticatorMethods)) as status, getDateTimestamp(max(_timestamp)) as _timestamp 	FROM auth_endpoint_login_channel WHERE isAuthenticated = true and operator IS NOT NULL and appID IS NOT NULL and msisdn IS NOT NULL group by sessionID ) temp GROUP BY operator, appID, _timestamp;
