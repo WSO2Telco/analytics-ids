@@ -18,19 +18,19 @@
 
         INSERT INTO TABLE loginChannels_per_operator SELECT day, operator,
         SUM(ussd_logins) as ussd_logins, SUM(ussd_pin_logins) as ussd_pin_logins, SUM(sms_logins) as sms_logins, SUM(he_logins) as he_logins,
-        SUM(total_count) as total_count, _timestamp FROM loginChannels GROUP BY day, operator, _timestamp;
+        SUM(total_count) as total_count, max(_timestamp) as _timestamp FROM loginChannels GROUP BY day, operator ;
 
         create temporary table loginChannels_per_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_LOGIN_CHANNELS", schema "day STRING -i, appID STRING -i -f, ussd_logins LONG -i,ussd_pin_logins LONG -i, sms_logins LONG -i, he_logins LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day, appID");
 
         INSERT INTO TABLE loginChannels_per_app SELECT day, appID,
         SUM(ussd_logins) as ussd_logins, SUM(ussd_pin_logins) as ussd_pin_logins, SUM(sms_logins) as sms_logins, SUM(he_logins) as he_logins,
-        SUM(total_count) as total_count, _timestamp FROM loginChannels GROUP BY day, appID, _timestamp;
+        SUM(total_count) as total_count, max(_timestamp) as _timestamp FROM loginChannels GROUP BY day, appID ;
 
         create temporary table loginChannels_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_LOGIN_CHANNELS", schema "day STRING -i, ussd_logins LONG -i,ussd_pin_logins LONG -i, sms_logins LONG -i, he_logins LONG -i, total_count LONG -i, _timestamp LONG -i", primaryKeys "day");
 
         INSERT INTO TABLE loginChannels_total SELECT day,
         SUM(ussd_logins) as ussd_logins, SUM(ussd_pin_logins) as ussd_pin_logins, SUM(sms_logins) as sms_logins, SUM(he_logins) as he_logins,
-        SUM(total_count) as total_count, _timestamp FROM loginChannels GROUP BY day, _timestamp;
+        SUM(total_count) as total_count, max(_timestamp) as _timestamp FROM loginChannels GROUP BY day ;
 
         INCREMENTAL_TABLE_COMMIT auth_endpoint_loginChannels;
         INCREMENTAL_TABLE_COMMIT login_channels;
