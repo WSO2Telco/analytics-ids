@@ -105,21 +105,58 @@
         where user_status_meta_raw_droputs.operator IS NOT NULL and user_status_meta_raw_droputs.appId IS NOT NULL group by sessionID ) as meta on meta.sessionID=dropouts.sessionID  group by meta.operator, meta.appId, meta._timestamp;
 
 
-        insert into table dropout_summary SELECT day, operator, appId,
-        SUM(IF(type = "USSD_PUSH",dropout.dropoutCount,0)) as ussd_dropouts,
-        SUM(IF(type = "SMS",dropout.dropoutCount,0)) as sms_dropouts,
-        SUM(IF(type = "MSISDN",dropout.dropoutCount,0)) as msisdn_dropouts,
-        SUM(IF(type ="ONNET_TC",dropout.dropoutCount,0)) as tnc_onnet_dropouts,
-        SUM(IF(type="OFFNET_TC",dropout.dropoutCount,0)) as tnc_offnet_dropouts,
-        SUM(IF(type="FEDERATED",dropout.dropoutCount,0)) as federated_dropouts,
-        SUM(dropout.dropoutCount) as total_dropouts, _timestamp from dropout group by operator, appId, day, _timestamp;
+        INSERT INTO TABLE dropout_summary
+        SELECT day, operator, appId,
+            SUM(IF(type = "USSD_PUSH",dropout.dropoutCount,0)) as ussd_dropouts,
+            SUM(IF(type = "SMS",dropout.dropoutCount,0)) as sms_dropouts,
+            SUM(IF(type = "MSISDN",dropout.dropoutCount,0)) as msisdn_dropouts,
+            SUM(IF(type ="ONNET_TC",dropout.dropoutCount,0)) as tnc_onnet_dropouts,
+            SUM(IF(type="OFFNET_TC",dropout.dropoutCount,0)) as tnc_offnet_dropouts,
+            SUM(IF(type="FEDERATED",dropout.dropoutCount,0)) as federated_dropouts,
+            SUM(dropout.dropoutCount) as total_dropouts,
+            max(_timestamp) as _timestamp
+        FROM dropout
+        GROUP BY operator, appId, day;
 
 
-        INSERT INTO TABLE dropouts_app SELECT day, appID, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts) , SUM(federated_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, appID, _timestamp;
+        INSERT INTO TABLE dropouts_app
+        SELECT day, appID,
+            SUM(ussd_droputs),
+            SUM(sms_dropouts),
+            SUM(msisdn_dropouts),
+            SUM(tnc_onnet_dropouts),
+            SUM(tnc_offnet_dropouts),
+            SUM(federated_dropouts),
+            SUM(total_count),
+            max(_timestamp) as _timestamp
+        FROM dropout_summary
+        GROUP BY day, appID;
 
-        INSERT INTO TABLE dropouts_operator SELECT day, operator, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts) , SUM(federated_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, operator, _timestamp;
+        INSERT INTO TABLE dropouts_operator
+        SELECT day, operator,
+            SUM(ussd_droputs),
+            SUM(sms_dropouts),
+            SUM(msisdn_dropouts),
+            SUM(tnc_onnet_dropouts),
+            SUM(tnc_offnet_dropouts),
+            SUM(federated_dropouts),
+            SUM(total_count),
+            max(_timestamp) as _timestamp
+        FROM dropout_summary
+        GROUP BY day, operator;
 
-        INSERT INTO TABLE dropouts_total SELECT day, SUM(ussd_droputs), SUM(sms_dropouts), SUM(msisdn_dropouts), SUM(tnc_onnet_dropouts), SUM(tnc_offnet_dropouts) , SUM(federated_dropouts), SUM(total_count), _timestamp FROM dropout_summary GROUP BY day, _timestamp;
+        INSERT INTO TABLE dropouts_total
+        SELECT day,
+            SUM(ussd_droputs),
+            SUM(sms_dropouts),
+            SUM(msisdn_dropouts),
+            SUM(tnc_onnet_dropouts),
+            SUM(tnc_offnet_dropouts),
+            SUM(federated_dropouts),
+            SUM(total_count),
+            max(_timestamp) as _timestamp
+        FROM dropout_summary
+        GROUP BY day;
 
         INCREMENTAL_TABLE_COMMIT user_status_droputs;
         INCREMENTAL_TABLE_COMMIT user_status_meta_droputs;
