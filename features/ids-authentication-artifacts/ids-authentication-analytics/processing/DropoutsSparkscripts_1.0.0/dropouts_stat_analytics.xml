@@ -130,6 +130,7 @@
             SUM(total_count),
             max(_timestamp) as _timestamp
         FROM dropout_summary
+        WHERE operator!="spark"
         GROUP BY day, appID;
 
         INSERT INTO TABLE dropouts_operator
@@ -143,6 +144,7 @@
             SUM(total_count),
             max(_timestamp) as _timestamp
         FROM dropout_summary
+        WHERE operator!="spark"
         GROUP BY day, operator;
 
         INSERT INTO TABLE dropouts_total
@@ -156,6 +158,7 @@
             SUM(total_count),
             max(_timestamp) as _timestamp
         FROM dropout_summary
+        WHERE operator!="spark"
         GROUP BY day;
 
         INCREMENTAL_TABLE_COMMIT user_status_droputs;
