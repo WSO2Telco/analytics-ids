@@ -97,12 +97,26 @@
         newUser_authCount LONG -i, oldUser_authCount LONG -i,
         _timestamp LONG -i", primaryKeys "day, operator");
 
-        INSERT INTO TABLE attemptsVlogins_per_operator SELECT day, operator,
-        SUM(total_authCount), SUM(total_tokenCount), SUM(total_authFailed), SUM(total_tokenFailed),
-        SUM(onnet_authCount), SUM(onnet_tokenCount), SUM(onnet_authFailed), SUM(onnet_tokenFailed),
-        SUM(offnet_authCount), SUM(offnet_tokenCount), SUM(offnet_authFailed), SUM(offnet_tokenFailed),
-        SUM(newUser_authCount), SUM(oldUser_authCount),
-        _timestamp from attemptsVlogins GROUP BY day, _timestamp, operator;
+        INSERT INTO TABLE attemptsVlogins_per_operator
+        SELECT day, operator,
+            SUM(total_authCount),
+            SUM(total_tokenCount),
+            SUM(total_authFailed),
+            SUM(total_tokenFailed),
+            SUM(onnet_authCount),
+            SUM(onnet_tokenCount),
+            SUM(onnet_authFailed),
+            SUM(onnet_tokenFailed),
+            SUM(offnet_authCount),
+            SUM(offnet_tokenCount),
+            SUM(offnet_authFailed),
+            SUM(offnet_tokenFailed),
+            SUM(newUser_authCount),
+            SUM(oldUser_authCount),
+            max(_timestamp) as _timestamp
+        FROM attemptsVlogins
+        WHERE operator!="spark"
+        GROUP BY day, operator;
 
         create temporary table attemptsVlogins_per_app using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_APP_ATTEMPTS_N_LOGINS", schema "day STRING -i, appID STRING -i -f, total_authCount LONG -i, total_tokenCount LONG -i, total_authFailed LONG -i, total_tokenFailed LONG -i,
         onnet_authCount LONG -i, onnet_tokenCount LONG -i, onnet_authFailed LONG -i, onnet_tokenFailed LONG -i,
@@ -110,12 +124,26 @@
         newUser_authCount LONG -i, oldUser_authCount LONG -i,
         _timestamp LONG -i", primaryKeys "day, appID");
 
-        INSERT INTO TABLE attemptsVlogins_per_app SELECT day, appID,
-        SUM(total_authCount), SUM(total_tokenCount), SUM(total_authFailed), SUM(total_tokenFailed),
-        SUM(onnet_authCount), SUM(onnet_tokenCount), SUM(onnet_authFailed), SUM(onnet_tokenFailed),
-        SUM(offnet_authCount), SUM(offnet_tokenCount), SUM(offnet_authFailed), SUM(offnet_tokenFailed),
-        SUM(newUser_authCount), SUM(oldUser_authCount),
-        _timestamp from attemptsVlogins GROUP BY day, _timestamp, appID;
+        INSERT INTO TABLE attemptsVlogins_per_app
+        SELECT day, appID,
+            SUM(total_authCount),
+            SUM(total_tokenCount),
+            SUM(total_authFailed),
+            SUM(total_tokenFailed),
+            SUM(onnet_authCount),
+            SUM(onnet_tokenCount),
+            SUM(onnet_authFailed),
+            SUM(onnet_tokenFailed),
+            SUM(offnet_authCount),
+            SUM(offnet_tokenCount),
+            SUM(offnet_authFailed),
+            SUM(offnet_tokenFailed),
+            SUM(newUser_authCount),
+            SUM(oldUser_authCount),
+            max(_timestamp) as _timestamp
+        FROM attemptsVlogins
+        WHERE operator!="spark"
+        GROUP BY day, appID;
 
         create temporary table attemptsVlogins_total using CarbonAnalytics options (tableName "COM_WSO2TELCO_SUMMARY_TOTAL_ATTEMPTS_N_LOGINS", schema "day STRING -i, total_authCount LONG -i, total_tokenCount LONG -i, total_authFailed LONG -i, total_tokenFailed LONG -i,
         onnet_authCount LONG -i, onnet_tokenCount LONG -i, onnet_authFailed LONG -i, onnet_tokenFailed LONG -i,
@@ -123,12 +151,26 @@
         newUser_authCount LONG -i, oldUser_authCount LONG -i,
         _timestamp LONG -i", primaryKeys "day");
 
-        INSERT INTO TABLE attemptsVlogins_total SELECT day,
-        SUM(total_authCount), SUM(total_tokenCount), SUM(total_authFailed), SUM(total_tokenFailed),
-        SUM(onnet_authCount), SUM(onnet_tokenCount), SUM(onnet_authFailed), SUM(onnet_tokenFailed),
-        SUM(offnet_authCount), SUM(offnet_tokenCount), SUM(offnet_authFailed), SUM(offnet_tokenFailed),
-        SUM(newUser_authCount), SUM(oldUser_authCount),
-        _timestamp from attemptsVlogins GROUP BY day, _timestamp;
+        INSERT INTO TABLE attemptsVlogins_total
+        SELECT day,
+            SUM(total_authCount),
+            SUM(total_tokenCount),
+            SUM(total_authFailed),
+            SUM(total_tokenFailed),
+            SUM(onnet_authCount),
+            SUM(onnet_tokenCount),
+            SUM(onnet_authFailed),
+            SUM(onnet_tokenFailed),
+            SUM(offnet_authCount),
+            SUM(offnet_tokenCount),
+            SUM(offnet_authFailed),
+            SUM(offnet_tokenFailed),
+            SUM(newUser_authCount),
+            SUM(oldUser_authCount),
+            max(_timestamp) as _timestamp
+        FROM attemptsVlogins
+        WHERE operator!="spark"
+        GROUP BY day;
 
         INCREMENTAL_TABLE_COMMIT user_status_raw_attemptsVlogins;
         INCREMENTAL_TABLE_COMMIT user_status_meta_raw_attemptsVlogins;
